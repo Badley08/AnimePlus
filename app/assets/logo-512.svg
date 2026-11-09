@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Anime Plus">
+  <defs>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="18" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="inner-glow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="bg-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#16358F"/>
+      <stop offset="60%" stop-color="#0A1433"/>
+      <stop offset="100%" stop-color="#070B16"/>
+    </linearGradient>
+    <linearGradient id="stroke-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7AABFF"/>
+      <stop offset="100%" stop-color="#2F6BFF"/>
+    </linearGradient>
+    <linearGradient id="play-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5B8FFF"/>
+      <stop offset="100%" stop-color="#2F6BFF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Fond -->
+  <rect width="512" height="512" rx="110" fill="url(#bg-grad)"/>
+
+  <!-- Halo extérieur (glow) -->
+  <rect width="512" height="512" rx="110"
+        fill="none"
+        stroke="#2F6BFF"
+        stroke-width="8"
+        opacity="0.25"
+        filter="url(#glow)"/>
+
+  <!-- Contour -->
+  <rect x="10" y="10" width="492" height="492" rx="104"
+        fill="none"
+        stroke="url(#stroke-grad)"
+        stroke-width="16"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <!-- Triangle play -->
+  <path d="M148 144 L340 256 L148 368 Z"
+        fill="url(#play-grad)"
+        filter="url(#inner-glow)"
+        opacity="0.95"/>
+
+  <!-- Plus : branche verticale -->
+  <line x1="390" y1="280" x2="390" y2="390"
+        stroke="url(#stroke-grad)"
+        stroke-width="34"
+        stroke-linecap="round"
+        filter="url(#inner-glow)"/>
+
+  <!-- Plus : branche horizontale -->
+  <line x1="335" y1="335" x2="445" y2="335"
+        stroke="url(#stroke-grad)"
+        stroke-width="34"
+        stroke-linecap="round"
+        filter="url(#inner-glow)"/>
+</svg>
+

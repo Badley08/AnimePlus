@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Anime Plus - MVP</title>
+<style>
+/* =====================================================================
+   ANIME PLUS - PROTOTYPE MVP (sombre, accent bleu electrique)
+   Pour l'IA qui convertit en React Native :
+   - Ecrans = sections .v (splash, gate, home, search, det, ply, lib, set)
+   - Tokens :root -> theme.ts ; icones SVG du <symbol> sprite -> react-native-svg
+   - Donnees fictives dans const D (remplacer par Room/SQLite)
+   - Recherche : suggestions a toucher, jamais de resultats auto
+   - Selection : Saison (puces) puis Episode (liste)
+   - Mot de passe de demo : animeplus (a remplacer par un hash)
+   ===================================================================== */
+:root{--bg:#070B16;--surface:#0F1526;--surface-2:#172038;--line:#222D4A;--text:#EAF0FF;--muted:#8C9AC0;--accent:#2F6BFF;--accent-soft:#1B3A8F;--danger:#FF5C7A;--font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:#03050B;color:var(--text);font-family:var(--font);display:grid;place-items:center}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{width:min(100vw,430px);height:min(100dvh,880px);background:var(--bg);position:relative;overflow:hidden}
+.v{position:absolute;inset:0;display:none;flex-direction:column;overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 20px) 16px 96px}
+.v.on{display:flex;animation:in .22s ease-out}
+@keyframes in{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.i.f{fill:currentColor;stroke:none}
+.title{font-size:28px;font-weight:700;letter-spacing:-.02em;margin-bottom:16px}
+.h{font-size:18px;font-weight:600;margin:24px 0 12px}
+.muted,small{color:var(--muted);font-size:13px}
+.btn{height:52px;border-radius:12px;background:var(--accent);color:#fff;font-weight:600;font-size:16px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn:active{transform:scale(.98)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 0 12px;scrollbar-width:none}
+.chip{flex:none;padding:9px 16px;border-radius:999px;background:var(--surface-2);font-size:14px;color:var(--muted);min-height:40px;display:inline-flex;align-items:center;transition:background .2s}
+.chip.on{background:var(--accent);color:#fff}
+.p{background:linear-gradient(160deg,hsl(calc(205 + var(--h)*14) 80% 40%),#0A1128 78%);border-radius:12px;position:relative}
+.badge{position:absolute;top:8px;right:8px;background:rgba(7,11,22,.8);padding:4px 8px;border-radius:999px;font-size:12px;font-style:normal}
+
+/* Splash et mot de passe */
+#splash,#gate{justify-content:center;align-items:center;text-align:center;padding:24px;background:radial-gradient(circle at 50% 36%,#16358F 0,#0A1433 40%,var(--bg) 74%)}
+.logo{width:128px;height:128px;fill:none;stroke:var(--accent);stroke-width:5;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 22px rgba(47,107,255,.6))}
+.logo *{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.3s ease-out forwards}
+.logo path:nth-child(2){animation-delay:.35s}.logo path:nth-child(3){animation-delay:.8s}
+@keyframes draw{to{stroke-dashoffset:0}}
+.word{font-size:32px;font-weight:700;letter-spacing:-.03em;margin-top:20px}
+.credits{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 48px);left:0;right:0;color:var(--muted);font-size:14px;line-height:1.9}
+.credits b{color:var(--text);font-weight:600}
+#gate form{width:100%;margin-top:28px}
+#gate .logo{width:88px;height:88px}
+.pw{position:relative}
+.pw .i{position:absolute;left:16px;top:14px;color:var(--muted)}
+.field{width:100%;height:52px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--text);padding:0 16px 0 48px;font:16px var(--font)}
+.field.bad{border-color:var(--danger);animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.err{color:var(--danger);font-size:14px;margin:10px 0 0;text-align:left;min-height:20px}
+#gate .btn{margin-top:12px}
+.field.good{border-color:#4CD4A0}
+.err.ok{color:#4CD4A0;text-align:center;font-size:16px;font-weight:600;margin-top:12px}
+.tick{width:72px;height:72px;fill:none;stroke:#4CD4A0;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;margin-top:28px}
+.tick *{stroke-dasharray:1;stroke-dashoffset:1;animation:draw .5s ease-out forwards}
+.tick path{animation-delay:.35s}
+#gate.win form{display:none}
+#gate.win .logo{animation:pulse .9s ease-out}
+@keyframes pulse{50%{transform:scale(1.12);filter:drop-shadow(0 0 40px rgba(76,212,160,.8))}}
+.v.on.zoom{animation:zoom .6s cubic-bezier(.2,.8,.2,1)}
+@keyframes zoom{from{opacity:0;transform:scale(1.08)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.tick *{animation:none;stroke-dashoffset:0}#gate.win .logo,.v.on.zoom{animation:none}}
+@media (prefers-reduced-motion:reduce){.logo *{animation:none;stroke-dashoffset:0}.v.on{animation:none}}
+
+/* Accueil */
+.hero{height:210px;padding:16px;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;width:100%;border-radius:18px}
+.hero h2{font-size:22px}
+.prog{height:4px;border-radius:4px;background:rgba(255,255,255,.2);margin-top:10px}
+.prog i{display:block;height:100%;width:42%;background:#fff;border-radius:4px}
+.rail{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none}
+.card{flex:0 0 118px}.card .p{height:170px;margin-bottom:8px}.card b{font-size:14px;font-weight:600}
+.row{display:flex;gap:12px;align-items:center;width:100%;padding:12px 0;border-bottom:1px solid var(--line)}
+.row .p{width:64px;height:92px;flex:none;border-radius:10px}.row>div{flex:1}.row b{display:block;font-size:16px;margin-bottom:4px}
+
+/* Recherche */
+.sf{position:relative}.sf .i{position:absolute;left:14px;top:14px;color:var(--muted)}
+.sf .field{padding-right:48px}
+.clr{position:absolute;right:4px;top:4px;width:44px;height:44px;display:grid;place-items:center;color:var(--muted)}
+.sug{margin-top:12px;display:flex;flex-direction:column}
+.sug .row{padding:10px 8px;border-radius:12px;border-bottom:0}.sug .row:active{background:var(--surface-2)}
+.sug .row .p{width:48px;height:68px}
+mark{background:none;color:var(--accent);font-weight:700}
+.rec{display:flex;align-items:center;gap:12px;padding:14px 8px;color:var(--muted);width:100%}
+.empty{padding:32px 8px;text-align:center;color:var(--muted);line-height:1.5}
+
+/* Fiche */
+.back{width:44px;height:44px;border-radius:50%;background:rgba(7,11,22,.7);display:grid;place-items:center;position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);left:12px;z-index:2}
+.cover{height:250px;margin:-20px -16px 0;border-radius:0 0 24px 24px}
+.ep{display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface);border-radius:14px;margin-bottom:8px}
+.ep .n{width:40px;height:40px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center;font-weight:600;flex:none}
+.ep .t{flex:1}.ep b{display:block;font-size:15px}
+.ib{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--surface-2)}
+.ib.pl{background:var(--accent);color:#fff}.ib.ok{color:#4CD4A0}
+
+/* Lecteur */
+#ply{background:#000;padding:0}
+.scr{flex:1;border-radius:0;display:grid;place-items:center}
+.pb{width:76px;height:76px;border-radius:50%;background:rgba(7,11,22,.65);display:grid;place-items:center}
+.pb .i{width:34px;height:34px}
+.ptop{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);left:68px;right:16px;font-weight:600}
+.pbot{padding:16px 20px calc(env(safe-area-inset-bottom,0px) + 28px);background:#000}
+.seek{height:6px;border-radius:6px;background:var(--surface-2);margin-bottom:10px}.seek i{display:block;height:100%;width:0;background:var(--accent);border-radius:6px}
+.times{display:flex;justify-content:space-between;color:var(--muted);font-size:13px}
+
+/* Bibliotheque */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid .card .p{height:200px}
+
+/* Reglages */
+.group{background:var(--surface);border-radius:14px;margin-bottom:16px}
+.set{display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:1px solid var(--line);font-size:15px;gap:12px}
+.set:last-child{border-bottom:0}
+.notice{padding:16px;border:1px solid var(--accent-soft);border-radius:14px;font-size:14px;line-height:1.5}
+.notice b{display:block;margin-bottom:4px}
+
+/* Navigation, feuille, toast */
+#tabs{position:absolute;left:0;right:0;bottom:0;height:calc(68px + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);display:flex;background:rgba(15,21,38,.97);border-top:1px solid var(--line);z-index:5}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--muted);font-size:12px;text-align:center}
+.tab.on{color:var(--accent)}
+#scrim{position:absolute;inset:0;background:rgba(0,0,0,.6);z-index:8}
+#sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:22px 22px 0 0;padding:20px 16px calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateY(105%);transition:transform .25s;z-index:9}
+#sheet.on{transform:none}
+#sheet h3{font-size:18px;margin-bottom:12px}
+.opt{display:flex;justify-content:space-between;align-items:center;width:100%;padding:14px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;min-height:52px}
+.opt.on{border-color:var(--accent);background:rgba(47,107,255,.12)}
+.bar{height:6px;background:var(--surface-2);border-radius:6px;margin:12px 0}.bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:6px}
+#toast{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);background:var(--surface-2);padding:12px 18px;border-radius:999px;font-size:14px;z-index:10;white-space:nowrap}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+<symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
+<symbol id="lib" viewBox="0 0 24 24"><rect x="3" y="4" width="6" height="16" rx="1"/><rect x="11" y="4" width="6" height="16" rx="1"/><path d="M19 6v14"/></symbol>
+<symbol id="set" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></symbol>
+<symbol id="back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+<symbol id="play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></symbol>
+<symbol id="pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></symbol>
+<symbol id="zip" viewBox="0 0 24 24"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></symbol>
+<symbol id="ok" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
+<symbol id="lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+<symbol id="x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+</defs></svg>
+
+<div class="app">
+
+<!-- 1. SPLASH -->
+<section class="v on" id="splash">
+  <svg class="logo" viewBox="0 0 120 120" aria-label="Anime Plus"><rect x="8" y="8" width="104" height="104" rx="30" pathLength="1"/><path d="M42 34l32 22-32 22z" pathLength="1"/><path d="M88 74v22M77 85h22" pathLength="1"/></svg>
+  <div class="word">animeplus</div>
+  <div class="credits">Idée par <b>Strong</b><br>Dev par <b>Karlito</b></div>
+</section>
+
+<!-- 2. MOT DE PASSE -->
+<section class="v" id="gate">
+  <svg class="logo" viewBox="0 0 120 120" aria-hidden="true"><rect x="8" y="8" width="104" height="104" rx="30" pathLength="1"/><path d="M42 34l32 22-32 22z" pathLength="1"/><path d="M88 74v22M77 85h22" pathLength="1"/></svg>
+  <div class="word" style="font-size:26px">animeplus</div>
+  <p class="muted" style="margin-top:8px">Application privée, entre le mot de passe.</p>
+  <form id="gf" autocomplete="off">
+    <div class="pw"><svg class="i"><use href="#lock"/></svg><input class="field" id="pw" type="password" placeholder="Mot de passe" aria-label="Mot de passe"></div>
+    <p class="err" id="ge"></p>
+    <button class="btn" type="submit">Déverrouiller</button>
+  </form>
+  <svg class="tick" id="tk" viewBox="0 0 52 52" hidden aria-hidden="true"><circle cx="26" cy="26" r="23" pathLength="1"/><path d="M15 27l8 8 14-16" pathLength="1"/></svg>
+  <p class="err ok" id="gm" hidden>Mot de passe correct, bienvenue.</p>
+</section>
+
+<!-- 3. ACCUEIL -->
+<section class="v" id="home">
+  <h1 class="title">Accueil</h1>
+  <button class="p hero" style="--h:1" data-resume>
+    <small style="color:#cfe0ff">Reprendre</small>
+    <h2>Les Lames du crépuscule</h2>
+    <small style="color:#cfe0ff">Saison 1, épisode 7</small>
+    <div class="prog"><i></i></div>
+  </button>
+  <h2 class="h">Ajoutés récemment</h2>
+  <div class="rail" id="hr"></div>
+  <h2 class="h">En cours</h2>
+  <button class="row" data-o="3"><div class="p" style="--h:3"></div><div><b>Nuit sans fin</b><small>Saison 1, épisode 3 sur 12</small></div></button>
+</section>
+
+<!-- 4. RECHERCHE -->
+<section class="v" id="search">
+  <h1 class="title">Recherche</h1>
+  <div class="sf"><svg class="i"><use href="#search"/></svg><input class="field" id="q" placeholder="Titre d'un anime" aria-label="Rechercher" autocomplete="off"><button class="clr" id="qc" hidden aria-label="Effacer"><svg class="i"><use href="#x"/></svg></button></div>
+  <div class="sug" id="sug"></div>
+</section>
+
+<!-- 5. FICHE (saison puis episode) -->
+<section class="v" id="det">
+  <button class="back" data-v="search" aria-label="Retour"><svg class="i"><use href="#back"/></svg></button>
+  <div class="p cover" id="dc"></div>
+  <h1 class="title" id="dt" style="margin-top:16px;margin-bottom:8px"></h1>
+  <div class="chips" id="dm"></div>
+  <p class="muted" id="dd" style="font-size:15px;line-height:1.5"></p>
+  <h2 class="h" id="sh">Saisons</h2>
+  <div class="chips" id="seas"></div>
+  <h2 class="h" id="eh" style="margin-top:8px"></h2>
+  <div id="eps"></div>
+</section>
+
+<!-- 6. LECTEUR -->
+<section class="v" id="ply">
+  <button class="back" id="pb" aria-label="Retour"><svg class="i"><use href="#back"/></svg></button>
+  <div class="ptop" id="pt"></div>
+  <div class="p scr" style="--h:2" id="scr"><button class="pb" id="pp" aria-label="Lecture ou pause"><svg class="i f"><use href="#play" id="pu"/></svg></button></div>
+  <div class="pbot"><div class="seek"><i id="sk"></i></div><div class="times"><span id="tc">0:00</span><span>24:00</span></div></div>
+</section>
+
+<!-- 7. BIBLIOTHEQUE -->
+<section class="v" id="lib">
+  <h1 class="title">Bibliothèque</h1>
+  <div class="chips" id="lf"><button class="chip on" data-f="all">Tout</button><button class="chip" data-f="fav">Favoris</button><button class="chip" data-f="big">À compresser</button></div>
+  <div class="grid" id="lg"></div>
+</section>
+
+<!-- 8. REGLAGES ET A PROPOS -->
+<section class="v" id="set">
+  <h1 class="title">Réglages</h1>
+  <div class="group">
+    <div class="set"><span>Qualité de compression</span><small>720p, environ 90 Mo</small></div>
+    <div class="set"><span>Dossier des vidéos</span><small>Stockage interne</small></div>
+    <div class="set"><span>Verrouiller l'application</span><small>Activé</small></div>
+  </div>
+  <h2 class="h" style="margin-top:8px">À propos</h2>
+  <div class="group">
+    <div class="set"><span>Version</span><small>1.0.0 MVP</small></div>
+    <div class="set"><span>Idée</span><small>Strong</small></div>
+    <div class="set"><span>Développement</span><small>Karlito</small></div>
+  </div>
+  <div class="notice"><b>Application non commerciale</b>Anime Plus n'est ni à vendre ni à louer. Elle ne doit pas être partagée en dehors de ses deux utilisateurs.</div>
+</section>
+
+<nav id="tabs" hidden>
+  <button class="tab on" data-v="home"><svg class="i"><use href="#home"/></svg>Accueil</button>
+  <button class="tab" data-v="search"><svg class="i"><use href="#search"/></svg>Recherche</button>
+  <button class="tab" data-v="lib"><svg class="i"><use href="#lib"/></svg>Bibliothèque</button>
+  <button class="tab" data-v="set"><svg class="i"><use href="#set"/></svg>Réglages</button>
+</nav>
+
+<div id="scrim" hidden></div>
+<div id="sheet" role="dialog" aria-label="Compression">
+  <h3>Compresser l'épisode</h3>
+  <div id="qs"></div>
+  <div class="bar" id="bw" hidden><i id="bar"></i></div>
+  <button class="btn" id="sb" style="margin-top:8px">Compresser</button>
+</div>
+<div id="toast" hidden></div>
+</div>
+
+<script>
+/* ---------- Donnees fictives : s = nombre d'episodes par saison ---------- */
+const D=[
+ {id:1,t:"Les Lames du crépuscule",y:2022,g:"Action",s:[12,12],fav:1,big:1,d:"Dans un empire en déclin, une escouade de duellistes cherche l'origine d'une lumière qui efface les noms."},
+ {id:2,t:"Ciel de verre",y:2023,g:"Drame",s:[24],d:"Une pilote de planeur découvre que le ciel de sa ville cache une frontière invisible."},
+ {id:3,t:"Nuit sans fin",y:2021,g:"Thriller",s:[12,10,8],fav:1,d:"Dans une ville où le soleil ne se lève plus, un archiviste enquête sur les disparus de minuit."},
+ {id:4,t:"Le dernier phare",y:2021,g:"Film",s:[1],film:1,big:1,d:"Un gardien et une enfant traversent une mer gelée pour rallumer le dernier phare."},
+ {id:5,t:"Cendres de printemps",y:2020,g:"Romance",s:[13,13],d:"Deux voisins se retrouvent chaque année sous le même cerisier, malgré tout ce qui les sépare."}
+];
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const tot=a=>a.s.reduce((x,y)=>x+y,0);
+const sz=(a,s,e)=>60+((a.id*37+s*17+e*29)%240);
+const norm=t=>t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+let pick=null,seas=0,done={},rec=['Nuit','Lames'],lf='all',ek=null,qi=1,busy=0,pt=null,playing=0,pos=0;
+const Q=[['480p',60],['720p',90],['1080p',180]];
+
+function go(v){
+  $$('.v').forEach(e=>e.classList.toggle('on',e.id===v));
+  $('#tabs').hidden=!['home','search','lib','set'].includes(v);
+  $$('.tab').forEach(t=>t.classList.toggle('on',t.dataset.v===v));
+  if(v!=='ply')stop();
+  if(v==='search')sug();
+}
+function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(t.h);t.h=setTimeout(()=>t.hidden=true,1800)}
+function card(a){return `<button class="card" data-o="${a.id}"><div class="p" style="--h:${a.id}"><i class="badge">${a.film?'Film':tot(a)+' ép.'}</i></div><b>${a.t}</b></button>`}
+function info(a){return a.film?'Film, 1 h 48':`Série, ${a.s.length} saison${a.s.length>1?'s':''}, ${tot(a)} épisodes`}
+
+/* Splash puis mot de passe */
+setTimeout(()=>go('gate'),2800);
+/* Verification du mot de passe (demo : remplacer par un hash en React Native) */
+const PW='animeplus';
+$('#gf').onsubmit=e=>{
+  e.preventDefault();
+  const f=$('#pw'),m=$('#ge'),v=f.value.trim().toLowerCase();
+  f.classList.remove('bad','good');
+  if(!v){m.textContent='Entre le mot de passe.';return}
+  if(v!==PW){
+    m.textContent='Mot de passe incorrect. Réessaie.';
+    void f.offsetWidth;f.classList.add('bad');
+    navigator.vibrate&&navigator.vibrate([60,40,60]);
+    f.select();return;
+  }
+  /* Succes : champ vert, logo qui pulse, coche animee, puis entree en zoom */
+  m.textContent='';f.classList.add('good');
+  $('#gate').classList.add('win');$('#tk').hidden=false;$('#gm').hidden=false;
+  navigator.vibrate&&navigator.vibrate(40);
+  setTimeout(()=>{
+    go('home');$('#home').classList.add('zoom');
+    setTimeout(()=>{
+      $('#home').classList.remove('zoom');$('#gate').classList.remove('win');
+      $('#tk').hidden=true;$('#gm').hidden=true;f.value='';f.classList.remove('good');
+    },700);
+  },1300);
+};
+
+/* Accueil et bibliotheque */
+$('#hr').innerHTML=[...D].reverse().slice(0,4).map(card).join('');
+function drawL(){const l=D.filter(a=>lf==='all'||a[lf]);$('#lg').innerHTML=l.map(card).join('')||'<p class="empty">Rien ici pour le moment.</p>'}
+drawL();
+$('#lf').onclick=e=>{const b=e.target.closest('[data-f]');if(!b)return;lf=b.dataset.f;$$('#lf .chip').forEach(c=>c.classList.toggle('on',c===b));drawL()};
+
+/* Recherche : suggestions a toucher, pas de resultats automatiques */
+function sug(){
+  const v=$('#q').value.trim(),n=norm(v);$('#qc').hidden=!v;
+  if(!v){$('#sug').innerHTML=(rec.length?'<small style="padding:8px">Recherches récentes</small>':'')+rec.map(r=>`<button class="rec" data-r="${r}"><svg class="i"><use href="#clock"/></svg>${r}</button>`).join('');return}
+  const l=D.filter(a=>norm(a.t).includes(n));
+  $('#sug').innerHTML=l.length?l.map(a=>{const i=norm(a.t).indexOf(n),t=a.t;
+    return `<button class="row" data-o="${a.id}" data-rq="${v}"><div class="p" style="--h:${a.id}"></div><div><b>${t.slice(0,i)}<mark>${t.slice(i,i+n.length)}</mark>${t.slice(i+n.length)}</b><small>${info(a)}</small><br><small>${a.y}, ${a.g}</small></div></button>`}).join(''):`<p class="empty">Aucune suggestion pour « ${v} ».<br>Vérifie l'orthographe ou essaie un autre mot.</p>`;
+}
+$('#q').oninput=sug;
+$('#qc').onclick=()=>{$('#q').value='';sug();$('#q').focus()};
+
+/* Fiche : Saison (puces) puis Episode (liste) */
+function open(id){pick=D.find(a=>a.id==id);seas=0;drawD();go('det');$('#det').scrollTop=0}
+function drawD(){const a=pick;
+  $('#dc').style.setProperty('--h',a.id);$('#dt').textContent=a.t;
+  $('#dm').innerHTML=`<span class="chip">${a.y}</span><span class="chip">${a.g}</span><span class="chip">${info(a).replace('Série, ','')}</span>`;
+  $('#dd').textContent=a.d;
+  $('#sh').hidden=$('#seas').hidden=a.film||a.s.length<2;
+  $('#seas').innerHTML=a.s.map((n,i)=>`<button class="chip${i===seas?' on':''}" data-s="${i}">Saison ${i+1}</button>`).join('');
+  $('#eh').textContent=a.film?'Film':`Saison ${seas+1}, ${a.s[seas]} épisodes`;
+  $('#eps').innerHTML=Array.from({length:a.s[seas]},(_,i)=>{const k=`${a.id}-${seas}-${i}`,c=done[k],m=a.film?'1 h 48':'24 min';
+    return `<div class="ep"><div class="n">${a.film?'F':i+1}</div><div class="t"><b>${a.film?'Film complet':'Épisode '+(i+1)}</b><small>${m}, ${c?c+' Mo, compressé':sz(a,seas,i)+' Mo'}</small></div>${c?'<span class="ib ok"><svg class="i"><use href="#ok"/></svg></span>':`<button class="ib" data-z="${k}" aria-label="Compresser"><svg class="i"><use href="#zip"/></svg></button>`}<button class="ib pl" data-p="${i}" aria-label="Lire"><svg class="i f"><use href="#play"/></svg></button></div>`}).join('');
+}
+$('#seas').onclick=e=>{const b=e.target.closest('[data-s]');if(b){seas=+b.dataset.s;drawD()}};
+$('#eps').onclick=e=>{const p=e.target.closest('[data-p]'),z=e.target.closest('[data-z]');if(p)play(+p.dataset.p);if(z)sheet(z.dataset.z)};
+
+/* Lecteur */
+function stop(){clearInterval(pt);playing=0;$('#pu').setAttribute('href','#play')}
+function tick(){playing=1;$('#pu').setAttribute('href','#pause');clearInterval(pt);pt=setInterval(()=>{pos=Math.min(pos+1,100);$('#sk').style.width=pos+'%';const s=Math.round(pos*14.4);$('#tc').textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');if(pos>=100)stop()},300)}
+function play(i){pos=0;$('#sk').style.width='0';$('#tc').textContent='0:00';
+  $('#pt').textContent=pick.film?pick.t:`${pick.t}, saison ${seas+1}, épisode ${i+1}`;$('#scr').style.setProperty('--h',pick.id);go('ply');tick()}
+$('#pp').onclick=()=>playing?stop():tick();
+$('#pb').onclick=()=>go('det');
+
+/* Compression : feuille avec 3 qualites puis progression */
+function drawQ(){$('#qs').innerHTML=Q.map((o,i)=>`<button class="opt${i===qi?' on':''}" data-q="${i}"><b>${o[0]}</b><small>environ ${o[1]} Mo</small></button>`).join('')}
+function sheet(k){ek=k;qi=1;busy=0;$('#bw').hidden=true;$('#bar').style.width='0';$('#sb').textContent='Compresser';drawQ();$('#sheet').classList.add('on');$('#scrim').hidden=false}
+function shut(){$('#sheet').classList.remove('on');$('#scrim').hidden=true}
+$('#qs').onclick=e=>{const b=e.target.closest('[data-q]');if(b&&!busy){qi=+b.dataset.q;drawQ()}};
+$('#scrim').onclick=()=>{if(!busy)shut()};
+$('#sb').onclick=()=>{if(busy)return;busy=1;$('#bw').hidden=false;let p=0;
+  const t=setInterval(()=>{p+=4;$('#bar').style.width=p+'%';$('#sb').textContent='Compression '+p+'%';
+    if(p>=100){clearInterval(t);busy=0;done[ek]=Q[qi][1];shut();drawD();toast('Épisode compressé')}},90)};
+
+/* Navigation globale */
+document.addEventListener('click',e=>{
+  const o=e.target.closest('[data-o]');
+  if(o){const rq=o.dataset.rq;if(rq&&!rec.includes(rq))rec.unshift(rq);open(o.dataset.o);return}
+  if(e.target.closest('[data-resume]')){pick=D[0];seas=0;play(6);return}
+  const r=e.target.closest('[data-r]');if(r){$('#q').value=r.dataset.r;sug();return}
+  const v=e.target.closest('[data-v]');if(v)go(v.dataset.v);
+});
+</script>
+</body>
+</html>

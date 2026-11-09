@@ -1,0 +1,288 @@
+/* ============================================================
+   LIBRARY.CSS — Bibliothèque / Collection
+   ============================================================ */
+
+.library-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ---- Header ---- */
+.library-header {
+  padding: 16px 16px 0;
+  flex-shrink: 0;
+}
+
+.library-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-bottom: 14px;
+}
+
+/* ---- Filter tabs ---- */
+.library-filters {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  margin-bottom: 14px;
+}
+
+.library-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.library-filter-btn {
+  flex-shrink: 0;
+  padding: 7px 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: 100px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color var(--transition), color var(--transition), background var(--transition);
+  white-space: nowrap;
+}
+
+.library-filter-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ---- Count badge ---- */
+.library-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background: var(--surface-2);
+  border-radius: 100px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--muted);
+  margin-left: 4px;
+}
+
+.library-filter-btn.active .library-count {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+}
+
+/* ---- Sort / Options row ---- */
+.library-options-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.library-results-count {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.library-sort-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color var(--transition);
+}
+
+.library-sort-btn:active {
+  color: var(--accent);
+}
+
+/* ---- Grid ---- */
+.library-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(var(--navbar-h) + var(--safe-bottom));
+}
+
+.library-body::-webkit-scrollbar {
+  display: none;
+}
+
+.library-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0 16px 16px;
+}
+
+.library-grid > .library-anime-card {
+  width: calc(50% - 5px);
+}
+
+/* ---- Anime card in library ---- */
+.library-anime-card {
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform var(--transition);
+  position: relative;
+}
+
+.library-anime-card:active {
+  transform: scale(0.97);
+}
+
+.library-anime-card-poster {
+  position: relative;
+  padding-top: 140%;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.library-anime-card-poster img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.library-anime-card-poster .no-poster {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: var(--muted);
+}
+
+/* ---- Status badge on card ---- */
+.library-card-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 2px 7px;
+  border-radius: 100px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.library-card-badge.ongoing {
+  background: var(--accent);
+  color: #fff;
+}
+
+.library-card-badge.fav {
+  background: var(--danger);
+  color: #fff;
+}
+
+.library-card-badge.completed {
+  background: var(--success);
+  color: #000;
+}
+
+/* ---- Fav heart icon on poster ---- */
+.library-card-fav-icon {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--danger);
+  font-size: 0.875rem;
+}
+
+/* ---- Card info ---- */
+.library-anime-card-info {
+  padding: 8px 10px 10px;
+  flex: 1;
+}
+
+.library-anime-card-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.library-anime-card-meta {
+  font-size: 0.7rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.library-anime-card-progress {
+  height: 2px;
+  background: var(--line);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.library-anime-card-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 100px;
+}
+
+/* ---- Long press menu indicator ---- */
+.library-anime-card-menu-hint {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  opacity: 0;
+}
+
+/* ---- Empty state ---- */
+.library-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.library-empty-icon {
+  font-size: 3.5rem;
+  opacity: 0.4;
+}
+
+.library-empty-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.library-empty-text {
+  font-size: 0.875rem;
+  color: var(--muted);
+  line-height: 1.5;
+}

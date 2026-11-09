@@ -1,0 +1,113 @@
+/* ============================================================
+   NAVBAR.CSS — Barre de navigation bottom
+   ============================================================ */
+
+.navbar {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  height: calc(var(--navbar-h) + var(--safe-bottom));
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: flex-start;
+  padding-top: 6px;
+  z-index: 70;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  will-change: transform;
+}
+
+.navbar.hidden {
+  transform: translateX(-50%) translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---- Nav items ---- */
+.navbar-items {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  justify-content: space-around;
+}
+
+.navbar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 16px;
+  cursor: pointer;
+  flex: 1;
+  position: relative;
+  transition: color var(--transition);
+}
+
+.navbar-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 28px;
+  color: var(--muted);
+  font-size: 1.1rem;
+  position: relative;
+  transition: color var(--transition), transform 0.15s ease;
+}
+
+.navbar-item-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--muted);
+  transition: color var(--transition);
+  letter-spacing: 0.2px;
+}
+
+/* ---- Active state ---- */
+.navbar-item.active .navbar-item-icon {
+  color: var(--accent);
+}
+
+.navbar-item.active .navbar-item-label {
+  color: var(--accent);
+}
+
+/* ---- Dot indicator on active tab ---- */
+.navbar-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* ---- Tap scale animation ---- */
+.navbar-item:active .navbar-item-icon {
+  transform: scale(0.85);
+}
+
+/* ---- Badge (notifications) ---- */
+.navbar-badge {
+  position: absolute;
+  top: -2px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  background: var(--danger);
+  border-radius: 100px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--surface);
+}

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>Anime Plus</title>
+
+  <!-- CSS Component-based -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/splash.css">
+  <link rel="stylesheet" href="css/gate.css">
+  <link rel="stylesheet" href="css/home.css">
+  <link rel="stylesheet" href="css/search.css">
+  <link rel="stylesheet" href="css/detail.css">
+  <link rel="stylesheet" href="css/player.css">
+  <link rel="stylesheet" href="css/library.css">
+  <link rel="stylesheet" href="css/settings.css">
+  <link rel="stylesheet" href="css/navbar.css">
+  <link rel="stylesheet" href="css/toast.css">
+
+  <!-- GSAP via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+</head>
+<body>
+
+  <!-- Sprite SVG vectoriel -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+      <symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
+      <symbol id="lib" viewBox="0 0 24 24"><rect x="3" y="4" width="6" height="16" rx="1"/><rect x="11" y="4" width="6" height="16" rx="1"/><path d="M19 6v14"/></symbol>
+      <symbol id="set" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></symbol>
+      <symbol id="back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+      <symbol id="play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></symbol>
+      <symbol id="pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></symbol>
+      <symbol id="zip" viewBox="0 0 24 24"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></symbol>
+      <symbol id="ok" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
+      <symbol id="lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+      <symbol id="x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+      <symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+      <symbol id="heart" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="app">
+    <!-- Conteneur d'affichage dynamique piloté par le routeur -->
+    <div id="view-container"></div>
+
+    <!-- Barre d'onglets basse -->
+    <nav id="tabs" hidden>
+      <button class="tab on" data-v="home"><svg class="i"><use href="#home"/></svg>Accueil</button>
+      <button class="tab" data-v="search"><svg class="i"><use href="#search"/></svg>Recherche</button>
+      <button class="tab" data-v="lib"><svg class="i"><use href="#lib"/></svg>Bibliothèque</button>
+      <button class="tab" data-v="set"><svg class="i"><use href="#set"/></svg>Réglages</button>
+    </nav>
+
+    <!-- Bottom Sheet & Scrim pour dialogue et compression -->
+    <div id="scrim" hidden></div>
+    <div id="sheet" role="dialog" aria-label="Modal Sheet"></div>
+  </div>
+
+  <!-- Services Core -->
+  <script src="js/services/storage.js"></script>
+  <script src="js/scrapping/scraper.js"></script>
+  <script src="js/services/downloader.js"></script>
+
+  <!-- Alias global pour compatibilité -->
+  <script>
+    window.Downloader = window.DownloaderService || window.Downloader;
+  </script>
+
+  <!-- Composants UI -->
+  <script src="js/components/Toast.js"></script>
+  <script src="js/components/Sheet.js"></script>
+  <script src="js/components/NavBar.js"></script>
+  <script src="js/components/Splash.js"></script>
+  <script src="js/components/Gate.js"></script>
+  <script src="js/components/Home.js"></script>
+  <script src="js/components/Search.js"></script>
+  <script src="js/components/Detail.js"></script>
+  <script src="js/components/Player.js"></script>
+  <script src="js/components/Library.js"></script>
+  <script src="js/components/Settings.js"></script>
+
+  <!-- Routeur & Initialisation -->
+  <script src="js/router.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

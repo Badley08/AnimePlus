@@ -1,0 +1,190 @@
+/* ============================================================
+   TOAST CSS (inline in base, but extra specifics here)
+   ============================================================ */
+
+/* Toast component styles handled via JS inline or base.css */
+/* Additional sheet and toast styles */
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  color: var(--text);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  animation: toastIn 0.25s ease forwards;
+  min-width: 200px;
+  pointer-events: all;
+}
+
+.toast.toast-success {
+  border-color: var(--success);
+}
+
+.toast.toast-error {
+  border-color: var(--danger);
+}
+
+.toast.toast-info {
+  border-color: var(--accent);
+}
+
+.toast.hiding {
+  animation: toastOut 0.2s ease forwards;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(8px) scale(0.95); }
+}
+
+.toast-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.toast-text {
+  flex: 1;
+  line-height: 1.4;
+}
+
+/* ---- Bottom Sheet ---- */
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 11, 22, 0.75);
+  z-index: 90;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.sheet-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.sheet {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  bottom: 0;
+  width: 100%;
+  max-width: 430px;
+  background: var(--surface);
+  border-radius: 20px 20px 0 0;
+  border-top: 1px solid var(--line);
+  z-index: 91;
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--safe-bottom);
+  will-change: transform;
+}
+
+.sheet.active {
+  transform: translateX(-50%) translateY(0);
+}
+
+.sheet-handle {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 6px;
+  flex-shrink: 0;
+}
+
+.sheet-handle-bar {
+  width: 36px;
+  height: 4px;
+  background: var(--line);
+  border-radius: 100px;
+}
+
+.sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 16px 12px;
+  flex-shrink: 0;
+}
+
+.sheet-title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.sheet-close-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 16px 16px;
+}
+
+.sheet-body::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---- Sheet items ---- */
+.sheet-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: color var(--transition);
+  font-size: 0.9375rem;
+}
+
+.sheet-item:last-child {
+  border-bottom: none;
+}
+
+.sheet-item:active {
+  color: var(--accent);
+}
+
+.sheet-item-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.sheet-item.danger {
+  color: var(--danger);
+}
+
+.sheet-item.danger .sheet-item-icon {
+  background: rgba(255, 92, 122, 0.1);
+  color: var(--danger);
+}

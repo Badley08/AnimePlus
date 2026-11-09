@@ -1,0 +1,45 @@
+<!-- 
+  ANIME PLUS — Logo inline SVG
+  Usage dans Splash.js et Gate.js :
+    document.querySelector('.logo-wrap').innerHTML = LOGO_SVG;
+  3 paths séparés pour l'animation DrawSVG / stroke-dashoffset :
+    #logo-rect   → contour arrondi
+    #logo-play   → triangle play
+    #logo-plus   → signe +
+-->
+<svg class="logo" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"
+     role="img" aria-label="Anime Plus" fill="none"
+     stroke-linecap="round" stroke-linejoin="round">
+  <defs>
+    <filter id="logo-glow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Fond -->
+  <rect x="8" y="8" width="104" height="104" rx="28" fill="#070B16" fill-opacity="0.6"/>
+
+  <!-- Contour (animé : stroke-dashoffset) -->
+  <rect id="logo-rect"
+        x="8" y="8" width="104" height="104" rx="28"
+        stroke="#2F6BFF" stroke-width="4.5"
+        pathLength="1"
+        style="stroke-dasharray:1;stroke-dashoffset:1"/>
+
+  <!-- Triangle play (animé séparément) -->
+  <path id="logo-play"
+        d="M38 36 L70 60 L38 84 Z"
+        stroke="#2F6BFF" stroke-width="4"
+        fill="rgba(47,107,255,0.15)"
+        pathLength="1"
+        style="stroke-dasharray:1;stroke-dashoffset:1"/>
+
+  <!-- Signe + (deux segments animés) -->
+  <path id="logo-plus"
+        d="M88 68 V92 M76 80 H100"
+        stroke="#2F6BFF" stroke-width="5"
+        pathLength="1"
+        style="stroke-dasharray:1;stroke-dashoffset:1"/>
+</svg>
+

@@ -1,0 +1,406 @@
+/* ============================================================
+   DETAIL.CSS — Fiche anime
+   ============================================================ */
+
+.detail-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ---- Hero ---- */
+.detail-hero {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.detail-hero-bg {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  background: var(--surface-2);
+  display: block;
+  filter: brightness(0.4);
+}
+
+.detail-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(7,11,22,0.3) 0%, rgba(7,11,22,0.9) 70%, var(--bg) 100%);
+}
+
+.detail-hero-back {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(7,11,22,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  z-index: 2;
+}
+
+.detail-hero-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0 16px 16px;
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+/* ---- Poster ---- */
+.detail-poster {
+  width: 90px;
+  height: 128px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--surface-2);
+  border: 2px solid var(--line);
+  position: relative;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+
+.detail-poster img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detail-poster .no-poster {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: var(--muted);
+}
+
+/* ---- Hero info ---- */
+.detail-hero-info {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 4px;
+}
+
+.detail-title {
+  font-size: 1.125rem;
+  font-weight: 800;
+  line-height: 1.25;
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.detail-meta-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.detail-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.detail-source-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: var(--accent-soft);
+  border-radius: 100px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ---- Genre chips ---- */
+.detail-genres {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 0 16px;
+  margin-bottom: 14px;
+}
+
+/* ---- Action buttons ---- */
+.detail-actions {
+  display: flex;
+  gap: 10px;
+  padding: 0 16px;
+  margin-bottom: 20px;
+}
+
+.detail-action-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: transform var(--transition);
+}
+
+.detail-action-btn:active {
+  transform: scale(0.96);
+}
+
+.detail-action-play {
+  background: var(--accent);
+  color: #fff;
+}
+
+.detail-action-fav {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.detail-action-fav.active {
+  background: rgba(255, 92, 122, 0.12);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* ---- Synopsis ---- */
+.detail-synopsis-wrap {
+  padding: 0 16px;
+  margin-bottom: 20px;
+}
+
+.detail-synopsis-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.detail-synopsis {
+  font-size: 0.875rem;
+  color: var(--muted);
+  line-height: 1.6;
+  position: relative;
+  overflow: hidden;
+  max-height: 72px;
+  transition: max-height 0.3s ease;
+}
+
+.detail-synopsis.expanded {
+  max-height: 1000px;
+}
+
+.detail-synopsis-toggle {
+  font-size: 0.8125rem;
+  color: var(--accent);
+  margin-top: 4px;
+  cursor: pointer;
+  display: inline-block;
+}
+
+/* ---- Season tabs ---- */
+.detail-seasons-wrap {
+  flex-shrink: 0;
+}
+
+.detail-seasons-label {
+  padding: 0 16px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.detail-seasons-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 16px 12px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.detail-seasons-row::-webkit-scrollbar {
+  display: none;
+}
+
+.detail-season-btn {
+  flex-shrink: 0;
+  padding: 7px 14px;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: 100px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color var(--transition), color var(--transition), background var(--transition);
+  white-space: nowrap;
+}
+
+.detail-season-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ---- Episodes list ---- */
+.detail-episodes {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(var(--navbar-h) + var(--safe-bottom));
+}
+
+.detail-episodes::-webkit-scrollbar {
+  display: none;
+}
+
+.episode-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  transition: background var(--transition);
+  cursor: pointer;
+}
+
+.episode-item:last-child {
+  border-bottom: none;
+}
+
+.episode-item:active {
+  background: var(--surface);
+}
+
+.episode-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.episode-number.watched {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.episode-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.episode-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.episode-meta {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.episode-progress-mini {
+  height: 2px;
+  background: var(--line);
+  border-radius: 100px;
+  overflow: hidden;
+  margin-top: 5px;
+}
+
+.episode-progress-mini-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 100px;
+}
+
+.episode-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.episode-play-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+  transition: transform var(--transition);
+}
+
+.episode-play-btn:active {
+  transform: scale(0.9);
+}
+
+.episode-dl-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  flex-shrink: 0;
+  transition: transform var(--transition);
+}
+
+.episode-dl-btn:active {
+  transform: scale(0.9);
+}
+
+.episode-dl-btn.downloading {
+  color: var(--accent);
+  border-color: var(--accent);
+  animation: pulse 1s ease infinite;
+}
+
+.episode-dl-btn.done {
+  color: var(--success);
+  border-color: var(--success);
+}

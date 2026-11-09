@@ -1,0 +1,202 @@
+/* ============================================================
+   GATE.CSS — Écran de mot de passe
+   ============================================================ */
+
+.gate-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 32px 24px;
+  gap: 0;
+}
+
+/* ---- Logo mini ---- */
+.gate-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 36px;
+}
+
+.gate-logo-icon {
+  width: 64px;
+  height: 64px;
+}
+
+.gate-logo-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.gate-logo-text {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text);
+}
+
+.gate-logo-text span {
+  color: var(--accent);
+}
+
+/* ---- Form ---- */
+.gate-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.gate-label {
+  font-size: 0.875rem;
+  color: var(--muted);
+  margin-bottom: 4px;
+  display: block;
+}
+
+.gate-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.gate-subtitle {
+  font-size: 0.875rem;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+/* ---- Password input state ---- */
+.gate-input-wrap {
+  position: relative;
+}
+
+.gate-input {
+  width: 100%;
+  padding: 14px 48px 14px 16px;
+  background: var(--surface);
+  border: 2px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 1rem;
+  letter-spacing: 2px;
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+.gate-input:focus {
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+
+.gate-input.success {
+  border-color: var(--success) !important;
+  background: rgba(47, 217, 127, 0.07) !important;
+  color: var(--success);
+}
+
+.gate-input.error {
+  border-color: var(--danger) !important;
+  animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* ---- Eye icon ---- */
+.gate-eye-btn {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+/* ---- Success checkmark ---- */
+.gate-check {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--success);
+  display: none;
+  align-items: center;
+}
+
+.gate-check.visible {
+  display: flex;
+  animation: popIn 0.3s ease;
+}
+
+@keyframes popIn {
+  0% { transform: translateY(-50%) scale(0); }
+  70% { transform: translateY(-50%) scale(1.2); }
+  100% { transform: translateY(-50%) scale(1); }
+}
+
+/* ---- Submit button ---- */
+.gate-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: opacity var(--transition), transform var(--transition);
+}
+
+.gate-btn:active {
+  transform: scale(0.97);
+}
+
+.gate-btn.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* ---- Error message ---- */
+.gate-error {
+  font-size: 0.8125rem;
+  color: var(--danger);
+  text-align: center;
+  min-height: 20px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.gate-error.visible {
+  opacity: 1;
+}
+
+/* ---- Pulse success on logo ---- */
+.gate-logo-icon.success-pulse {
+  animation: successPulse 0.6s ease;
+}
+
+@keyframes successPulse {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.2); }
+  60% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}

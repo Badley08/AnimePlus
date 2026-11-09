@@ -1,0 +1,343 @@
+/* ============================================================
+   HOME.CSS — Écran d'accueil
+   ============================================================ */
+
+.home-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ---- Header ---- */
+.home-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 12px;
+  flex-shrink: 0;
+}
+
+.home-greeting {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.home-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.home-title span {
+  color: var(--accent);
+}
+
+.home-logo-btn {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border-radius: 50%;
+  border: 1px solid var(--line);
+}
+
+/* ---- Sections ---- */
+.home-section {
+  margin-bottom: 24px;
+}
+
+/* ---- Resume card ---- */
+.resume-card {
+  margin: 0 16px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  display: flex;
+  align-items: stretch;
+  min-height: 110px;
+  cursor: pointer;
+  transition: transform var(--transition);
+}
+
+.resume-card:active {
+  transform: scale(0.98);
+}
+
+.resume-card-poster {
+  width: 80px;
+  flex-shrink: 0;
+  background: var(--surface-2);
+  position: relative;
+  overflow: hidden;
+}
+
+.resume-card-poster img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.resume-card-poster .no-poster {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 1.5rem;
+}
+
+.resume-card-body {
+  flex: 1;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.resume-card-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 4px;
+}
+
+.resume-card-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.resume-card-ep {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.resume-card-progress {
+  height: 3px;
+  background: var(--line);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.resume-card-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 100px;
+}
+
+.resume-card-action {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: 8px;
+}
+
+/* ---- Horizontal scroll row ---- */
+.home-scroll-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 0 16px 4px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.home-scroll-row::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---- Anime card in horizontal scroll ---- */
+.home-anime-card {
+  flex-shrink: 0;
+  width: 110px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: transform var(--transition);
+}
+
+.home-anime-card:active {
+  transform: scale(0.96);
+}
+
+.home-anime-card-poster {
+  position: relative;
+  padding-top: 140%;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.home-anime-card-poster img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.home-anime-card-poster .badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 100px;
+  text-transform: uppercase;
+}
+
+.home-anime-card-info {
+  padding: 7px 8px;
+}
+
+.home-anime-card-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.home-anime-card-meta {
+  font-size: 0.65rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* ---- En cours card ---- */
+.ongoing-card {
+  margin: 0 16px;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: transform var(--transition);
+}
+
+.ongoing-card:last-child {
+  margin-bottom: 0;
+}
+
+.ongoing-card:active {
+  transform: scale(0.98);
+}
+
+.ongoing-card-poster {
+  width: 48px;
+  height: 64px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  flex-shrink: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.ongoing-card-poster img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ongoing-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ongoing-card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ongoing-card-ep {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.ongoing-card-progress {
+  height: 2px;
+  background: var(--line);
+  border-radius: 100px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.ongoing-card-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 100px;
+}
+
+.ongoing-card-action {
+  color: var(--accent);
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+/* ---- Empty home ---- */
+.home-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 16px;
+  color: var(--muted);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+/* ---- Search shortcut bar ---- */
+.home-search-bar {
+  margin: 0 16px 20px;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: border-color var(--transition);
+}
+
+.home-search-bar:active {
+  border-color: var(--accent);
+}
