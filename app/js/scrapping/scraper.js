@@ -13,10 +13,7 @@
 
 const ScraperService = (() => {
 
-  const CORS_PROXIES = [
-    'https://api.allorigins.win/raw?url=',
-    'https://corsproxy.io/?url='
-  ];
+  const CORS_KEY = 'ec30d025';
 
   function isNativeAndroid() {
     return typeof window.Android !== 'undefined';
@@ -41,12 +38,17 @@ const ScraperService = (() => {
       }
     }
 
-    // En environnement Web (ex: Live Server localhost) : utiliser le proxy CORS
+    // En environnement Web (ex: Live Server localhost) : utiliser le proxy CORS avec clé active
+    const proxies = [
+      `https://corsproxy.io/?key=${CORS_KEY}&url=${encodeURIComponent(url)}`,
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+      `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+    ];
+
     let lastError = null;
-    for (const proxy of CORS_PROXIES) {
+    for (const proxyUrl of proxies) {
       try {
-        const proxyUrl = `${proxy}${encodeURIComponent(url)}`;
-        console.log(`[Scraper] Via Proxy: ${proxyUrl}`);
+        console.log(`[Scraper] Via Proxy: ${proxyUrl.split('&url=')[0]}...`);
 
         const fetchOpts = {
           headers: {
@@ -66,7 +68,7 @@ const ScraperService = (() => {
         const text = await res.text();
         if (text && text.length > 5) return text;
       } catch (err) {
-        console.warn(`[Scraper] Proxy ${proxy} a échoué:`, err.message);
+        console.warn(`[Scraper] Proxy a échoué:`, err.message);
         lastError = err;
       }
     }
@@ -252,7 +254,12 @@ const ScraperService = (() => {
   async function getAnimeDetail(animeUrl, source) {
     console.log(`[Scraper] getAnimeDetail: ${animeUrl} (Source: ${source})`);
 
-    if (source === 'animesama' || animeUrl.includes('anime-sama.to')) {
+    if (!animeUrl || typeof animeUrl !== 'string') {
+      console.warn('[Scraper] URL invalide ou manquante pour getAnimeDetail:', animeUrl);
+      throw new Error("L'URL de l'anime est invalide ou manquante.");
+    }
+
+    if (source === 'animesama' || animeUrl.includes('anime-sama')) {
       return await getDetailAnimeSama(animeUrl);
     } else {
       return await getDetailVoirAnime(animeUrl);
@@ -350,37 +357,32 @@ const ScraperService = (() => {
 
   // --- Chargement des épisodes réels d'une saison Anime-Sama via episodes.js ---
   async function getSeasonEpisodesAnimeSama(seasonUrl) {
+    if (!seasonUrl) return [];
     const normUrl = seasonUrl.endsWith('/') ? seasonUrl : `${seasonUrl}/`;
-    const jsUrl = `${normUrl}episodes.js`;
-    console.log(`[Scraper] Chargement des flux réels: ${jsUrl}`);
+    console.log(`[Scraper] Chargement des flux réels: ${normUrl}`);
 
     try {
-      const js = await request(jsUrl, {
-        headers: { 'Referer': normUrl }
-      });
+      // 1. Tenter d'abord de charger la page HTML pour récupérer le filever ou eps1 directement
+      let filever = '';
+      try {
+        const pageHtml = await request(normUrl);
+        const fvMatch = pageHtml.match(/episodes\.js\?filever=([a-zA-Z0-9]+)/);
+        if (fvMatch) filever = fvMatch[1];
 
-      const episodes = [];
-
-      // Analyse des tableaux eps1, eps2, eps3...
-      // eps1 = Lecteur principal (ex: uqload, sendvid, ansembed)
-      const eps1Match = js.match(/var\s+eps1\s*=\s*\[([\s\S]*?)\];/);
-      const eps2Match = js.match(/var\s+eps2\s*=\s*\[([\s\S]*?)\];/);
-
-      const targetArray = eps1Match ? eps1Match[1] : (eps2Match ? eps2Match[1] : '');
-      if (targetArray) {
-        const urls = targetArray.match(/['"]([^'"]+)['"]/g) || [];
-        urls.forEach((u, idx) => {
-          const rawUrl = u.replace(/['"]/g, '').trim();
-          if (rawUrl) {
-            episodes.push({
-              number: idx + 1,
-              title: `Épisode ${idx + 1}`,
-              streamUrl: rawUrl,
-              duration: '24 min'
-            });
-          }
-        });
+        const directEps = parseEpisodesFromScript(pageHtml);
+        if (directEps && directEps.length > 0) {
+          console.log(`[Scraper] ${directEps.length} épisodes trouvés directement dans la page`);
+          return directEps;
+        }
+      } catch (pageErr) {
+        console.warn(`[Scraper] Info page saison: ${pageErr.message}`);
       }
+
+      // 2. Charger le fichier episodes.js
+      const jsUrl = filever ? `${normUrl}episodes.js?filever=${filever}` : `${normUrl}episodes.js`;
+      console.log(`[Scraper] Fetch episodes.js: ${jsUrl}`);
+      const js = await request(jsUrl);
+      const episodes = parseEpisodesFromScript(js);
 
       console.log(`[Scraper] ${episodes.length} épisodes réels chargés depuis Anime-Sama`);
       return episodes;
@@ -388,6 +390,33 @@ const ScraperService = (() => {
       console.error(`[Scraper] Erreur lecture episodes.js sur ${seasonUrl}:`, err);
       return [];
     }
+  }
+
+  function parseEpisodesFromScript(scriptContent) {
+    if (!scriptContent) return [];
+    const episodes = [];
+
+    // Analyse des tableaux eps1, eps2, eps3...
+    const eps1Match = scriptContent.match(/var\s+eps1\s*=\s*\[([\s\S]*?)\];/);
+    const eps2Match = scriptContent.match(/var\s+eps2\s*=\s*\[([\s\S]*?)\];/);
+    const eps3Match = scriptContent.match(/var\s+eps3\s*=\s*\[([\s\S]*?)\];/);
+
+    const targetArray = eps1Match ? eps1Match[1] : (eps2Match ? eps2Match[1] : (eps3Match ? eps3Match[1] : ''));
+    if (targetArray) {
+      const urls = targetArray.match(/['"]([^'"]+)['"]/g) || [];
+      urls.forEach((u, idx) => {
+        const rawUrl = u.replace(/['"]/g, '').trim();
+        if (rawUrl) {
+          episodes.push({
+            number: idx + 1,
+            title: `Épisode ${idx + 1}`,
+            streamUrl: rawUrl,
+            duration: '24 min'
+          });
+        }
+      });
+    }
+    return episodes;
   }
 
   // --- Fiche Réelle VoirAnime (ex: Bleach, Akame ga Kill) ---
@@ -456,13 +485,18 @@ const ScraperService = (() => {
       const html = await request(episodePageUrl);
       const doc = parseHTML(html);
 
-      const iframe = doc.querySelector('iframe[src*="vkspeed"], iframe[src*="embed"], iframe');
-      if (iframe) {
-        const src = iframe.getAttribute('src');
+      const embedIframe = doc.querySelector('.player-embed iframe, #pembed iframe, #embed_holder iframe, iframe[src*="voembed"], iframe[src*="vkspeed"], iframe[src*="uqload"], iframe');
+      if (embedIframe) {
+        const src = embedIframe.getAttribute('src');
         if (src && !src.includes('ads') && !src.includes('google')) {
-          console.log(`[Scraper] Lecteur trouvé: ${src}`);
+          console.log(`[Scraper] Lecteur VoirAnime trouvé: ${src}`);
           return src;
         }
+      }
+
+      const regexMatch = html.match(/<iframe[^>]+src=["']([^"']*(?:embed|voembed|vkspeed|uqload)[^"']*)["']/i);
+      if (regexMatch && regexMatch[1]) {
+        return regexMatch[1];
       }
     } catch (e) {
       console.warn('[Scraper] Erreur extraction iframe VoirAnime:', e);

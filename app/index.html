@@ -145,7 +145,7 @@
     <div class="ptop" id="pt">Titre de l'épisode</div>
     <div class="player-box" id="player-container">
       <video id="vid" playsinline preload="auto" controls></video>
-      <iframe id="vid-frame" hidden allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+      <iframe id="vid-frame" hidden allowfullscreen allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe>
     </div>
     <div class="pbot" id="player-bot">
       <div class="seek" id="seek-bar"><i id="sk"></i></div>
@@ -357,7 +357,7 @@ async function renderHome() {
   }
 
   // 3. Favoris
-  const favs = Storage.getFavorites ? Storage.getFavorites() : [];
+  const favs = (Storage.getFavorites ? Storage.getFavorites() : []).filter(a => a && a.url && a.title);
   const fTitle = $('#home-favs-title');
   const fContainer = $('#home-favs');
   if (favs.length) {
@@ -374,8 +374,10 @@ async function renderHome() {
 
     fContainer.querySelectorAll('.search-row').forEach(r => {
       r.onclick = () => {
-        const anime = JSON.parse(decodeURIComponent(r.dataset.anime));
-        go('det', { anime });
+        try {
+          const anime = JSON.parse(decodeURIComponent(r.dataset.anime));
+          if (anime && anime.url) go('det', { anime });
+        } catch (e) { console.error('Parse fav error:', e); }
       };
     });
   } else {
@@ -467,6 +469,12 @@ function renderSearch() {
 
 // --- Fiche Anime Style Boruto / Anime-Sama ---
 async function openDetail(anime) {
+  if (!anime || !anime.url) {
+    console.warn("[App] openDetail: anime ou URL manquante", anime);
+    toast("Impossible d'ouvrir : lien manquant");
+    go('home');
+    return;
+  }
   currentAnime = anime;
   $('#det-back').onclick = () => go('home');
 
@@ -613,15 +621,25 @@ async function loadSeasonEpisodes(seasonIdx) {
 
 // --- Lecteur Universel (HTML5 MP4 ou Iframe Embed) ---
 async function playEpisode(anime, seasonTitle, episodeTitle, streamUrl) {
+  if (!streamUrl) {
+    toast("Flux vidéo indisponible");
+    return;
+  }
   $('#pt').textContent = `${anime.title} — ${episodeTitle}`;
   go('ply');
 
-  let finalUrl = streamUrl;
+  let finalUrl = streamUrl.trim();
+  if (finalUrl.startsWith('//')) finalUrl = 'https:' + finalUrl;
 
   // Si VoirAnime, résoudre l'iframe de streaming
-  if (anime.source === 'voiranime' && streamUrl && !streamUrl.includes('embed') && !streamUrl.endsWith('.mp4')) {
+  if (anime.source === 'voiranime' && finalUrl && !finalUrl.includes('embed') && !finalUrl.endsWith('.mp4')) {
     $('#pt').textContent = 'Résolution du flux...';
-    finalUrl = await ScraperService.resolveVoirAnimeStream(streamUrl);
+    try {
+      finalUrl = await ScraperService.resolveVoirAnimeStream(finalUrl);
+    } catch (e) {
+      console.warn('Erreur résolution flux VoirAnime:', e);
+    }
+    if (finalUrl.startsWith('//')) finalUrl = 'https:' + finalUrl;
     $('#pt').textContent = `${anime.title} — ${episodeTitle}`;
   }
 
@@ -739,7 +757,7 @@ window.onCompressionDone = (id, outPath, err) => {
 // --- Bibliothèque ---
 function renderLib() {
   const g = $('#lg');
-  const favs = Storage.getFavorites ? Storage.getFavorites() : [];
+  const favs = (Storage.getFavorites ? Storage.getFavorites() : []).filter(a => a && a.url && a.title);
   if (!favs.length) {
     g.innerHTML = '<p class="empty" style="grid-column: 1/-1;">Aucun favori enregistré.<br><small>Ajoute des animes depuis leur fiche.</small></p>';
     return;
@@ -758,8 +776,10 @@ function renderLib() {
 
   g.querySelectorAll('.as-carte').forEach(c => {
     c.onclick = () => {
-      const anime = JSON.parse(decodeURIComponent(c.dataset.anime));
-      go('det', { anime });
+      try {
+        const anime = JSON.parse(decodeURIComponent(c.dataset.anime));
+        if (anime && anime.url) go('det', { anime });
+      } catch (e) { console.error('Parse fav lib error:', e); }
     };
   });
 }
