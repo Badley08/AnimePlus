@@ -139,14 +139,16 @@
     </div>
   </section>
 
-  <!-- 6. LECTEUR VIDÉO (HTML5 MP4 + IFRAME EMBED) -->
+  <!-- 6. LECTEUR VIDÉO (HTML5 MP4 + IFRAME EMBED SÉCURISÉ) -->
   <section class="v" id="ply">
     <button class="back" id="pb" aria-label="Retour"><svg class="i"><use href="#back"/></svg></button>
     <div class="ptop" id="pt">Titre de l'épisode</div>
     <div class="player-box" id="player-container">
       <video id="vid" playsinline preload="auto" controls></video>
-      <iframe id="vid-frame" hidden allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe>
+      <iframe id="vid-frame" hidden allow="autoplay; fullscreen; encrypted-media; picture-in-picture" sandbox="allow-scripts allow-forms allow-presentation"></iframe>
     </div>
+    <!-- Sélecteur de lecteurs alternatifs pour cet épisode -->
+    <div id="player-streams-bar" style="display:flex;gap:6px;overflow-x:auto;padding:8px 12px;background:var(--surface);"></div>
     <div class="pbot" id="player-bot">
       <div class="seek" id="seek-bar"><i id="sk"></i></div>
       <div class="times"><span id="tc">0:00</span><span id="td">0:00</span></div>
@@ -163,23 +165,55 @@
     <div class="grid" id="lg"></div>
   </section>
 
-  <!-- 8. RÉGLAGES -->
+  <!-- 8. RÉGLAGES (Simple & accessible pour non-tech) -->
   <section class="v" id="set">
-    <h1 class="title">Réglages</h1>
-    <div class="group">
-      <div class="set" id="cfg-qual"><span>Qualité de compression</span><small id="lbl-qual">720p</small></div>
-      <div class="set" id="cfg-lock"><span>Verrouiller au lancement</span><small id="lbl-lock">Activé</small></div>
+    <h1 class="title">Paramètres</h1>
+
+    <div class="settings-card">
+      <div class="set-header">
+        <svg class="i" style="color:var(--accent-cyan);width:20px;height:20px;"><use href="#zip"/></svg>
+        <div>
+          <b>Qualité de téléchargement</b>
+          <p class="muted" style="font-size:12px;margin-top:2px;">Choisissez la taille des épisodes compressés</p>
+        </div>
+      </div>
+      <div class="settings-btns" id="quality-selector">
+        <button class="btn-option" data-qual="480p">480p <small>(Léger)</small></button>
+        <button class="btn-option on" data-qual="720p">720p <small>(Optimal)</small></button>
+        <button class="btn-option" data-qual="1080p">1080p <small>(HD)</small></button>
+      </div>
     </div>
-    <h2 class="oe-h2">Mises à jour</h2>
-    <div class="group">
-      <div class="set" id="cfg-update"><span>Rechercher une mise à jour</span><small>GitHub Releases</small></div>
-      <div class="set" id="cfg-clean"><span>Vider le cache</span><small style="color:var(--danger)">Nettoyer</small></div>
+
+    <div class="settings-card">
+      <div class="set-header">
+        <svg class="i" style="color:var(--accent-cyan);width:20px;height:20px;"><use href="#lock"/></svg>
+        <div>
+          <b>Sécurité au lancement</b>
+          <p class="muted" style="font-size:12px;margin-top:2px;">Demander le code PIN à chaque ouverture</p>
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <button class="btn-action" id="btn-toggle-lock">Verrouillage activé</button>
+      </div>
     </div>
-    <h2 class="oe-h2">À propos</h2>
-    <div class="group">
-      <div class="set"><span>Version</span><small>1.0.0 (WebView Edition)</small></div>
-      <div class="set"><span>Idée originale</span><small>Strong</small></div>
-      <div class="set"><span>Développeur</span><small>Karlito</small></div>
+
+    <div class="settings-card">
+      <div class="set-header">
+        <svg class="i" style="color:var(--accent-cyan);width:20px;height:20px;"><use href="#info"/></svg>
+        <div>
+          <b>Maintenance & Application</b>
+          <p class="muted" style="font-size:12px;margin-top:2px;">Mises à jour et nettoyage de l'application</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button class="btn-action" id="btn-check-update" style="flex:1;">Vérifier mise à jour</button>
+        <button class="btn-action danger" id="btn-clean-cache" style="flex:1;">Nettoyer le cache</button>
+      </div>
+    </div>
+
+    <div class="settings-card" style="text-align:center;padding:16px;">
+      <b style="font-size:14px;color:var(--text-muted);">Anime Plus v1.0.0</b>
+      <p class="muted" style="font-size:12px;margin-top:4px;">Développé avec ❤️ par Karlito Dev</p>
     </div>
   </section>
 
@@ -606,7 +640,7 @@ async function loadSeasonEpisodes(seasonIdx) {
     btn.onclick = () => {
       const idx = parseInt(btn.dataset.play, 10);
       const ep = episodes[idx];
-      playEpisode(currentAnime, season.title, ep.title, ep.streamUrl);
+      playEpisode(currentAnime, season.title, ep.title, ep.streamUrl, ep.streams || []);
     };
   });
 
@@ -614,13 +648,13 @@ async function loadSeasonEpisodes(seasonIdx) {
     btn.onclick = () => {
       const idx = parseInt(btn.dataset.comp, 10);
       const ep = episodes[idx];
-      openCompressionSheet(ep.title, ep.streamUrl);
+      openCompressionSheet(ep.title, ep.streamUrl, ep.streams || []);
     };
   });
 }
 
-// --- Lecteur Universel (HTML5 MP4 ou Iframe Embed) ---
-async function playEpisode(anime, seasonTitle, episodeTitle, streamUrl) {
+// --- Lecteur Universel (HTML5 MP4 ou Iframe Embed Sécurisé avec Multi-Lecteurs) ---
+async function playEpisode(anime, seasonTitle, episodeTitle, streamUrl, availableStreams = []) {
   if (!streamUrl) {
     toast("Flux vidéo indisponible");
     return;
@@ -628,8 +662,45 @@ async function playEpisode(anime, seasonTitle, episodeTitle, streamUrl) {
   $('#pt').textContent = `${anime.title} — ${episodeTitle}`;
   go('ply');
 
+  // Affichage de la barre de choix des lecteurs pour cet épisode
+  const sBar = $('#player-streams-bar');
+  if (availableStreams && availableStreams.length > 1) {
+    sBar.style.display = 'flex';
+    sBar.innerHTML = availableStreams.map((st, i) => `
+      <button class="chip ${st.url === streamUrl ? 'on' : ''}" style="white-space:nowrap;padding:4px 10px;font-size:12px;" data-surl="${encodeURIComponent(st.url)}">
+        ${st.name}
+      </button>
+    `).join('');
+
+    sBar.querySelectorAll('button').forEach(b => {
+      b.onclick = () => {
+        sBar.querySelectorAll('button').forEach(btn => btn.classList.remove('on'));
+        b.classList.add('on');
+        const nextUrl = decodeURIComponent(b.dataset.surl);
+        loadStreamIntoPlayer(anime, seasonTitle, episodeTitle, nextUrl);
+      };
+    });
+  } else {
+    sBar.style.display = 'none';
+    sBar.innerHTML = '';
+  }
+
+  await loadStreamIntoPlayer(anime, seasonTitle, episodeTitle, streamUrl);
+}
+
+async function loadStreamIntoPlayer(anime, seasonTitle, episodeTitle, streamUrl) {
   let finalUrl = streamUrl.trim();
   if (finalUrl.startsWith('//')) finalUrl = 'https:' + finalUrl;
+
+  // Tentative de résolution directe en MP4 / M3U8 (comme AnimeSamaApi / Miro-sh)
+  if (ScraperService.resolveDirectMediaUrl) {
+    try {
+      const resolved = await ScraperService.resolveDirectMediaUrl(finalUrl);
+      if (resolved && resolved.url) {
+        finalUrl = resolved.url;
+      }
+    } catch (_) {}
+  }
 
   // Si VoirAnime, résoudre l'iframe de streaming
   if (anime.source === 'voiranime' && finalUrl && !finalUrl.includes('embed') && !finalUrl.endsWith('.mp4')) {
@@ -655,10 +726,9 @@ async function playEpisode(anime, seasonTitle, episodeTitle, streamUrl) {
     duration: 1440
   });
 
-  // Détermine si le flux est un MP4 direct ou un lecteur embed iframe
-  const isDirectMp4 = finalUrl.endsWith('.mp4') || finalUrl.includes('.mp4?');
+  const isDirectMedia = finalUrl.endsWith('.mp4') || finalUrl.includes('.mp4?') || finalUrl.endsWith('.m3u8') || finalUrl.includes('.m3u8?');
 
-  if (isDirectMp4) {
+  if (isDirectMedia) {
     iframe.hidden = true;
     iframe.src = 'about:blank';
     video.hidden = false;
@@ -666,7 +736,7 @@ async function playEpisode(anime, seasonTitle, episodeTitle, streamUrl) {
     video.src = finalUrl;
     video.play().catch(() => {});
   } else {
-    // Embed iframe sécurisé sans popups
+    // Embed iframe sécurisé anti-redirection (pas de top-navigation possible)
     video.pause();
     video.hidden = true;
     $('#player-bot').hidden = true;
@@ -681,13 +751,13 @@ $('#pb').onclick = () => {
   go('det', { anime: currentAnime });
 };
 
-// --- Compression Vidéo Matérielle (Kotlin) ---
-function openCompressionSheet(epTitle, url) {
+// --- Compression Vidéo Matérielle (Kotlin Media3 Transformer) ---
+function openCompressionSheet(epTitle, url, streams = []) {
   $('#sheet').classList.add('on');
   $('#scrim').hidden = false;
   $('#bw').hidden = true;
   $('#bar').style.width = '0%';
-  $('#sb').textContent = 'Lancer la compression';
+  $('#sb').textContent = 'Télécharger & Compresser';
 
   let selectedQuality = '720p';
   const qs = [
@@ -709,27 +779,62 @@ function openCompressionSheet(epTitle, url) {
     };
   });
 
-  $('#sb').onclick = () => {
+  $('#sb').onclick = async () => {
     $('#bw').hidden = false;
-    $('#sb').textContent = 'Compression en cours...';
+    $('#sb').textContent = 'Préparation du flux...';
 
-    // Appel direct au bridge Kotlin Media3 Transformer si sous Android
-    if (window.AndroidCompression && window.AndroidCompression.compress) {
-      window.AndroidCompression.compress(url, selectedQuality, "comp_job");
+    // Trouver le meilleur flux direct pour le téléchargement
+    let streamToDownload = url;
+    for (const st of streams) {
+      if (st.url && (st.url.includes('sendvid') || st.url.includes('sibnet') || st.url.includes('ansembed') || st.url.includes('.mp4'))) {
+        streamToDownload = st.url;
+        break;
+      }
+    }
+
+    if (ScraperService.resolveDirectMediaUrl) {
+      const direct = await ScraperService.resolveDirectMediaUrl(streamToDownload);
+      if (direct && direct.url) streamToDownload = direct.url;
+    }
+
+    const safeName = (epTitle || 'episode').replace(/[^a-zA-Z0-9_\-]/g, '_') + '.mp4';
+
+    // Appel au bridge matériel Kotlin Media3 (Download + H.264 Hardware Compressor)
+    if (window.AndroidDownload && window.AndroidDownload.downloadAndCompress) {
+      $('#sb').textContent = 'Téléchargement & Compression...';
+      const jobId = 'dc_' + Date.now();
+      window.onDownloadCompressProgress = (id, stage, p) => {
+        if (id === jobId) {
+          $('#bar').style.width = `${p}%`;
+          $('#sb').textContent = stage === 'download' ? `Téléchargement ${p}%` : `Compression matérielle ${p}%`;
+        }
+      };
+      window.onDownloadCompressDone = (id, path, err) => {
+        if (id === jobId) {
+          $('#sheet').classList.remove('on');
+          $('#scrim').hidden = true;
+          if (err) {
+            toast('Erreur: ' + err);
+          } else {
+            toast('Épisode compressé et sauvegardé !');
+          }
+        }
+      };
+      window.AndroidDownload.downloadAndCompress(streamToDownload, selectedQuality, safeName, jobId);
     } else {
-      // Simulation visuelle pour dev web
+      // Simulation visuelle fluide pour aperçu Web PC
       let p = 0;
       const t = setInterval(() => {
         p += 5;
         $('#bar').style.width = `${p}%`;
-        $('#sb').textContent = `Compression ${p}%`;
+        $('#sb').textContent = p < 50 ? `Téléchargement ${p * 2}%` : `Compression matérielle ${(p - 50) * 2}%`;
         if (p >= 100) {
           clearInterval(t);
           $('#sheet').classList.remove('on');
           $('#scrim').hidden = true;
-          toast('Épisode compressé avec succès !');
+          toast('Épisode compressé avec succès (Kotlin Media3) !');
         }
-      }, 60);
+      }, 50);
     }
   };
 }
@@ -784,51 +889,70 @@ function renderLib() {
   });
 }
 
-// --- Réglages ---
+// --- Paramètres Utilisateur & Contrôles intuitifs ---
 function renderSettings() {
   const s = Storage.getSettings ? Storage.getSettings() : { quality: '720p', lockEnabled: true };
-  $('#lbl-qual').textContent = s.quality || '720p';
-  $('#lbl-lock').textContent = s.lockEnabled ? 'Activé' : 'Désactivé';
 
-  $('#cfg-qual').onclick = () => {
-    const list = ['480p', '720p', '1080p'];
-    s.quality = list[(list.indexOf(s.quality) + 1) % list.length];
-    Storage.setSettings(s);
-    $('#lbl-qual').textContent = s.quality;
-    toast(`Qualité : ${s.quality}`);
-  };
+  // Boutons de choix de qualité
+  const qBtns = $$('#quality-selector .btn-option');
+  qBtns.forEach(b => {
+    b.classList.toggle('on', b.dataset.qual === (s.quality || '720p'));
+    b.onclick = () => {
+      s.quality = b.dataset.qual;
+      Storage.setSettings(s);
+      qBtns.forEach(x => x.classList.toggle('on', x === b));
+      toast(`Qualité réglée sur ${s.quality}`);
+    };
+  });
 
-  $('#cfg-lock').onclick = () => {
-    s.lockEnabled = !s.lockEnabled;
-    Storage.setSettings(s);
-    $('#lbl-lock').textContent = s.lockEnabled ? 'Activé' : 'Désactivé';
-    toast(`Verrouillage ${s.lockEnabled ? 'activé' : 'désactivé'}`);
-  };
+  // Bouton de sécurité / code PIN
+  const lockBtn = $('#btn-toggle-lock');
+  if (lockBtn) {
+    const updateLockUi = () => {
+      lockBtn.textContent = s.lockEnabled ? 'Verrouillage activé (Recommandé)' : 'Verrouillage désactivé';
+      lockBtn.classList.toggle('on', s.lockEnabled);
+    };
+    updateLockUi();
+    lockBtn.onclick = () => {
+      s.lockEnabled = !s.lockEnabled;
+      Storage.setSettings(s);
+      updateLockUi();
+      toast(s.lockEnabled ? 'Sécurité activée au démarrage' : 'Sécurité désactivée');
+    };
+  }
 
-  $('#cfg-update').onclick = () => {
-    toast('Recherche de version GitHub...');
-    if (window.Android && window.Android.checkUpdate) {
-      window.Android.checkUpdate('1.0.0');
-    } else {
-      fetch('https://api.github.com/repos/karlitodev/animeplus/releases/latest')
-        .then(r => r.json())
-        .then(d => {
-          if (d.tag_name && d.tag_name !== 'v1.0.0') {
-            toast(`Nouvelle version ${d.tag_name} disponible !`);
-          } else {
-            toast('Anime Plus est à jour (v1.0.0)');
-          }
-        })
-        .catch(() => toast('Anime Plus est à jour (v1.0.0)'));
-    }
-  };
+  // Vérification de mise à jour
+  const updateBtn = $('#btn-check-update');
+  if (updateBtn) {
+    updateBtn.onclick = () => {
+      toast('Recherche de version GitHub...');
+      if (window.Android && window.Android.checkUpdate) {
+        window.Android.checkUpdate('1.0.0');
+      } else {
+        fetch('https://api.github.com/repos/karlitodev/animeplus/releases/latest')
+          .then(r => r.json())
+          .then(d => {
+            if (d.tag_name && d.tag_name !== 'v1.0.0') {
+              toast(`Nouvelle version ${d.tag_name} disponible !`);
+            } else {
+              toast('Anime Plus est à jour (v1.0.0)');
+            }
+          })
+          .catch(() => toast('Anime Plus est à jour (v1.0.0)'));
+      }
+    };
+  }
 
-  $('#cfg-clean').onclick = () => {
-    if (confirm('Vider l\'historique et le cache local ?')) {
-      Storage.clearHistory ? Storage.clearHistory() : null;
-      toast('Cache vidé.');
-    }
-  };
+  // Nettoyage du cache
+  const cleanBtn = $('#btn-clean-cache');
+  if (cleanBtn) {
+    cleanBtn.onclick = () => {
+      if (confirm('Voulez-vous réinitialiser le cache et l\'historique ?')) {
+        Storage.clearHistory ? Storage.clearHistory() : null;
+        toast('Cache nettoyé.');
+      }
+    };
+  }
 }
 
 // --- Navigation Tab Bar ---

@@ -1,21 +1,21 @@
 /* =====================================================================
-   ANIME PLUS — CSS MOBILE-FIRST STYLE ANIME-SAMA (Boruto)
+   ANIME PLUS — CSS MOBILE-FIRST DESIGN SOIGNÉ (Bleu Nuit & Cyan Anime-Sama)
    Optimisé pour Android / Tecno & Webview
    ===================================================================== */
 :root {
-  --bg: #070B16;
-  --bg-darker: #020306;
-  --surface: #0A1424;
-  --surface-2: #0F1D35;
-  --surface-glass: rgba(10, 20, 36, 0.85);
-  --line: rgba(56, 189, 248, 0.16);
-  --line-strong: rgba(56, 189, 248, 0.35);
-  --text: #F1F5F9;
+  --bg: #0B1120;
+  --bg-darker: #070D1A;
+  --surface: #111C35;
+  --surface-2: #18284A;
+  --surface-glass: rgba(17, 28, 53, 0.88);
+  --line: rgba(56, 189, 248, 0.18);
+  --line-strong: rgba(56, 189, 248, 0.4);
+  --text: #F8FAFC;
   --text-muted: #94A3B8;
-  --accent: #2F6BFF;
+  --accent: #2563EB;
   --accent-cyan: #38BDF8;
-  --accent-soft: rgba(47, 107, 255, 0.18);
-  --danger: #FF5C7A;
+  --accent-soft: rgba(37, 99, 235, 0.22);
+  --danger: #EF4444;
   --success: #22C55E;
   --gold: #FACC15;
   --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -38,7 +38,10 @@ html, body {
 }
 
 body {
-  background: #020306;
+  background: var(--bg);
+  background: radial-gradient(1000px 480px at 10% -10%, rgba(37, 99, 235, 0.25), transparent 60%),
+              radial-gradient(1100px 600px at 60% 115%, rgba(14, 165, 233, 0.18), transparent 60%),
+              linear-gradient(180deg, #0B1120 0%, #070D1A 100%);
   color: var(--text);
   font-family: var(--font);
   display: flex;
@@ -922,6 +925,87 @@ button:focus-visible, input:focus-visible {
 /* =====================================================================
    RÉGLAGES & ONGLETS
    ===================================================================== */
+/* =====================================================================
+   RÉGLAGES & CONTRÔLES INTUITIFS (UX Non-Tech)
+   ===================================================================== */
+.settings-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.set-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-btns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.btn-option {
+  padding: 10px 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-option small {
+  display: block;
+  font-size: 10px;
+  font-weight: 500;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+.btn-option.on {
+  background: var(--accent);
+  border-color: var(--accent-cyan);
+  color: #fff;
+  box-shadow: 0 0 12px rgba(37, 99, 235, 0.4);
+}
+
+.btn-action {
+  width: 100%;
+  padding: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-action.on {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.btn-action.danger {
+  color: var(--danger);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.btn-action:active {
+  transform: scale(0.98);
+}
+
 .group {
   background: var(--surface);
   border: 1px solid var(--line);

@@ -439,28 +439,77 @@ const ScraperService = (() => {
 
   function parseEpisodesFromScript(scriptContent) {
     if (!scriptContent) return [];
+
+    // Récupération de tous les lecteurs déclarés : var eps1 = [...], var eps2 = [...], var eps3 = [...], etc.
+    const players = {};
+    const regexEps = /var\s+(eps\d+)\s*=\s*\[([\s\S]*?)\];/g;
+    let match;
+
+    while ((match = regexEps.exec(scriptContent)) !== null) {
+      const pName = match[1];
+      const urlsBlock = match[2];
+      const urls = (urlsBlock.match(/['"]([^'"]+)['"]/g) || []).map(u => u.replace(/['"]/g, '').trim()).filter(Boolean);
+      if (urls.length > 0) {
+        players[pName] = urls;
+      }
+    }
+
+    const playerKeys = Object.keys(players);
+    if (playerKeys.length === 0) return [];
+
+    // Détermine le nombre total d'épisodes (le max parmi les lecteurs disponibles)
+    const maxEp = Math.max(...playerKeys.map(k => players[k].length));
     const episodes = [];
 
-    // Analyse des tableaux eps1, eps2, eps3...
-    const eps1Match = scriptContent.match(/var\s+eps1\s*=\s*\[([\s\S]*?)\];/);
-    const eps2Match = scriptContent.match(/var\s+eps2\s*=\s*\[([\s\S]*?)\];/);
-    const eps3Match = scriptContent.match(/var\s+eps3\s*=\s*\[([\s\S]*?)\];/);
+    // Trie pour privilégier les lecteurs rapides & direct stream sans pubs
+    // Ex: ansembed > uqload > sendvid > sibnet > smoothpre > vk
+    function sortStreams(streams) {
+      const score = url => {
+        const u = url.toLowerCase();
+        if (u.includes('sendvid')) return 1;
+        if (u.includes('ansembed') || u.includes('movembed')) return 2;
+        if (u.includes('uqload')) return 3;
+        if (u.includes('sibnet')) return 4;
+        if (u.includes('smoothpre') || u.includes('movearnpre')) return 5;
+        if (u.includes('vk.com')) return 6;
+        return 10;
+      };
+      return [...streams].sort((a, b) => score(a.url) - score(b.url));
+    }
 
-    const targetArray = eps1Match ? eps1Match[1] : (eps2Match ? eps2Match[1] : (eps3Match ? eps3Match[1] : ''));
-    if (targetArray) {
-      const urls = targetArray.match(/['"]([^'"]+)['"]/g) || [];
-      urls.forEach((u, idx) => {
-        const rawUrl = u.replace(/['"]/g, '').trim();
-        if (rawUrl) {
-          episodes.push({
-            number: idx + 1,
-            title: `Épisode ${idx + 1}`,
-            streamUrl: rawUrl,
-            duration: '24 min'
+    for (let i = 0; i < maxEp; i++) {
+      const availableStreams = [];
+      playerKeys.forEach(k => {
+        if (players[k][i]) {
+          let label = 'Lecteur ' + k.replace('eps', '');
+          const u = players[k][i].toLowerCase();
+          if (u.includes('ansembed')) label = 'Ansembed (HD)';
+          else if (u.includes('sendvid')) label = 'SendVid (MP4)';
+          else if (u.includes('uqload')) label = 'Uqload';
+          else if (u.includes('sibnet')) label = 'Sibnet';
+          else if (u.includes('vk.com')) label = 'VK Video';
+          else if (u.includes('smoothpre') || u.includes('movearnpre')) label = 'SmoothPre';
+
+          availableStreams.push({
+            name: label,
+            key: k,
+            url: players[k][i]
           });
         }
       });
+
+      const sorted = sortStreams(availableStreams);
+      const primaryUrl = sorted.length > 0 ? sorted[0].url : '';
+
+      episodes.push({
+        number: i + 1,
+        title: `Épisode ${i + 1}`,
+        streamUrl: primaryUrl,
+        streams: sorted, // Multiples lecteurs disponibles pour cet épisode
+        duration: '24 min'
+      });
     }
+
     return episodes;
   }
 
@@ -549,6 +598,52 @@ const ScraperService = (() => {
     return episodePageUrl;
   }
 
+  // --- Résolveurs de flux directs (M3U8 / MP4) inspirés d'AnimeSamaApi ---
+  async function resolveDirectMediaUrl(embedUrl) {
+    if (!embedUrl) return null;
+    const u = embedUrl.trim();
+
+    try {
+      // 1. SendVid -> MP4 direct
+      if (u.includes('sendvid.com')) {
+        const html = await request(u, { headers: { 'Referer': 'https://sendvid.com/' } });
+        const mp4Match = html.match(/<source\s+src="([^"]+\.mp4[^"]*)"/i) || html.match(/og:video"\s+content="([^"]+\.mp4[^"]*)"/i);
+        if (mp4Match && mp4Match[1]) {
+          console.log('[Scraper] SendVid résolu en MP4:', mp4Match[1]);
+          return { url: mp4Match[1], type: 'mp4' };
+        }
+      }
+
+      // 2. Ansembed / Movembed -> M3U8 direct
+      if (u.includes('ansembed') || u.includes('movembed')) {
+        const html = await request(u, { headers: { 'Referer': u } });
+        const m3u8Match = html.match(/file\s*:\s*['"]([^'"]+\.m3u8[^'"]*)['"]/i);
+        if (m3u8Match && m3u8Match[1]) {
+          console.log('[Scraper] Ansembed résolu en M3U8:', m3u8Match[1]);
+          return { url: m3u8Match[1], type: 'm3u8' };
+        }
+      }
+
+      // 3. Sibnet -> MP4 direct
+      if (u.includes('video.sibnet.ru')) {
+        const idMatch = u.match(/videoid=(\d+)/);
+        if (idMatch) {
+          const shellHtml = await request(u, { headers: { 'Referer': 'https://video.sibnet.ru/' } });
+          const slugMatch = shellHtml.match(/\/v\/[a-zA-Z0-9_\-]+\/\d+\.mp4/);
+          if (slugMatch) {
+            const finalMp4 = `https://video.sibnet.ru${slugMatch[0]}`;
+            console.log('[Scraper] Sibnet résolu en MP4:', finalMp4);
+            return { url: finalMp4, type: 'mp4' };
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[Scraper] Échec résolution directe pour', u, e.message);
+    }
+
+    return null;
+  }
+
   // ==========================================
   // 3. TENDANCES / POPULAIRES AU DÉMARRAGE (ZÉRO FAKE)
   // ==========================================
@@ -597,6 +692,7 @@ const ScraperService = (() => {
     getAnimeDetail,
     getSeasonEpisodesAnimeSama,
     resolveVoirAnimeStream,
+    resolveDirectMediaUrl,
     getTrending,
     isNativeAndroid
   };
