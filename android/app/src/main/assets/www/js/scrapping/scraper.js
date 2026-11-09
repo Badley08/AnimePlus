@@ -81,12 +81,10 @@ const ScraperService = (() => {
       }
     }
 
-    // 2. Proxies Web avec priorités
+    // 2. Proxies Web avec priorités fiables (élimination de cors.lol qui rate-limit)
     const proxies = [
-      `http://127.0.0.1:8888/proxy?url=${encodeURIComponent(url)}`, // Serveur proxy embarqué dans l'APK
-      `/proxy?url=${encodeURIComponent(url)}`, // Serveur proxy local de dev (server.py)
-      `https://api.cors.lol/?url=${encodeURIComponent(url)}`, // Proxy cors.lol
-      `https://corsproxy.io/?key=${CORS_KEY}&url=${encodeURIComponent(url)}`,
+      `http://127.0.0.1:8888/proxy?url=${encodeURIComponent(url)}`, // Serveur local de l'app / PC (déjà actif)
+      `https://corsproxy.io/?key=${CORS_KEY}&url=${encodeURIComponent(url)}`, // Clé API active de l'utilisateur
       `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
       `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
     ];
