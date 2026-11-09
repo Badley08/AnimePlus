@@ -7,14 +7,19 @@ import android.view.WindowManager
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.karlitodev.animeplus.bridge.*
+import com.karlitodev.animeplus.server.LocalProxyServer
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
+    private var localServer: LocalProxyServer? = null
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Démarrage du serveur proxy interne à l'APK (127.0.0.1:8888)
+        localServer = LocalProxyServer(this, 8888).apply { start() }
 
         // Plein écran immersif
         window.setFlags(
@@ -114,6 +119,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        localServer?.stop()
         webView.destroy()
         super.onDestroy()
     }

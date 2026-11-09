@@ -16,30 +16,76 @@ const ScraperService = (() => {
   const CORS_KEY = 'ec30d025';
 
   function isNativeAndroid() {
-    return typeof window.Android !== 'undefined';
+    return typeof window.Android !== 'undefined' && typeof window.Android.httpGet === 'function';
+  }
+
+  // Wrapper d'appel réseau natif Android via OkHttp
+  function nativeHttpRequest(url, options = {}) {
+    return new Promise((resolve, reject) => {
+      const callbackId = 'cb_' + Math.random().toString(36).substring(2, 9);
+
+      if (!window._nativeHttpCallbacks) window._nativeHttpCallbacks = {};
+      window._nativeHttpCallbacks[callbackId] = { resolve, reject };
+
+      if (!window.onNativeHttpSuccess) {
+        window.onNativeHttpSuccess = (cbId, data) => {
+          if (window._nativeHttpCallbacks && window._nativeHttpCallbacks[cbId]) {
+            window._nativeHttpCallbacks[cbId].resolve(data);
+            delete window._nativeHttpCallbacks[cbId];
+          }
+        };
+      }
+      if (!window.onNativeHttpError) {
+        window.onNativeHttpError = (cbId, error) => {
+          if (window._nativeHttpCallbacks && window._nativeHttpCallbacks[cbId]) {
+            window._nativeHttpCallbacks[cbId].reject(new Error(error));
+            delete window._nativeHttpCallbacks[cbId];
+          }
+        };
+      }
+
+      try {
+        if (options.method === 'POST') {
+          const bodyStr = options.body || '';
+          const cType = (options.headers && options.headers['Content-Type']) || 'application/x-www-form-urlencoded';
+          window.Android.httpPost(url, bodyStr, cType, callbackId);
+        } else {
+          window.Android.httpGet(url, callbackId);
+        }
+      } catch (e) {
+        delete window._nativeHttpCallbacks[callbackId];
+        reject(e);
+      }
+    });
   }
 
   /**
    * Effectue une requête réseau réelle avec gestion CORS transparente
+   * Priorité :
+   * 1. Android Natif (OkHttp sécurisé sans proxy, bypass Cloudflare/Referer)
+   * 2. Serveur Python local AnimePlus (/proxy?url=...)
+   * 3. cors.lol (https://api.cors.lol/?url=...)
+   * 4. corsproxy.io avec clé API
+   * 5. allorigins & codetabs
    */
   async function request(url, options = {}) {
     const isNative = isNativeAndroid();
     console.log(`[Scraper] Request: ${url} (Native: ${isNative})`);
 
-    // En environnement Android natif WebView (avec universal access), fetch direct
+    // 1. Android Natif : OkHttp interne ultra-rapide avec injection automatique des Referers
     if (isNative) {
       try {
-        const res = await fetch(url, options);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return await res.text();
+        return await nativeHttpRequest(url, options);
       } catch (err) {
-        console.error(`[Scraper] Native fetch failed for ${url}:`, err);
-        throw err;
+        console.warn(`[Scraper] Native OkHttp failed for ${url}, fallback to web proxies:`, err);
       }
     }
 
-    // En environnement Web (ex: Live Server localhost) : utiliser le proxy CORS avec clé active
+    // 2. Proxies Web avec priorités
     const proxies = [
+      `http://127.0.0.1:8888/proxy?url=${encodeURIComponent(url)}`, // Serveur proxy embarqué dans l'APK
+      `/proxy?url=${encodeURIComponent(url)}`, // Serveur proxy local de dev (server.py)
+      `https://api.cors.lol/?url=${encodeURIComponent(url)}`, // Proxy cors.lol
       `https://corsproxy.io/?key=${CORS_KEY}&url=${encodeURIComponent(url)}`,
       `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
       `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
@@ -48,7 +94,7 @@ const ScraperService = (() => {
     let lastError = null;
     for (const proxyUrl of proxies) {
       try {
-        console.log(`[Scraper] Via Proxy: ${proxyUrl.split('&url=')[0]}...`);
+        console.log(`[Scraper] Via Proxy: ${proxyUrl.split('?')[0]}...`);
 
         const fetchOpts = {
           headers: {
@@ -57,7 +103,6 @@ const ScraperService = (() => {
           }
         };
 
-        // Si POST, transmettre le corps si supporté par le proxy
         if (options.method === 'POST') {
           fetchOpts.method = 'POST';
           fetchOpts.body = options.body;
@@ -66,9 +111,11 @@ const ScraperService = (() => {
         const res = await fetch(proxyUrl, fetchOpts);
         if (!res.ok) throw new Error(`Proxy HTTP ${res.status}`);
         const text = await res.text();
-        if (text && text.length > 5) return text;
+        if (text && text.length > 5 && !text.includes('Rate limit exceeded') && !text.includes('Attention Required! | Cloudflare')) {
+          return text;
+        }
       } catch (err) {
-        console.warn(`[Scraper] Proxy a échoué:`, err.message);
+        console.warn(`[Scraper] Proxy ${proxyUrl.split('?')[0]} a échoué:`, err.message);
         lastError = err;
       }
     }
