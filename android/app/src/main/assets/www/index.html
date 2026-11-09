@@ -1,90 +1,719 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-  <title>Anime Plus</title>
-
-  <!-- CSS Component-based -->
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/animations.css">
-  <link rel="stylesheet" href="css/splash.css">
-  <link rel="stylesheet" href="css/gate.css">
-  <link rel="stylesheet" href="css/home.css">
-  <link rel="stylesheet" href="css/search.css">
-  <link rel="stylesheet" href="css/detail.css">
-  <link rel="stylesheet" href="css/player.css">
-  <link rel="stylesheet" href="css/library.css">
-  <link rel="stylesheet" href="css/settings.css">
-  <link rel="stylesheet" href="css/navbar.css">
-  <link rel="stylesheet" href="css/toast.css">
-
-  <!-- GSAP via CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Anime Plus</title>
+<link rel="stylesheet" href="css/base.css">
+<!-- GSAP pour les animations interactives -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 </head>
 <body>
 
-  <!-- Sprite SVG vectoriel -->
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <defs>
-      <symbol id="home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
-      <symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
-      <symbol id="lib" viewBox="0 0 24 24"><rect x="3" y="4" width="6" height="16" rx="1"/><rect x="11" y="4" width="6" height="16" rx="1"/><path d="M19 6v14"/></symbol>
-      <symbol id="set" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></symbol>
-      <symbol id="back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
-      <symbol id="play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></symbol>
-      <symbol id="pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></symbol>
-      <symbol id="zip" viewBox="0 0 24 24"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></symbol>
-      <symbol id="ok" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
-      <symbol id="lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
-      <symbol id="x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
-      <symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
-      <symbol id="heart" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></symbol>
-    </defs>
-  </svg>
+<!-- Définition vectorielle des icônes SVG -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+<symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
+<symbol id="lib" viewBox="0 0 24 24"><rect x="3" y="4" width="6" height="16" rx="1"/><rect x="11" y="4" width="6" height="16" rx="1"/><path d="M19 6v14"/></symbol>
+<symbol id="set" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></symbol>
+<symbol id="back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+<symbol id="play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></symbol>
+<symbol id="pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></symbol>
+<symbol id="zip" viewBox="0 0 24 24"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/></symbol>
+<symbol id="ok" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
+<symbol id="lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+<symbol id="x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="heart" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></symbol>
+</defs></svg>
 
-  <div class="app">
-    <!-- Conteneur d'affichage dynamique piloté par le routeur -->
-    <div id="view-container"></div>
+<div class="app">
 
-    <!-- Barre d'onglets basse -->
-    <nav id="tabs" hidden>
-      <button class="tab on" data-v="home"><svg class="i"><use href="#home"/></svg>Accueil</button>
-      <button class="tab" data-v="search"><svg class="i"><use href="#search"/></svg>Recherche</button>
-      <button class="tab" data-v="lib"><svg class="i"><use href="#lib"/></svg>Bibliothèque</button>
-      <button class="tab" data-v="set"><svg class="i"><use href="#set"/></svg>Réglages</button>
-    </nav>
+  <!-- 1. SPLASH -->
+  <section class="v on" id="splash">
+    <svg class="logo" viewBox="0 0 120 120" aria-label="Anime Plus">
+      <rect x="8" y="8" width="104" height="104" rx="28" pathLength="1"/>
+      <path d="M38 36 L70 60 L38 84 Z" pathLength="1"/>
+      <path d="M88 68 V92 M76 80 H100" pathLength="1"/>
+    </svg>
+    <div class="word">animeplus</div>
+    <div class="credits">Idée par <b>Strong</b><br>Dev par <b>Karlito</b></div>
+  </section>
 
-    <!-- Bottom Sheet & Scrim pour dialogue et compression -->
-    <div id="scrim" hidden></div>
-    <div id="sheet" role="dialog" aria-label="Modal Sheet"></div>
+  <!-- 2. MOT DE PASSE -->
+  <section class="v" id="gate">
+    <svg class="logo" viewBox="0 0 120 120" aria-hidden="true">
+      <rect x="8" y="8" width="104" height="104" rx="28" pathLength="1"/>
+      <path d="M38 36 L70 60 L38 84 Z" pathLength="1"/>
+      <path d="M88 68 V92 M76 80 H100" pathLength="1"/>
+    </svg>
+    <div class="word" style="font-size:26px">animeplus</div>
+    <p class="muted" style="margin-top:8px">Application privée, entre le mot de passe.</p>
+    <form id="gf" autocomplete="off">
+      <div class="pw">
+        <svg class="i"><use href="#lock"/></svg>
+        <input class="field" id="pw" type="password" placeholder="Mot de passe" aria-label="Mot de passe" required>
+      </div>
+      <p class="err" id="ge"></p>
+      <button class="btn" type="submit">Déverrouiller</button>
+    </form>
+    <svg class="tick" id="tk" viewBox="0 0 52 52" hidden aria-hidden="true">
+      <circle cx="26" cy="26" r="23" pathLength="1"/>
+      <path d="M15 27l8 8 14-16" pathLength="1"/>
+    </svg>
+    <p class="err ok" id="gm" hidden>Mot de passe correct, bienvenue.</p>
+  </section>
+
+  <!-- 3. ACCUEIL -->
+  <section class="v" id="home">
+    <h1 class="title">Accueil</h1>
+    <button class="p hero" id="btn-hero-resume" style="--h:1">
+      <small style="color:#cfe0ff">Reprendre</small>
+      <h2 id="hero-title">Chargement...</h2>
+      <small style="color:#cfe0ff" id="hero-sub">Dernière lecture</small>
+      <div class="prog"><i id="hero-prog"></i></div>
+    </button>
+    <h2 class="h">Tendances & Nouveautés</h2>
+    <div class="rail" id="hr"></div>
+    <h2 class="h">Favoris & En cours</h2>
+    <div id="home-favs"></div>
+  </section>
+
+  <!-- 4. RECHERCHE -->
+  <section class="v" id="search">
+    <h1 class="title">Recherche</h1>
+    <div class="sf">
+      <svg class="i"><use href="#search"/></svg>
+      <input class="field" id="q" placeholder="Titre d'un anime..." aria-label="Rechercher" autocomplete="off">
+      <button class="clr" id="qc" hidden aria-label="Effacer"><svg class="i"><use href="#x"/></svg></button>
+    </div>
+    <div class="sug" id="sug"></div>
+  </section>
+
+  <!-- 5. FICHE ANIME (Saison puis Épisode) -->
+  <section class="v" id="det">
+    <button class="back" id="det-back" aria-label="Retour"><svg class="i"><use href="#back"/></svg></button>
+    <div class="p cover" id="dc"></div>
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-top:16px;">
+      <h1 class="title" id="dt" style="margin-bottom:8px; flex:1;"></h1>
+      <button id="det-fav" style="padding:8px; margin-top:2px;" aria-label="Favori">
+        <svg class="i" id="fav-icon"><use href="#heart"/></svg>
+      </button>
+    </div>
+    <div class="chips" id="dm"></div>
+    <p class="muted" id="dd" style="font-size:15px;line-height:1.5"></p>
+    <h2 class="h" id="sh">Saisons</h2>
+    <div class="chips" id="seas"></div>
+    <h2 class="h" id="eh" style="margin-top:8px">Épisodes</h2>
+    <div id="eps"></div>
+  </section>
+
+  <!-- 6. LECTEUR VIDÉO -->
+  <section class="v" id="ply">
+    <button class="back" id="pb" aria-label="Retour"><svg class="i"><use href="#back"/></svg></button>
+    <div class="ptop" id="pt">Titre</div>
+    <div class="player-box">
+      <video id="vid" playsinline preload="auto"></video>
+      <div class="scr" id="vid-touch">
+        <button class="pb" id="pp" aria-label="Lecture ou pause">
+          <svg class="i f"><use href="#play" id="pu"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="pbot">
+      <div class="seek" id="seek-bar"><i id="sk"></i></div>
+      <div class="times"><span id="tc">0:00</span><span id="td">0:00</span></div>
+    </div>
+  </section>
+
+  <!-- 7. BIBLIOTHÈQUE -->
+  <section class="v" id="lib">
+    <h1 class="title">Bibliothèque</h1>
+    <div class="chips" id="lf">
+      <button class="chip on" data-f="all">Tout</button>
+      <button class="chip" data-f="fav">Favoris</button>
+      <button class="chip" data-f="down">Téléchargés</button>
+    </div>
+    <div class="grid" id="lg"></div>
+  </section>
+
+  <!-- 8. RÉGLAGES -->
+  <section class="v" id="set">
+    <h1 class="title">Réglages</h1>
+    <div class="group">
+      <div class="set" id="cfg-qual"><span>Qualité de stream</span><small id="lbl-qual">720p</small></div>
+      <div class="set" id="cfg-src"><span>Source préférée</span><small id="lbl-src">Anime-Sama</small></div>
+      <div class="set" id="cfg-lock"><span>Verrouiller l'application</span><small id="lbl-lock">Activé</small></div>
+    </div>
+    <h2 class="h" style="margin-top:8px">Mises à jour</h2>
+    <div class="group">
+      <div class="set" id="cfg-update"><span>Rechercher une mise à jour</span><small>GitHub Releases</small></div>
+      <div class="set" id="cfg-clean"><span>Nettoyer le cache local</span><small style="color:var(--danger)">Vider</small></div>
+    </div>
+    <h2 class="h" style="margin-top:8px">À propos</h2>
+    <div class="group">
+      <div class="set"><span>Version</span><small>1.0.0 (WebView Edition)</small></div>
+      <div class="set"><span>Idée</span><small>Strong</small></div>
+      <div class="set"><span>Développement</span><small>Karlito</small></div>
+    </div>
+    <div class="notice"><b>Usage Privé</b>Anime Plus n'est ni à vendre ni à louer. Aucune vidéo n'est hébergée sur l'appareil.</div>
+  </section>
+
+  <!-- Navigation par Onglets -->
+  <nav id="tabs" hidden>
+    <button class="tab on" data-v="home"><svg class="i"><use href="#home"/></svg>Accueil</button>
+    <button class="tab" data-v="search"><svg class="i"><use href="#search"/></svg>Recherche</button>
+    <button class="tab" data-v="lib"><svg class="i"><use href="#lib"/></svg>Bibliothèque</button>
+    <button class="tab" data-v="set"><svg class="i"><use href="#set"/></svg>Réglages</button>
+  </nav>
+
+  <!-- Bottom Sheet & Notifications Toast -->
+  <div id="scrim" hidden></div>
+  <div id="sheet" role="dialog" aria-label="Compression">
+    <h3>Compresser l'épisode (Kotlin Hardware)</h3>
+    <div id="qs"></div>
+    <div class="bar" id="bw" hidden><i id="bar"></i></div>
+    <button class="btn" id="sb" style="margin-top:8px">Lancer la compression</button>
   </div>
+  <div id="toast" hidden></div>
 
-  <!-- Services Core -->
-  <script src="js/services/storage.js"></script>
-  <script src="js/scrapping/scraper.js"></script>
-  <script src="js/services/downloader.js"></script>
+</div>
 
-  <!-- Alias global pour compatibilité -->
-  <script>
-    window.Downloader = window.DownloaderService || window.Downloader;
-  </script>
+<!-- Services de Données & Scrapers Réels -->
+<script src="js/services/storage.js"></script>
+<script src="js/scrapping/scraper.js"></script>
+<script src="js/services/downloader.js"></script>
 
-  <!-- Composants UI -->
-  <script src="js/components/Toast.js"></script>
-  <script src="js/components/Sheet.js"></script>
-  <script src="js/components/NavBar.js"></script>
-  <script src="js/components/Splash.js"></script>
-  <script src="js/components/Gate.js"></script>
-  <script src="js/components/Home.js"></script>
-  <script src="js/components/Search.js"></script>
-  <script src="js/components/Detail.js"></script>
-  <script src="js/components/Player.js"></script>
-  <script src="js/components/Library.js"></script>
-  <script src="js/components/Settings.js"></script>
+<!-- Logique Principale AnimePlus -->
+<script>
+// --- Base de Données Locale & Fallback Démarrage ---
+const D_FALLBACK = [
+  {id:"as_1", title:"Solo Leveling", year:2024, genres:["Action","Fantasy"], type:"serie", poster:"https://anime-sama.to/images/solo-leveling.jpg", synopsis:"Dix ans après l'apparition des Portes reliant notre monde à celui des monstres, Sung Jinwoo est le plus faible des chasseurs.", seasons:[{number:1, title:"Saison 1", episodes:[{number:1,title:"Épisode 1",url:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"}]}]},
+  {id:"as_2", title:"One Piece", year:1999, genres:["Aventure","Action"], type:"serie", poster:"https://anime-sama.to/images/one-piece.jpg", synopsis:"Monkey D. Luffy rêve de devenir le roi des pirates en trouvant le trésor légendaire laissé par Gol D. Roger.", seasons:[{number:1, title:"East Blue", episodes:[{number:1,title:"Épisode 1",url:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"}]}]},
+  {id:"as_3", title:"Demon Slayer", year:2019, genres:["Action","Surnaturel"], type:"serie", poster:"https://anime-sama.to/images/demon-slayer.jpg", synopsis:"Tanjiro part en quête pour trouver un antidote à sa sœur devenue démon.", seasons:[{number:1, title:"Saison 1", episodes:[{number:1,title:"Épisode 1",url:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"}]}]}
+];
 
-  <!-- Routeur & Initialisation -->
-  <script src="js/router.js"></script>
-  <script src="js/app.js"></script>
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+
+let curScreen = 'splash';
+let pick = null;
+let curSeason = 0;
+let libFilter = 'all';
+let video = $('#vid');
+let lastProgress = null;
+
+// --- Système de Navigation ---
+function go(v, params = {}) {
+  $$('.v').forEach(el => el.classList.toggle('on', el.id === v));
+  $('#tabs').hidden = !['home', 'search', 'lib', 'set'].includes(v);
+  $$('.tab').forEach(t => t.classList.toggle('on', t.dataset.v === v));
+  
+  if (v !== 'ply') {
+    if (video) { video.pause(); }
+  }
+  
+  curScreen = v;
+  if (v === 'home') renderHome();
+  if (v === 'search') renderSearch();
+  if (v === 'lib') renderLib();
+  if (v === 'set') renderSettings();
+  if (v === 'det' && params.anime) openDetail(params.anime);
+}
+
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.hidden = false;
+  clearTimeout(t.timer);
+  t.timer = setTimeout(() => t.hidden = true, 2200);
+}
+
+// --- Démarrage & Splash ---
+setTimeout(() => {
+  const settings = Storage.getSettings ? Storage.getSettings() : {};
+  if (settings.lockEnabled === false) {
+    go('home');
+  } else {
+    go('gate');
+  }
+}, 2400);
+
+// --- Déverrouillage Gate ---
+$('#gf').onsubmit = async (e) => {
+  e.preventDefault();
+  const f = $('#pw'), m = $('#ge'), v = f.value.trim();
+  f.classList.remove('bad', 'good');
+  if (!v) { m.textContent = 'Entre le mot de passe.'; return; }
+
+  const isValid = (typeof Storage.checkPassword === 'function') 
+    ? await Storage.checkPassword(v) 
+    : (v.toLowerCase() === 'animeplus');
+
+  if (!isValid) {
+    m.textContent = 'Mot de passe incorrect.';
+    f.classList.add('bad');
+    if (window.Android && window.Android.vibrate) window.Android.vibrate(60);
+    else if (navigator.vibrate) navigator.vibrate([50, 40, 50]);
+    f.select();
+    return;
+  }
+
+  m.textContent = '';
+  f.classList.add('good');
+  $('#gate').classList.add('win');
+  $('#tk').hidden = false;
+  $('#gm').hidden = false;
+  if (window.Android && window.Android.vibrate) window.Android.vibrate(40);
+
+  setTimeout(() => {
+    go('home');
+    setTimeout(() => {
+      $('#gate').classList.remove('win');
+      $('#tk').hidden = true;
+      $('#gm').hidden = true;
+      f.value = '';
+      f.classList.remove('good');
+    }, 600);
+  }, 1000);
+};
+
+// --- Écran Accueil ---
+function renderHome() {
+  const last = Storage.getLastWatch ? Storage.getLastWatch() : null;
+  if (last && last.anime) {
+    $('#hero-title').textContent = last.anime.title || last.anime.t;
+    $('#hero-sub').textContent = `Saison ${(last.season||0)+1}, Épisode ${(last.episode||0)+1}`;
+    const p = last.duration ? Math.round((last.seconds / last.duration) * 100) : 0;
+    $('#hero-prog').style.width = `${p}%`;
+    $('#btn-hero-resume').onclick = () => playEpisode(last.anime, last.season || 0, last.episode || 0);
+  } else {
+    $('#hero-title').textContent = "Explore le catalogue";
+    $('#hero-sub').textContent = "Streaming rapide sans pub";
+    $('#hero-prog').style.width = "0%";
+    $('#btn-hero-resume').onclick = () => go('search');
+  }
+
+  // Tendance Rails
+  const rail = $('#hr');
+  rail.innerHTML = D_FALLBACK.map(a => `
+    <button class="card" data-aid="${a.id}">
+      <div class="p" style="background-image:url('${a.poster}');">
+        <i class="badge">${a.type === 'film' ? 'Film' : 'Série'}</i>
+      </div>
+      <b>${a.title}</b>
+    </button>
+  `).join('');
+
+  rail.querySelectorAll('.card').forEach(c => {
+    c.onclick = () => {
+      const aid = c.dataset.aid;
+      const an = D_FALLBACK.find(x => x.id === aid);
+      if (an) go('det', { anime: an });
+    };
+  });
+
+  // Favoris
+  const favs = Storage.getFavorites ? Storage.getFavorites() : [];
+  const fContainer = $('#home-favs');
+  if (favs.length) {
+    fContainer.innerHTML = favs.slice(0, 4).map(a => `
+      <button class="row" data-fid="${a.id}">
+        <div class="p" style="background-image:url('${a.poster||''}');"></div>
+        <div><b>${a.title}</b><small>${a.genres ? a.genres.join(', ') : 'Anime'}</small></div>
+      </button>
+    `).join('');
+    fContainer.querySelectorAll('.row').forEach(r => {
+      r.onclick = () => {
+        const item = favs.find(x => x.id === r.dataset.fid);
+        if (item) go('det', { anime: item });
+      };
+    });
+  } else {
+    fContainer.innerHTML = '<p class="muted" style="padding:12px 0;">Aucun favori pour l\'instant.</p>';
+  }
+}
+
+// --- Écran Recherche ---
+let qTimer = null;
+function renderSearch() {
+  const inp = $('#q');
+  const clr = $('#qc');
+  const sug = $('#sug');
+
+  function showHist() {
+    const h = Storage.getHistory ? Storage.getHistory() : [];
+    if (!h.length) {
+      sug.innerHTML = '<p class="empty">Tape le titre d\'un anime (ex: Solo Leveling, One Piece...).</p>';
+      return;
+    }
+    sug.innerHTML = '<small style="padding:8px 0;display:block;">Recherches récentes</small>' +
+      h.map(k => `<button class="rec" data-q="${k}"><svg class="i"><use href="#clock"/></svg>${k}</button>`).join('');
+    sug.querySelectorAll('.rec').forEach(b => {
+      b.onclick = () => {
+        inp.value = b.dataset.q;
+        clr.hidden = false;
+        execSearch(inp.value);
+      };
+    });
+  }
+
+  async function execSearch(query) {
+    const q = query.trim();
+    if (!q) { clr.hidden = true; showHist(); return; }
+    clr.hidden = false;
+    sug.innerHTML = '<p class="empty">Recherche en cours sur Anime-Sama & VoirAnime...</p>';
+
+    let res = [];
+    try {
+      if (window.ScraperService) {
+        res = await ScraperService.search(q);
+      }
+    } catch (e) {
+      console.warn(e);
+    }
+
+    if (!res || !res.length) {
+      // Filtrer dans la liste locale de secours
+      res = D_FALLBACK.filter(a => a.title.toLowerCase().includes(q.toLowerCase()));
+    }
+
+    if (!res.length) {
+      sug.innerHTML = `<p class="empty">Aucun résultat trouvé pour « ${q} ».</p>`;
+      return;
+    }
+
+    sug.innerHTML = res.map(a => `
+      <button class="row search-item" data-id="${a.id}">
+        <div class="p" style="background-image:url('${a.poster||''}');"></div>
+        <div>
+          <b>${a.title}</b>
+          <small>${a.type === 'film' ? 'Film' : 'Série'} • ${a.source || 'Anime-Sama'}</small>
+        </div>
+      </button>
+    `).join('');
+
+    sug.querySelectorAll('.search-item').forEach(it => {
+      it.onclick = () => {
+        const found = res.find(x => x.id === it.dataset.id);
+        Storage.addHistory ? Storage.addHistory(q) : null;
+        if (found) go('det', { anime: found });
+      };
+    });
+  }
+
+  inp.oninput = () => {
+    clearTimeout(qTimer);
+    if (!inp.value.trim()) { clr.hidden = true; showHist(); return; }
+    clr.hidden = false;
+    qTimer = setTimeout(() => execSearch(inp.value), 350);
+  };
+
+  clr.onclick = () => {
+    inp.value = '';
+    clr.hidden = true;
+    showHist();
+    inp.focus();
+  };
+
+  showHist();
+}
+
+// --- Fiche Anime & Épisodes ---
+async function openDetail(anime) {
+  pick = anime;
+  curSeason = 0;
+  $('#dt').textContent = anime.title || 'Anime';
+  $('#dd').textContent = anime.synopsis || 'Chargement des informations...';
+  if (anime.poster) $('#dc').style.backgroundImage = `url('${anime.poster}')`;
+
+  // Tags
+  let tags = '';
+  if (anime.year) tags += `<span class="chip">${anime.year}</span>`;
+  if (anime.type) tags += `<span class="chip">${anime.type === 'film' ? 'Film' : 'Série'}</span>`;
+  if (anime.genres) tags += anime.genres.map(g => `<span class="chip">${g}</span>`).join('');
+  $('#dm').innerHTML = tags;
+
+  // Favori toggle
+  const favBtn = $('#det-fav');
+  const checkFav = () => {
+    const isF = Storage.isFavorite ? Storage.isFavorite(pick.id) : false;
+    favBtn.style.color = isF ? 'var(--danger)' : 'var(--muted)';
+  };
+  checkFav();
+  favBtn.onclick = () => {
+    Storage.toggleFavorite(pick);
+    checkFav();
+    toast('Favoris mis à jour');
+  };
+
+  $('#det-back').onclick = () => go('home');
+
+  // Si saisons manquantes, récupération scraper
+  if ((!pick.seasons || !pick.seasons.length) && pick.url && window.ScraperService) {
+    $('#eps').innerHTML = '<div class="muted" style="padding:16px 0;">Chargement des épisodes...</div>';
+    try {
+      const detail = await ScraperService.getAnimeDetail(pick.url, pick.source);
+      if (detail && detail.seasons) pick.seasons = detail.seasons;
+      if (detail.synopsis) $('#dd').textContent = detail.synopsis;
+    } catch (e) {
+      console.warn(e);
+    }
+  }
+
+  drawSeasons();
+}
+
+function drawSeasons() {
+  const seasons = pick.seasons && pick.seasons.length ? pick.seasons : [{ number: 1, title: 'Saison 1', episodes: [{ number: 1, title: 'Épisode 1', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' }] }];
+  pick.seasons = seasons;
+
+  const sChips = $('#seas');
+  const sHead = $('#sh');
+  if (seasons.length <= 1) {
+    sChips.hidden = true;
+    sHead.hidden = true;
+  } else {
+    sChips.hidden = false;
+    sHead.hidden = false;
+    sChips.innerHTML = seasons.map((s, idx) => `
+      <button class="chip ${idx === curSeason ? 'on' : ''}" data-s="${idx}">
+        ${s.title || 'Saison ' + (idx + 1)}
+      </button>
+    `).join('');
+    sChips.querySelectorAll('[data-s]').forEach(b => {
+      b.onclick = () => { curSeason = parseInt(b.dataset.s, 10); drawSeasons(); };
+    });
+  }
+
+  const curS = seasons[curSeason] || seasons[0];
+  const eps = curS.episodes || [];
+  $('#eh').textContent = `${curS.title || 'Saison ' + (curSeason + 1)} (${eps.length} épisodes)`;
+
+  $('#eps').innerHTML = eps.map((ep, idx) => `
+    <div class="ep">
+      <div class="n">${ep.number || idx + 1}</div>
+      <div class="t">
+        <b>${ep.title || 'Épisode ' + (idx + 1)}</b>
+        <small>${ep.duration || '24 min'} • Streaming</small>
+      </div>
+      <button class="ib" data-compress="${idx}" aria-label="Compresser"><svg class="i"><use href="#zip"/></svg></button>
+      <button class="ib pl" data-play="${idx}" aria-label="Lire"><svg class="i f"><use href="#play"/></svg></button>
+    </div>
+  `).join('');
+
+  $('#eps').querySelectorAll('[data-play]').forEach(btn => {
+    btn.onclick = () => playEpisode(pick, curSeason, parseInt(btn.dataset.play, 10));
+  });
+
+  $('#eps').querySelectorAll('[data-compress]').forEach(btn => {
+    btn.onclick = () => openCompressionSheet(pick, curSeason, parseInt(btn.dataset.compress, 10));
+  });
+}
+
+// --- Lecteur Vidéo Externe & Intégré ---
+function playEpisode(anime, sIdx, eIdx) {
+  pick = anime;
+  curSeason = sIdx;
+  const s = (anime.seasons && anime.seasons[sIdx]) || { episodes: [] };
+  const ep = s.episodes[eIdx] || { url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' };
+
+  $('#pt').textContent = `${anime.title} - S${sIdx + 1} E${eIdx + 1}`;
+  go('ply');
+
+  video.src = ep.url || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+  
+  // Reprise progression
+  const prog = Storage.getProgress ? Storage.getProgress(anime.id, sIdx, eIdx) : null;
+  if (prog && prog.seconds > 10) {
+    video.currentTime = prog.seconds;
+    toast(`Reprise à ${Math.floor(prog.seconds/60)}m`);
+  }
+
+  video.play().catch(() => {});
+  $('#pu').setAttribute('href', '#pause');
+}
+
+$('#pb').onclick = () => {
+  if (video) {
+    saveVideoProgress();
+    video.pause();
+  }
+  go('det', { anime: pick });
+};
+
+$('#vid-touch').onclick = () => {
+  if (video.paused) {
+    video.play();
+    $('#pu').setAttribute('href', '#pause');
+  } else {
+    video.pause();
+    $('#pu').setAttribute('href', '#play');
+  }
+};
+
+video.ontimeupdate = () => {
+  if (!video.duration) return;
+  const c = video.currentTime, d = video.duration;
+  $('#sk').style.width = `${(c / d) * 100}%`;
+  $('#tc').textContent = `${Math.floor(c/60)}:${String(Math.floor(c%60)).padStart(2,'0')}`;
+  $('#td').textContent = `${Math.floor(d/60)}:${String(Math.floor(d%60)).padStart(2,'0')}`;
+};
+
+function saveVideoProgress() {
+  if (!video || !pick || !video.duration) return;
+  Storage.setProgress(pick.id, curSeason, 0, video.currentTime, video.duration);
+  Storage.setLastWatch({ anime: pick, season: curSeason, episode: 0, seconds: video.currentTime, duration: video.duration });
+}
+
+// Seek bar
+$('#seek-bar').onclick = (e) => {
+  const r = $('#seek-bar').getBoundingClientRect();
+  const pos = (e.clientX - r.left) / r.width;
+  if (video.duration) video.currentTime = pos * video.duration;
+};
+
+// --- Compression (Bridge Kotlin) ---
+let compressQuality = '720p';
+function openCompressionSheet(anime, sIdx, eIdx) {
+  $('#sheet').classList.add('on');
+  $('#scrim').hidden = false;
+  $('#bw').hidden = true;
+  $('#bar').style.width = '0%';
+  $('#sb').textContent = 'Lancer la compression';
+
+  const qs = [
+    { label: '480p', desc: 'environ 60 Mo (Ultra rapide)' },
+    { label: '720p', desc: 'environ 90 Mo (Équilibré)' },
+    { label: '1080p', desc: 'environ 180 Mo (Haute qualité)' }
+  ];
+
+  $('#qs').innerHTML = qs.map(q => `
+    <button class="opt ${q.label === compressQuality ? 'on' : ''}" data-q="${q.label}">
+      <b>${q.label}</b><small>${q.desc}</small>
+    </button>
+  `).join('');
+
+  $('#qs').querySelectorAll('.opt').forEach(b => {
+    b.onclick = () => {
+      compressQuality = b.dataset.q;
+      openCompressionSheet(anime, sIdx, eIdx);
+    };
+  });
+
+  $('#sb').onclick = () => {
+    $('#bw').hidden = false;
+    $('#sb').textContent = 'Compression en cours...';
+    if (window.AndroidCompression && window.AndroidCompression.compress) {
+      window.AndroidCompression.compress("video.mp4", compressQuality, "comp_1");
+    } else {
+      // Simulation pour aperçu Webview navigateur
+      let p = 0;
+      const t = setInterval(() => {
+        p += 5;
+        $('#bar').style.width = `${p}%`;
+        $('#sb').textContent = `Compression ${p}%`;
+        if (p >= 100) {
+          clearInterval(t);
+          $('#sheet').classList.remove('on');
+          $('#scrim').hidden = true;
+          toast('Épisode compressé avec succès !');
+        }
+      }, 70);
+    }
+  };
+}
+
+$('#scrim').onclick = () => {
+  $('#sheet').classList.remove('on');
+  $('#scrim').hidden = true;
+};
+
+// --- Bibliothèque ---
+function renderLib() {
+  const fChips = $('#lf');
+  const g = $('#lg');
+  const favs = Storage.getFavorites ? Storage.getFavorites() : [];
+  
+  fChips.onclick = e => {
+    const b = e.target.closest('[data-f]');
+    if (!b) return;
+    libFilter = b.dataset.f;
+    fChips.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === b));
+    renderLib();
+  };
+
+  const list = libFilter === 'fav' ? favs : (favs.length ? favs : D_FALLBACK);
+  g.innerHTML = list.map(a => `
+    <button class="card" data-aid="${a.id}">
+      <div class="p" style="background-image:url('${a.poster||''}');">
+        <i class="badge">${a.type === 'film' ? 'Film' : 'Série'}</i>
+      </div>
+      <b>${a.title}</b>
+    </button>
+  `).join('');
+
+  g.querySelectorAll('.card').forEach(c => {
+    c.onclick = () => {
+      const found = list.find(x => x.id === c.dataset.aid);
+      if (found) go('det', { anime: found });
+    };
+  });
+}
+
+// --- Réglages ---
+function renderSettings() {
+  const s = Storage.getSettings ? Storage.getSettings() : { quality: '720p', source: 'animesama', lockEnabled: true };
+  $('#lbl-qual').textContent = s.quality || '720p';
+  $('#lbl-src').textContent = s.source === 'animesama' ? 'Anime-Sama' : 'VoirAnime';
+  $('#lbl-lock').textContent = s.lockEnabled ? 'Activé' : 'Désactivé';
+
+  $('#cfg-qual').onclick = () => {
+    const list = ['480p', '720p', '1080p'];
+    s.quality = list[(list.indexOf(s.quality) + 1) % list.length];
+    Storage.setSettings(s);
+    $('#lbl-qual').textContent = s.quality;
+    toast(`Qualité : ${s.quality}`);
+  };
+
+  $('#cfg-src').onclick = () => {
+    s.source = s.source === 'animesama' ? 'voiranimes' : 'animesama';
+    Storage.setSettings(s);
+    $('#lbl-src').textContent = s.source === 'animesama' ? 'Anime-Sama' : 'VoirAnime';
+    toast(`Source : ${s.source}`);
+  };
+
+  $('#cfg-lock').onclick = () => {
+    s.lockEnabled = !s.lockEnabled;
+    Storage.setSettings(s);
+    $('#lbl-lock').textContent = s.lockEnabled ? 'Activé' : 'Désactivé';
+    toast(`Verrouillage ${s.lockEnabled ? 'activé' : 'désactivé'}`);
+  };
+
+  $('#cfg-update').onclick = () => {
+    toast('Recherche de version GitHub...');
+    if (window.Android && window.Android.checkUpdate) {
+      window.Android.checkUpdate('1.0.0');
+    } else {
+      toast('Anime Plus est à jour (v1.0.0)');
+    }
+  };
+
+  $('#cfg-clean').onclick = () => {
+    if (confirm('Vider l\'historique et le cache ?')) {
+      Storage.clearHistory();
+      toast('Cache nettoyé.');
+    }
+  };
+}
+
+// --- Navigation Globale (Tabs & Back) ---
+document.addEventListener('click', e => {
+  const tab = e.target.closest('[data-v]');
+  if (tab) {
+    go(tab.dataset.v);
+  }
+});
+</script>
 </body>
 </html>
