@@ -17,6 +17,38 @@ const ScraperService = (() => {
     ANIME2: '2anime',
   };
 
+  const DOMAINS = {
+    ANIMESAMA: 'https://anime-sama.to',
+    // VoirAnime change constamment de TLD (.be, .to, .com, .fr, .io, .club)
+    VOIRANIMES: [
+      'https://voiranime.be',
+      'https://voir-anime.to',
+      'https://v5.voiranimes.com',
+      'https://voiranime.com'
+    ],
+    ANIME2: 'https://2anime.xyz'
+  };
+
+  let activeVoirAnimeDomain = DOMAINS.VOIRANIMES[0];
+
+  /**
+   * Teste ou résout le domaine fonctionnel pour VoirAnime
+   */
+  async function resolveVoirAnimeDomain() {
+    for (const d of DOMAINS.VOIRANIMES) {
+      try {
+        const test = await fetchWithProxy(`${d}/`, { method: 'HEAD' });
+        if (test) {
+          activeVoirAnimeDomain = d;
+          return d;
+        }
+      } catch (e) {
+        // Continue sur le suivant
+      }
+    }
+    return activeVoirAnimeDomain;
+  }
+
   // Délai entre requêtes pour éviter le rate limiting
   const delay = (ms) => new Promise(r => setTimeout(r, ms));
 
@@ -78,18 +110,19 @@ const ScraperService = (() => {
   }
 
   // ======================================================
-  // ANIME-SAMA.FR
+  // ANIME-SAMA.TO
   // ======================================================
 
   async function _searchAnimeSama(query) {
-    const url = `https://anime-sama.to/?search=${encodeURIComponent(query)}`;
+    const base = DOMAINS.ANIMESAMA;
+    const url = `${base}/catalogue/?search=${encodeURIComponent(query)}`;
     try {
       const html = await fetchWithProxy(url);
       const doc = parseHTML(html);
       const results = [];
 
       // Anime-sama utilise des cartes avec classe spécifique
-      const cards = doc.querySelectorAll('.cardListAnime, [id^="anime-"]');
+      const cards = doc.querySelectorAll('.cardListAnime, [id^="anime-"], .anime-item');
 
       cards.forEach(card => {
         try {
@@ -100,7 +133,7 @@ const ScraperService = (() => {
           if (!title) return;
 
           const link = card.querySelector('a');
-          const href = link ? resolveUrl('https://anime-sama.to/', link.getAttribute('href')) : '';
+          const href = link ? resolveUrl(base + '/', link.getAttribute('href')) : '';
 
           const img = card.querySelector('img');
           const poster = img ? (img.getAttribute('data-src') || img.getAttribute('src') || '') : '';
@@ -123,7 +156,7 @@ const ScraperService = (() => {
             title,
             year,
             genres,
-            poster: resolveUrl('https://anime-sama.to/', poster),
+            poster: resolveUrl(base + '/', poster),
             synopsis: '',
             type,
             seasons: [],
@@ -139,7 +172,7 @@ const ScraperService = (() => {
       if (results.length === 0) {
         const links = doc.querySelectorAll('a[href*="/catalogue/"]');
         links.forEach(link => {
-          const href = resolveUrl('https://anime-sama.to/', link.getAttribute('href'));
+          const href = resolveUrl(base + '/', link.getAttribute('href'));
           const title = cleanText(link.getAttribute('title') || link.textContent);
           if (!title || href.includes('?') || title.length < 2) return;
           const id = `animesama_${href.split('/').filter(Boolean).pop()}`;
@@ -345,18 +378,19 @@ const ScraperService = (() => {
   }
 
   // ======================================================
-  // VOIRANIMES.COM
+  // VOIRANIMES
   // ======================================================
 
   async function _searchVoirAnimes(query) {
-    // Essai API si disponible, sinon HTML scraping
-    const apiUrl = `https://v5.voiranimes.com/api/search?q=${encodeURIComponent(query)}`;
-    const htmlUrl = `https://v5.voiranimes.com/anime-listings?search=${encodeURIComponent(query)}`;
+    const base = await resolveVoirAnimeDomain();
+    const apiUrl = `${base}/api/search?q=${encodeURIComponent(query)}`;
+    const htmlUrl = `${base}/?s=${encodeURIComponent(query)}`;
+    const fallbackListUrl = `${base}/anime-listings?search=${encodeURIComponent(query)}`;
 
     try {
       // Tentative API JSON
-      const jsonText = await fetchWithProxy(apiUrl);
       try {
+        const jsonText = await fetchWithProxy(apiUrl);
         const data = JSON.parse(jsonText);
         const list = data.data || data.results || data || [];
         if (Array.isArray(list) && list.length > 0) {
@@ -370,22 +404,28 @@ const ScraperService = (() => {
             type: (item.type || '').toLowerCase() === 'film' ? 'film' : 'serie',
             seasons: [],
             source: SOURCES.VOIRANIMES,
-            url: item.url || `https://v5.voiranimes.com/anime/${item.slug || item.id}`,
+            url: item.url || `${base}/anime/${item.slug || item.id}`,
           }));
         }
       } catch {}
 
-      // Fallback HTML
-      const html = await fetchWithProxy(htmlUrl);
+      // Fallback HTML avec sélecteurs universels
+      let html = '';
+      try {
+        html = await fetchWithProxy(htmlUrl);
+      } catch {
+        html = await fetchWithProxy(fallbackListUrl);
+      }
+
       const doc = parseHTML(html);
       const results = [];
 
-      const cards = doc.querySelectorAll('.anime-card, .item-anime, article[class*="anime"], .card');
+      const cards = doc.querySelectorAll('.anime-card, .item-anime, article[class*="anime"], .card, .post, .bsx, .film-detail');
       cards.forEach(card => {
         try {
           const link = card.querySelector('a');
-          const href = link ? resolveUrl('https://v5.voiranimes.com', link.getAttribute('href')) : '';
-          const titleEl = card.querySelector('h1, h2, h3, .title, .name, [class*="title"]') ||
+          const href = link ? resolveUrl(base, link.getAttribute('href')) : '';
+          const titleEl = card.querySelector('h1, h2, h3, .title, .name, [class*="title"], .tt') ||
                           card.querySelector('a[title]');
           const title = titleEl ? cleanText(titleEl.getAttribute('title') || titleEl.textContent) : '';
           if (!title || !href) return;
@@ -396,7 +436,7 @@ const ScraperService = (() => {
           const id = `voiranimes_${href.split('/').filter(Boolean).pop()}`;
           results.push({
             id, title, year: null, genres: [],
-            poster: resolveUrl('https://v5.voiranimes.com', poster),
+            poster: resolveUrl(base, poster),
             synopsis: '', type: 'serie', seasons: [],
             source: SOURCES.VOIRANIMES, url: href,
           });
