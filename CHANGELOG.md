@@ -19,3 +19,4 @@
   - `Library.js` : Gestion des favoris et des téléchargements hors-ligne.
   - `Settings.js` : Réglages de la qualité par défaut, source de scraping et recherche de mise à jour APK.
 - **Thème sombre épuré** : Tokens CSS bleus électriques respectés selon la maquette MVP originale (`#2F6BFF` et `#070B16`).
+

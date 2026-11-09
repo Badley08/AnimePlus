@@ -114,3 +114,4 @@ const Search = (() => {
 
   return { render, mount };
 })();
+

@@ -46,3 +46,4 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialisation du Routeur
   Router.init();
 });
+

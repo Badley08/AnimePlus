@@ -38,3 +38,4 @@ const Splash = (() => {
 
   return { render, mount };
 })();
+

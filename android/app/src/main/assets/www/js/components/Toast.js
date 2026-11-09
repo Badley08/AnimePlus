@@ -41,3 +41,4 @@ const Toast = (() => {
 
   return { show, init };
 })();
+

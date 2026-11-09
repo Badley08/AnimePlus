@@ -184,3 +184,4 @@ const Player = (() => {
 
   return { render, mount, destroy };
 })();
+

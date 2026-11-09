@@ -23,7 +23,7 @@ const ScraperService = (() => {
     VOIRANIMES: [
       'https://voiranime.be',
       'https://voir-anime.to',
-      'https://v5.voiranimes.com',
+      'https://v6.voiranimes.com',
       'https://voiranime.com'
     ],
     ANIME2: 'https://2anime.xyz'

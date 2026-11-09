@@ -182,3 +182,4 @@ const Detail = (() => {
 
   return { render, mount };
 })();
+

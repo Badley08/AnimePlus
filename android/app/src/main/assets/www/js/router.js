@@ -75,3 +75,4 @@ const Router = (() => {
 
   return { init, go, back };
 })();
+
