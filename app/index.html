@@ -4,13 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Anime Plus</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="shortcut icon" href="favicon.ico">
 <link rel="stylesheet" href="css/base.css">
-<!-- GSAP pour les animations interactives -->
+<!-- GSAP pour les animations UI -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 </head>
 <body>
 
-<!-- Définition vectorielle des icônes SVG -->
+<!-- Définitions vectorielles SVG -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <symbol id="home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
 <symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
@@ -24,7 +26,8 @@
 <symbol id="lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
 <symbol id="x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
 <symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
-<symbol id="heart" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></symbol>
+<symbol id="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></symbol>
+<symbol id="bookmark" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></symbol>
 </defs></svg>
 
 <div class="app">
@@ -61,21 +64,17 @@
       <circle cx="26" cy="26" r="23" pathLength="1"/>
       <path d="M15 27l8 8 14-16" pathLength="1"/>
     </svg>
-    <p class="err ok" id="gm" hidden>Mot de passe correct, bienvenue.</p>
   </section>
 
   <!-- 3. ACCUEIL -->
   <section class="v" id="home">
     <h1 class="title">Accueil</h1>
-    <button class="p hero" id="btn-hero-resume" style="--h:1">
-      <small style="color:#cfe0ff">Reprendre</small>
-      <h2 id="hero-title">Chargement...</h2>
-      <small style="color:#cfe0ff" id="hero-sub">Dernière lecture</small>
-      <div class="prog"><i id="hero-prog"></i></div>
-    </button>
-    <h2 class="h">Tendances & Nouveautés</h2>
-    <div class="rail" id="hr"></div>
-    <h2 class="h">Favoris & En cours</h2>
+    <div id="home-resume-wrap"></div>
+    <h2 class="oe-h2">Tendances <span>Anime-Sama</span></h2>
+    <div class="rail" id="hr">
+      <div class="muted" style="padding:16px 0;">Chargement des flux...</div>
+    </div>
+    <h2 class="oe-h2" id="home-favs-title" hidden>Ma Liste <span>Favoris</span></h2>
     <div id="home-favs"></div>
   </section>
 
@@ -84,43 +83,71 @@
     <h1 class="title">Recherche</h1>
     <div class="sf">
       <svg class="i"><use href="#search"/></svg>
-      <input class="field" id="q" placeholder="Titre d'un anime..." aria-label="Rechercher" autocomplete="off">
+      <input class="field" id="q" placeholder="Rechercher (ex: Boruto, Bleach...)" aria-label="Rechercher" autocomplete="off">
       <button class="clr" id="qc" hidden aria-label="Effacer"><svg class="i"><use href="#x"/></svg></button>
     </div>
     <div class="sug" id="sug"></div>
   </section>
 
-  <!-- 5. FICHE ANIME (Saison puis Épisode) -->
+  <!-- 5. FICHE ANIME (STYLE ANIME-SAMA BORUTO) -->
   <section class="v" id="det">
     <button class="back" id="det-back" aria-label="Retour"><svg class="i"><use href="#back"/></svg></button>
-    <div class="p cover" id="dc"></div>
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-top:16px;">
-      <h1 class="title" id="dt" style="margin-bottom:8px; flex:1;"></h1>
-      <button id="det-fav" style="padding:8px; margin-top:2px;" aria-label="Favori">
-        <svg class="i" id="fav-icon"><use href="#heart"/></svg>
-      </button>
-    </div>
-    <div class="chips" id="dm"></div>
-    <p class="muted" id="dd" style="font-size:15px;line-height:1.5"></p>
-    <h2 class="h" id="sh">Saisons</h2>
-    <div class="chips" id="seas"></div>
-    <h2 class="h" id="eh" style="margin-top:8px">Épisodes</h2>
-    <div id="eps"></div>
-  </section>
 
-  <!-- 6. LECTEUR VIDÉO -->
-  <section class="v" id="ply">
-    <button class="back" id="pb" aria-label="Retour"><svg class="i"><use href="#back"/></svg></button>
-    <div class="ptop" id="pt">Titre</div>
-    <div class="player-box">
-      <video id="vid" playsinline preload="auto"></video>
-      <div class="scr" id="vid-touch">
-        <button class="pb" id="pp" aria-label="Lecture ou pause">
-          <svg class="i f"><use href="#play" id="pu"/></svg>
-        </button>
+    <!-- Hero Header Anime-Sama -->
+    <div class="oe-hero">
+      <div class="oe-fond" id="oe-fond"><img id="det-bg" src="" alt=""></div>
+      <div class="oe-hero-contenu">
+        <div class="oe-affiche">
+          <img id="det-poster" src="" alt="Affiche">
+        </div>
+        <div class="oe-tete">
+          <div class="oe-badges" id="det-badges"></div>
+          <h1 class="oe-titre" id="dt">Chargement...</h1>
+          <p class="oe-alters" id="det-alters"></p>
+          <p class="oe-meta" id="det-meta"></p>
+          <div class="oe-notes">
+            <span class="oe-note">
+              <svg><use href="#star"/></svg>
+              <b id="det-note">7.8</b><span>/10</span>
+            </span>
+          </div>
+          <div class="oe-actions">
+            <button class="action-btn btn-favoris" id="det-fav">
+              <svg class="i" style="width:15px;height:15px;"><use href="#bookmark"/></svg>
+              <span id="det-fav-txt">Favoris</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="pbot">
+
+    <!-- Corps de la fiche -->
+    <div class="det-container">
+      <h2 class="oe-h2">Synopsis</h2>
+      <div class="oe-synopsis" id="dd">Chargement du synopsis...</div>
+      <div class="oe-genres" id="det-genres"></div>
+
+      <h2 class="oe-h2">Saisons & Versions</h2>
+      <div class="saisons-rail" id="det-saisons">
+        <div class="muted">Recherche des saisons...</div>
+      </div>
+
+      <h2 class="oe-h2"><span id="det-ep-title">Épisodes</span></h2>
+      <div class="ep-list" id="det-episodes">
+        <div class="muted">Sélectionne une saison pour afficher les épisodes.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. LECTEUR VIDÉO (HTML5 MP4 + IFRAME EMBED) -->
+  <section class="v" id="ply">
+    <button class="back" id="pb" aria-label="Retour"><svg class="i"><use href="#back"/></svg></button>
+    <div class="ptop" id="pt">Titre de l'épisode</div>
+    <div class="player-box" id="player-container">
+      <video id="vid" playsinline preload="auto" controls></video>
+      <iframe id="vid-frame" hidden allowfullscreen sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+    </div>
+    <div class="pbot" id="player-bot">
       <div class="seek" id="seek-bar"><i id="sk"></i></div>
       <div class="times"><span id="tc">0:00</span><span id="td">0:00</span></div>
     </div>
@@ -130,9 +157,8 @@
   <section class="v" id="lib">
     <h1 class="title">Bibliothèque</h1>
     <div class="chips" id="lf">
-      <button class="chip on" data-f="all">Tout</button>
-      <button class="chip" data-f="fav">Favoris</button>
-      <button class="chip" data-f="down">Téléchargés</button>
+      <button class="chip on" data-f="all">Favoris</button>
+      <button class="chip" data-f="history">Historique</button>
     </div>
     <div class="grid" id="lg"></div>
   </section>
@@ -141,25 +167,23 @@
   <section class="v" id="set">
     <h1 class="title">Réglages</h1>
     <div class="group">
-      <div class="set" id="cfg-qual"><span>Qualité de stream</span><small id="lbl-qual">720p</small></div>
-      <div class="set" id="cfg-src"><span>Source préférée</span><small id="lbl-src">Anime-Sama</small></div>
-      <div class="set" id="cfg-lock"><span>Verrouiller l'application</span><small id="lbl-lock">Activé</small></div>
+      <div class="set" id="cfg-qual"><span>Qualité de compression</span><small id="lbl-qual">720p</small></div>
+      <div class="set" id="cfg-lock"><span>Verrouiller au lancement</span><small id="lbl-lock">Activé</small></div>
     </div>
-    <h2 class="h" style="margin-top:8px">Mises à jour</h2>
+    <h2 class="oe-h2">Mises à jour</h2>
     <div class="group">
       <div class="set" id="cfg-update"><span>Rechercher une mise à jour</span><small>GitHub Releases</small></div>
-      <div class="set" id="cfg-clean"><span>Nettoyer le cache local</span><small style="color:var(--danger)">Vider</small></div>
+      <div class="set" id="cfg-clean"><span>Vider le cache</span><small style="color:var(--danger)">Nettoyer</small></div>
     </div>
-    <h2 class="h" style="margin-top:8px">À propos</h2>
+    <h2 class="oe-h2">À propos</h2>
     <div class="group">
       <div class="set"><span>Version</span><small>1.0.0 (WebView Edition)</small></div>
-      <div class="set"><span>Idée</span><small>Strong</small></div>
-      <div class="set"><span>Développement</span><small>Karlito</small></div>
+      <div class="set"><span>Idée originale</span><small>Strong</small></div>
+      <div class="set"><span>Développeur</span><small>Karlito</small></div>
     </div>
-    <div class="notice"><b>Usage Privé</b>Anime Plus n'est ni à vendre ni à louer. Aucune vidéo n'est hébergée sur l'appareil.</div>
   </section>
 
-  <!-- Navigation par Onglets -->
+  <!-- Navigation Basse -->
   <nav id="tabs" hidden>
     <button class="tab on" data-v="home"><svg class="i"><use href="#home"/></svg>Accueil</button>
     <button class="tab" data-v="search"><svg class="i"><use href="#search"/></svg>Recherche</button>
@@ -167,7 +191,7 @@
     <button class="tab" data-v="set"><svg class="i"><use href="#set"/></svg>Réglages</button>
   </nav>
 
-  <!-- Bottom Sheet & Notifications Toast -->
+  <!-- Bottom Sheet pour la Compression Natif Kotlin -->
   <div id="scrim" hidden></div>
   <div id="sheet" role="dialog" aria-label="Compression">
     <h3>Compresser l'épisode (Kotlin Hardware)</h3>
@@ -179,46 +203,40 @@
 
 </div>
 
-<!-- Services de Données & Scrapers Réels -->
+<!-- Scripts Core & Scraping Réel -->
 <script src="js/services/storage.js"></script>
 <script src="js/scrapping/scraper.js"></script>
 <script src="js/services/downloader.js"></script>
 
-<!-- Logique Principale AnimePlus -->
 <script>
-// --- Base de Données Locale & Fallback Démarrage ---
-const D_FALLBACK = [
-  {id:"as_1", title:"Solo Leveling", year:2024, genres:["Action","Fantasy"], type:"serie", poster:"https://anime-sama.to/images/solo-leveling.jpg", synopsis:"Dix ans après l'apparition des Portes reliant notre monde à celui des monstres, Sung Jinwoo est le plus faible des chasseurs.", seasons:[{number:1, title:"Saison 1", episodes:[{number:1,title:"Épisode 1",url:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"}]}]},
-  {id:"as_2", title:"One Piece", year:1999, genres:["Aventure","Action"], type:"serie", poster:"https://anime-sama.to/images/one-piece.jpg", synopsis:"Monkey D. Luffy rêve de devenir le roi des pirates en trouvant le trésor légendaire laissé par Gol D. Roger.", seasons:[{number:1, title:"East Blue", episodes:[{number:1,title:"Épisode 1",url:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"}]}]},
-  {id:"as_3", title:"Demon Slayer", year:2019, genres:["Action","Surnaturel"], type:"serie", poster:"https://anime-sama.to/images/demon-slayer.jpg", synopsis:"Tanjiro part en quête pour trouver un antidote à sa sœur devenue démon.", seasons:[{number:1, title:"Saison 1", episodes:[{number:1,title:"Épisode 1",url:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"}]}]}
-];
-
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 
 let curScreen = 'splash';
-let pick = null;
-let curSeason = 0;
-let libFilter = 'all';
+let currentAnime = null;
+let currentSeasons = [];
+let currentSeasonIdx = 0;
+let currentEpisodes = [];
 let video = $('#vid');
-let lastProgress = null;
+let iframe = $('#vid-frame');
 
-// --- Système de Navigation ---
-function go(v, params = {}) {
-  $$('.v').forEach(el => el.classList.toggle('on', el.id === v));
-  $('#tabs').hidden = !['home', 'search', 'lib', 'set'].includes(v);
-  $$('.tab').forEach(t => t.classList.toggle('on', t.dataset.v === v));
-  
-  if (v !== 'ply') {
+// --- Navigation Globale ---
+function go(screen, params = {}) {
+  $$('.v').forEach(el => el.classList.toggle('on', el.id === screen));
+  $('#tabs').hidden = !['home', 'search', 'lib', 'set'].includes(screen);
+  $$('.tab').forEach(t => t.classList.toggle('on', t.dataset.v === screen));
+
+  if (screen !== 'ply') {
     if (video) { video.pause(); }
+    if (iframe) { iframe.src = 'about:blank'; }
   }
-  
-  curScreen = v;
-  if (v === 'home') renderHome();
-  if (v === 'search') renderSearch();
-  if (v === 'lib') renderLib();
-  if (v === 'set') renderSettings();
-  if (v === 'det' && params.anime) openDetail(params.anime);
+
+  curScreen = screen;
+  if (screen === 'home') renderHome();
+  if (screen === 'search') renderSearch();
+  if (screen === 'lib') renderLib();
+  if (screen === 'set') renderSettings();
+  if (screen === 'det' && params.anime) openDetail(params.anime);
 }
 
 function toast(msg) {
@@ -237,17 +255,17 @@ setTimeout(() => {
   } else {
     go('gate');
   }
-}, 2400);
+}, 2200);
 
-// --- Déverrouillage Gate ---
+// --- Verrouillage / Gate ---
 $('#gf').onsubmit = async (e) => {
   e.preventDefault();
   const f = $('#pw'), m = $('#ge'), v = f.value.trim();
   f.classList.remove('bad', 'good');
   if (!v) { m.textContent = 'Entre le mot de passe.'; return; }
 
-  const isValid = (typeof Storage.checkPassword === 'function') 
-    ? await Storage.checkPassword(v) 
+  const isValid = (typeof Storage.checkPassword === 'function')
+    ? await Storage.checkPassword(v)
     : (v.toLowerCase() === 'animeplus');
 
   if (!isValid) {
@@ -263,7 +281,6 @@ $('#gf').onsubmit = async (e) => {
   f.classList.add('good');
   $('#gate').classList.add('win');
   $('#tk').hidden = false;
-  $('#gm').hidden = false;
   if (window.Android && window.Android.vibrate) window.Android.vibrate(40);
 
   setTimeout(() => {
@@ -271,70 +288,103 @@ $('#gf').onsubmit = async (e) => {
     setTimeout(() => {
       $('#gate').classList.remove('win');
       $('#tk').hidden = true;
-      $('#gm').hidden = true;
       f.value = '';
       f.classList.remove('good');
     }, 600);
-  }, 1000);
+  }, 900);
 };
 
-// --- Écran Accueil ---
-function renderHome() {
+// --- Accueil ---
+async function renderHome() {
+  // 1. Hero "Reprendre"
   const last = Storage.getLastWatch ? Storage.getLastWatch() : null;
+  const wrap = $('#home-resume-wrap');
   if (last && last.anime) {
-    $('#hero-title').textContent = last.anime.title || last.anime.t;
-    $('#hero-sub').textContent = `Saison ${(last.season||0)+1}, Épisode ${(last.episode||0)+1}`;
-    const p = last.duration ? Math.round((last.seconds / last.duration) * 100) : 0;
-    $('#hero-prog').style.width = `${p}%`;
-    $('#btn-hero-resume').onclick = () => playEpisode(last.anime, last.season || 0, last.episode || 0);
+    const p = last.duration ? Math.min(100, Math.round((last.seconds / last.duration) * 100)) : 0;
+    wrap.innerHTML = `
+      <button class="hero" id="btn-hero-resume" style="background:linear-gradient(160deg, #16358F 0%, #070B16 80%);">
+        <small style="color:#93C5FD; font-weight:700; text-transform:uppercase;">Reprendre la lecture</small>
+        <h2 style="font-size:20px; font-weight:800; color:#fff;">${last.anime.title}</h2>
+        <small style="color:#CBD5E1;">${last.episodeTitle || 'Épisode ' + ((last.episode || 0) + 1)}</small>
+        <div class="prog"><i style="width:${p}%"></i></div>
+      </button>
+    `;
+    $('#btn-hero-resume').onclick = () => {
+      playEpisode(last.anime, last.seasonTitle || 'Saison', last.episodeTitle || 'Épisode 1', last.streamUrl);
+    };
   } else {
-    $('#hero-title').textContent = "Explore le catalogue";
-    $('#hero-sub').textContent = "Streaming rapide sans pub";
-    $('#hero-prog').style.width = "0%";
-    $('#btn-hero-resume').onclick = () => go('search');
+    wrap.innerHTML = `
+      <button class="hero" id="btn-hero-discover" style="background:linear-gradient(160deg, #1E293B 0%, #070B16 80%);">
+        <small style="color:#93C5FD; font-weight:700; text-transform:uppercase;">Anime Plus</small>
+        <h2 style="font-size:20px; font-weight:800; color:#fff;">Catalogue Réel Sans Pub</h2>
+        <small style="color:#94A3B8;">Tape pour rechercher un anime sur Anime-Sama & VoirAnime</small>
+      </button>
+    `;
+    $('#btn-hero-discover').onclick = () => go('search');
   }
 
-  // Tendance Rails
+  // 2. Tendances réelles Anime-Sama
   const rail = $('#hr');
-  rail.innerHTML = D_FALLBACK.map(a => `
-    <button class="card" data-aid="${a.id}">
-      <div class="p" style="background-image:url('${a.poster}');">
-        <i class="badge">${a.type === 'film' ? 'Film' : 'Série'}</i>
-      </div>
-      <b>${a.title}</b>
-    </button>
-  `).join('');
+  try {
+    const list = await ScraperService.getTrending();
+    if (list && list.length) {
+      rail.innerHTML = list.map(a => `
+        <div class="as-carte" data-anime="${encodeURIComponent(JSON.stringify(a))}">
+          <div class="as-carte-img">
+            <img src="${a.poster}" alt="" loading="lazy">
+          </div>
+          <div class="as-carte-badges">
+            <span class="as-badge">Anime</span>
+          </div>
+          <div class="as-carte-title">
+            <h3>${a.title}</h3>
+          </div>
+        </div>
+      `).join('');
 
-  rail.querySelectorAll('.card').forEach(c => {
-    c.onclick = () => {
-      const aid = c.dataset.aid;
-      const an = D_FALLBACK.find(x => x.id === aid);
-      if (an) go('det', { anime: an });
-    };
-  });
+      rail.querySelectorAll('.as-carte').forEach(c => {
+        c.onclick = () => {
+          const anime = JSON.parse(decodeURIComponent(c.dataset.anime));
+          go('det', { anime });
+        };
+      });
+    } else {
+      rail.innerHTML = '<div class="muted" style="padding:16px 0;">Ouvre la recherche pour explorer les titres.</div>';
+    }
+  } catch (err) {
+    console.error('Trending error:', err);
+    rail.innerHTML = '<div class="muted" style="padding:16px 0;">Vérifie ta connexion.</div>';
+  }
 
-  // Favoris
+  // 3. Favoris
   const favs = Storage.getFavorites ? Storage.getFavorites() : [];
+  const fTitle = $('#home-favs-title');
   const fContainer = $('#home-favs');
   if (favs.length) {
+    fTitle.hidden = false;
     fContainer.innerHTML = favs.slice(0, 4).map(a => `
-      <button class="row" data-fid="${a.id}">
-        <div class="p" style="background-image:url('${a.poster||''}');"></div>
-        <div><b>${a.title}</b><small>${a.genres ? a.genres.join(', ') : 'Anime'}</small></div>
-      </button>
+      <div class="search-row" data-anime="${encodeURIComponent(JSON.stringify(a))}">
+        <div class="search-row-img"><img src="${a.poster}" alt=""></div>
+        <div class="search-row-info">
+          <b>${a.title}</b>
+          <small class="muted">${a.genres ? a.genres.slice(0, 3).join(', ') : 'Favori'}</small>
+        </div>
+      </div>
     `).join('');
-    fContainer.querySelectorAll('.row').forEach(r => {
+
+    fContainer.querySelectorAll('.search-row').forEach(r => {
       r.onclick = () => {
-        const item = favs.find(x => x.id === r.dataset.fid);
-        if (item) go('det', { anime: item });
+        const anime = JSON.parse(decodeURIComponent(r.dataset.anime));
+        go('det', { anime });
       };
     });
   } else {
-    fContainer.innerHTML = '<p class="muted" style="padding:12px 0;">Aucun favori pour l\'instant.</p>';
+    fTitle.hidden = true;
+    fContainer.innerHTML = '';
   }
 }
 
-// --- Écran Recherche ---
+// --- Recherche Réelle ---
 let qTimer = null;
 function renderSearch() {
   const inp = $('#q');
@@ -344,11 +394,12 @@ function renderSearch() {
   function showHist() {
     const h = Storage.getHistory ? Storage.getHistory() : [];
     if (!h.length) {
-      sug.innerHTML = '<p class="empty">Tape le titre d\'un anime (ex: Solo Leveling, One Piece...).</p>';
+      sug.innerHTML = '<p class="empty">Tape le titre d\'un anime (ex: Boruto, Bleach, Solo Leveling...).</p>';
       return;
     }
-    sug.innerHTML = '<small style="padding:8px 0;display:block;">Recherches récentes</small>' +
-      h.map(k => `<button class="rec" data-q="${k}"><svg class="i"><use href="#clock"/></svg>${k}</button>`).join('');
+    sug.innerHTML = '<small style="padding:8px 0; display:block; color:var(--text-muted);">Recherches récentes</small>' +
+      h.map(k => `<button class="rec" data-q="${k}"><svg class="i" style="width:16px;height:16px;"><use href="#clock"/></svg><span>${k}</span></button>`).join('');
+
     sug.querySelectorAll('.rec').forEach(b => {
       b.onclick = () => {
         inp.value = b.dataset.q;
@@ -364,42 +415,37 @@ function renderSearch() {
     clr.hidden = false;
     sug.innerHTML = '<p class="empty">Recherche en cours sur Anime-Sama & VoirAnime...</p>';
 
-    let res = [];
     try {
-      if (window.ScraperService) {
-        res = await ScraperService.search(q);
+      const results = await ScraperService.search(q);
+      if (!results || !results.length) {
+        sug.innerHTML = `<p class="empty">Aucun résultat trouvé pour « ${q} ».<br><small>Vérifie l'orthographe.</small></p>`;
+        return;
       }
-    } catch (e) {
-      console.warn(e);
-    }
 
-    if (!res || !res.length) {
-      // Filtrer dans la liste locale de secours
-      res = D_FALLBACK.filter(a => a.title.toLowerCase().includes(q.toLowerCase()));
-    }
-
-    if (!res.length) {
-      sug.innerHTML = `<p class="empty">Aucun résultat trouvé pour « ${q} ».</p>`;
-      return;
-    }
-
-    sug.innerHTML = res.map(a => `
-      <button class="row search-item" data-id="${a.id}">
-        <div class="p" style="background-image:url('${a.poster||''}');"></div>
-        <div>
-          <b>${a.title}</b>
-          <small>${a.type === 'film' ? 'Film' : 'Série'} • ${a.source || 'Anime-Sama'}</small>
+      sug.innerHTML = results.map(a => `
+        <div class="search-row" data-anime="${encodeURIComponent(JSON.stringify(a))}">
+          <div class="search-row-img">
+            <img src="${a.poster || 'assets/logo.svg'}" alt="" onerror="this.src='assets/logo.svg'">
+          </div>
+          <div class="search-row-info">
+            <b>${a.title}</b>
+            <small style="color:#93C5FD;">${a.source === 'animesama' ? 'Anime-Sama' : 'VoirAnime'}</small>
+            <small class="muted">• ${(a.badges || ['Anime']).join(' ')}</small>
+          </div>
         </div>
-      </button>
-    `).join('');
+      `).join('');
 
-    sug.querySelectorAll('.search-item').forEach(it => {
-      it.onclick = () => {
-        const found = res.find(x => x.id === it.dataset.id);
-        Storage.addHistory ? Storage.addHistory(q) : null;
-        if (found) go('det', { anime: found });
-      };
-    });
+      sug.querySelectorAll('.search-row').forEach(row => {
+        row.onclick = () => {
+          const anime = JSON.parse(decodeURIComponent(row.dataset.anime));
+          Storage.addHistory ? Storage.addHistory(q) : null;
+          go('det', { anime });
+        };
+      });
+    } catch (err) {
+      console.error('Search exec error:', err);
+      sug.innerHTML = `<p class="empty" style="color:var(--danger)">Erreur réseau : ${err.message}</p>`;
+    }
   }
 
   inp.oninput = () => {
@@ -419,195 +465,241 @@ function renderSearch() {
   showHist();
 }
 
-// --- Fiche Anime & Épisodes ---
+// --- Fiche Anime Style Boruto / Anime-Sama ---
 async function openDetail(anime) {
-  pick = anime;
-  curSeason = 0;
-  $('#dt').textContent = anime.title || 'Anime';
-  $('#dd').textContent = anime.synopsis || 'Chargement des informations...';
-  if (anime.poster) $('#dc').style.backgroundImage = `url('${anime.poster}')`;
+  currentAnime = anime;
+  $('#det-back').onclick = () => go('home');
 
-  // Tags
-  let tags = '';
-  if (anime.year) tags += `<span class="chip">${anime.year}</span>`;
-  if (anime.type) tags += `<span class="chip">${anime.type === 'film' ? 'Film' : 'Série'}</span>`;
-  if (anime.genres) tags += anime.genres.map(g => `<span class="chip">${g}</span>`).join('');
-  $('#dm').innerHTML = tags;
+  // Réinitialisation de l'affichage
+  $('#dt').textContent = anime.title || 'Anime';
+  $('#det-alters').textContent = '';
+  $('#det-meta').textContent = 'Chargement...';
+  $('#dd').textContent = 'Chargement des détails depuis ' + (anime.source === 'voiranime' ? 'VoirAnime' : 'Anime-Sama') + '...';
+  $('#det-poster').src = anime.poster || '';
+  $('#det-bg').src = anime.poster || '';
+  $('#det-saisons').innerHTML = '<div class="muted">Chargement des saisons...</div>';
+  $('#det-episodes').innerHTML = '';
+
+  // Badges initiaux
+  $('#det-badges').innerHTML = `<span class="as-badge">${anime.source === 'voiranime' ? 'VoirAnime' : 'Anime-Sama'}</span>`;
 
   // Favori toggle
   const favBtn = $('#det-fav');
   const checkFav = () => {
-    const isF = Storage.isFavorite ? Storage.isFavorite(pick.id) : false;
-    favBtn.style.color = isF ? 'var(--danger)' : 'var(--muted)';
+    const isF = Storage.isFavorite ? Storage.isFavorite(currentAnime.id) : false;
+    favBtn.classList.toggle('on', isF);
+    $('#det-fav-txt').textContent = isF ? 'Dans ma liste' : 'Favoris';
   };
   checkFav();
   favBtn.onclick = () => {
-    Storage.toggleFavorite(pick);
+    Storage.toggleFavorite(currentAnime);
     checkFav();
     toast('Favoris mis à jour');
   };
 
-  $('#det-back').onclick = () => go('home');
+  try {
+    // Récupération de la fiche complète en direct
+    const details = await ScraperService.getAnimeDetail(anime.url, anime.source);
+    currentAnime = { ...currentAnime, ...details };
 
-  // Si saisons manquantes, récupération scraper
-  if ((!pick.seasons || !pick.seasons.length) && pick.url && window.ScraperService) {
-    $('#eps').innerHTML = '<div class="muted" style="padding:16px 0;">Chargement des épisodes...</div>';
+    $('#dt').textContent = details.title || anime.title;
+    if (details.alters) $('#det-alters').textContent = details.alters;
+    if (details.synopsis) $('#dd').textContent = details.synopsis;
+    if (details.meta) $('#det-meta').textContent = details.meta;
+    if (details.note) $('#det-note').textContent = details.note;
+    if (details.heroBg) $('#det-bg').src = details.heroBg;
+    if (details.poster) $('#det-poster').src = details.poster;
+
+    // Genres
+    const gContainer = $('#det-genres');
+    if (details.genres && details.genres.length) {
+      gContainer.innerHTML = details.genres.map(g => `<span class="genre-pill">${g}</span>`).join('');
+    } else {
+      gContainer.innerHTML = '';
+    }
+
+    // Saisons
+    currentSeasons = details.seasons || [];
+    renderSeasonsList();
+  } catch (err) {
+    console.error('Detail fetch error:', err);
+    $('#dd').textContent = "Erreur lors du chargement des informations : " + err.message;
+  }
+}
+
+function renderSeasonsList() {
+  const container = $('#det-saisons');
+  if (!currentSeasons.length) {
+    container.innerHTML = '<div class="muted">Aucune saison disponible.</div>';
+    return;
+  }
+
+  container.innerHTML = currentSeasons.map((s, idx) => `
+    <button class="saison-card ${idx === currentSeasonIdx ? 'on' : ''}" data-sidx="${idx}">
+      <span>${s.title}</span>
+      ${s.lang ? `<span class="lang-badge">${s.lang}</span>` : ''}
+    </button>
+  `).join('');
+
+  container.querySelectorAll('.saison-card').forEach(card => {
+    card.onclick = () => {
+      currentSeasonIdx = parseInt(card.dataset.sidx, 10);
+      container.querySelectorAll('.saison-card').forEach(c => c.classList.toggle('on', c === card));
+      loadSeasonEpisodes(currentSeasonIdx);
+    };
+  });
+
+  // Charge automatiquement les épisodes de la première saison
+  loadSeasonEpisodes(0);
+}
+
+async function loadSeasonEpisodes(seasonIdx) {
+  const season = currentSeasons[seasonIdx];
+  if (!season) return;
+
+  const epContainer = $('#det-episodes');
+  $('#det-ep-title').textContent = `${season.title} (Chargement...)`;
+  epContainer.innerHTML = '<div class="muted" style="padding:14px 0;">Chargement des épisodes réels...</div>';
+
+  let episodes = season.episodes || [];
+
+  // Si Anime-Sama, charge dynamiquement episodes.js
+  if (currentAnime.source === 'animesama' && (!episodes || !episodes.length)) {
     try {
-      const detail = await ScraperService.getAnimeDetail(pick.url, pick.source);
-      if (detail && detail.seasons) pick.seasons = detail.seasons;
-      if (detail.synopsis) $('#dd').textContent = detail.synopsis;
+      episodes = await ScraperService.getSeasonEpisodesAnimeSama(season.url);
+      season.episodes = episodes;
     } catch (e) {
-      console.warn(e);
+      console.warn('Episodes load error:', e);
     }
   }
 
-  drawSeasons();
-}
+  $('#det-ep-title').textContent = `${season.title} (${episodes.length} épisodes)`;
 
-function drawSeasons() {
-  const seasons = pick.seasons && pick.seasons.length ? pick.seasons : [{ number: 1, title: 'Saison 1', episodes: [{ number: 1, title: 'Épisode 1', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' }] }];
-  pick.seasons = seasons;
-
-  const sChips = $('#seas');
-  const sHead = $('#sh');
-  if (seasons.length <= 1) {
-    sChips.hidden = true;
-    sHead.hidden = true;
-  } else {
-    sChips.hidden = false;
-    sHead.hidden = false;
-    sChips.innerHTML = seasons.map((s, idx) => `
-      <button class="chip ${idx === curSeason ? 'on' : ''}" data-s="${idx}">
-        ${s.title || 'Saison ' + (idx + 1)}
-      </button>
-    `).join('');
-    sChips.querySelectorAll('[data-s]').forEach(b => {
-      b.onclick = () => { curSeason = parseInt(b.dataset.s, 10); drawSeasons(); };
-    });
+  if (!episodes.length) {
+    epContainer.innerHTML = '<div class="muted" style="padding:14px 0;">Aucun épisode trouvé pour cette saison.</div>';
+    return;
   }
 
-  const curS = seasons[curSeason] || seasons[0];
-  const eps = curS.episodes || [];
-  $('#eh').textContent = `${curS.title || 'Saison ' + (curSeason + 1)} (${eps.length} épisodes)`;
-
-  $('#eps').innerHTML = eps.map((ep, idx) => `
-    <div class="ep">
-      <div class="n">${ep.number || idx + 1}</div>
-      <div class="t">
+  epContainer.innerHTML = episodes.map((ep, idx) => `
+    <div class="ep-item">
+      <div class="ep-num">${ep.number || (idx + 1)}</div>
+      <div class="ep-info">
         <b>${ep.title || 'Épisode ' + (idx + 1)}</b>
-        <small>${ep.duration || '24 min'} • Streaming</small>
+        <small class="muted">${ep.duration || '24 min'} • Streaming direct</small>
       </div>
-      <button class="ib" data-compress="${idx}" aria-label="Compresser"><svg class="i"><use href="#zip"/></svg></button>
-      <button class="ib pl" data-play="${idx}" aria-label="Lire"><svg class="i f"><use href="#play"/></svg></button>
+      <div class="ep-actions">
+        <button class="ep-btn" data-comp="${idx}" aria-label="Compresser"><svg class="i" style="width:16px;height:16px;"><use href="#zip"/></svg></button>
+        <button class="ep-btn play" data-play="${idx}" aria-label="Lire"><svg class="i f" style="width:16px;height:16px;"><use href="#play"/></svg></button>
+      </div>
     </div>
   `).join('');
 
-  $('#eps').querySelectorAll('[data-play]').forEach(btn => {
-    btn.onclick = () => playEpisode(pick, curSeason, parseInt(btn.dataset.play, 10));
+  epContainer.querySelectorAll('[data-play]').forEach(btn => {
+    btn.onclick = () => {
+      const idx = parseInt(btn.dataset.play, 10);
+      const ep = episodes[idx];
+      playEpisode(currentAnime, season.title, ep.title, ep.streamUrl);
+    };
   });
 
-  $('#eps').querySelectorAll('[data-compress]').forEach(btn => {
-    btn.onclick = () => openCompressionSheet(pick, curSeason, parseInt(btn.dataset.compress, 10));
+  epContainer.querySelectorAll('[data-comp]').forEach(btn => {
+    btn.onclick = () => {
+      const idx = parseInt(btn.dataset.comp, 10);
+      const ep = episodes[idx];
+      openCompressionSheet(ep.title, ep.streamUrl);
+    };
   });
 }
 
-// --- Lecteur Vidéo Externe & Intégré ---
-function playEpisode(anime, sIdx, eIdx) {
-  pick = anime;
-  curSeason = sIdx;
-  const s = (anime.seasons && anime.seasons[sIdx]) || { episodes: [] };
-  const ep = s.episodes[eIdx] || { url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' };
-
-  $('#pt').textContent = `${anime.title} - S${sIdx + 1} E${eIdx + 1}`;
+// --- Lecteur Universel (HTML5 MP4 ou Iframe Embed) ---
+async function playEpisode(anime, seasonTitle, episodeTitle, streamUrl) {
+  $('#pt').textContent = `${anime.title} — ${episodeTitle}`;
   go('ply');
 
-  video.src = ep.url || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
-  
-  // Reprise progression
-  const prog = Storage.getProgress ? Storage.getProgress(anime.id, sIdx, eIdx) : null;
-  if (prog && prog.seconds > 10) {
-    video.currentTime = prog.seconds;
-    toast(`Reprise à ${Math.floor(prog.seconds/60)}m`);
+  let finalUrl = streamUrl;
+
+  // Si VoirAnime, résoudre l'iframe de streaming
+  if (anime.source === 'voiranime' && streamUrl && !streamUrl.includes('embed') && !streamUrl.endsWith('.mp4')) {
+    $('#pt').textContent = 'Résolution du flux...';
+    finalUrl = await ScraperService.resolveVoirAnimeStream(streamUrl);
+    $('#pt').textContent = `${anime.title} — ${episodeTitle}`;
   }
 
-  video.play().catch(() => {});
-  $('#pu').setAttribute('href', '#pause');
+  console.log(`[Player] Lecture du flux: ${finalUrl}`);
+
+  // Enregistre en "Dernière lecture"
+  Storage.setLastWatch({
+    anime,
+    seasonTitle,
+    episodeTitle,
+    streamUrl: finalUrl,
+    seconds: 0,
+    duration: 1440
+  });
+
+  // Détermine si le flux est un MP4 direct ou un lecteur embed iframe
+  const isDirectMp4 = finalUrl.endsWith('.mp4') || finalUrl.includes('.mp4?');
+
+  if (isDirectMp4) {
+    iframe.hidden = true;
+    iframe.src = 'about:blank';
+    video.hidden = false;
+    $('#player-bot').hidden = false;
+    video.src = finalUrl;
+    video.play().catch(() => {});
+  } else {
+    // Embed iframe sécurisé sans popups
+    video.pause();
+    video.hidden = true;
+    $('#player-bot').hidden = true;
+    iframe.hidden = false;
+    iframe.src = finalUrl;
+  }
 }
 
 $('#pb').onclick = () => {
-  if (video) {
-    saveVideoProgress();
-    video.pause();
-  }
-  go('det', { anime: pick });
+  if (video) video.pause();
+  if (iframe) iframe.src = 'about:blank';
+  go('det', { anime: currentAnime });
 };
 
-$('#vid-touch').onclick = () => {
-  if (video.paused) {
-    video.play();
-    $('#pu').setAttribute('href', '#pause');
-  } else {
-    video.pause();
-    $('#pu').setAttribute('href', '#play');
-  }
-};
-
-video.ontimeupdate = () => {
-  if (!video.duration) return;
-  const c = video.currentTime, d = video.duration;
-  $('#sk').style.width = `${(c / d) * 100}%`;
-  $('#tc').textContent = `${Math.floor(c/60)}:${String(Math.floor(c%60)).padStart(2,'0')}`;
-  $('#td').textContent = `${Math.floor(d/60)}:${String(Math.floor(d%60)).padStart(2,'0')}`;
-};
-
-function saveVideoProgress() {
-  if (!video || !pick || !video.duration) return;
-  Storage.setProgress(pick.id, curSeason, 0, video.currentTime, video.duration);
-  Storage.setLastWatch({ anime: pick, season: curSeason, episode: 0, seconds: video.currentTime, duration: video.duration });
-}
-
-// Seek bar
-$('#seek-bar').onclick = (e) => {
-  const r = $('#seek-bar').getBoundingClientRect();
-  const pos = (e.clientX - r.left) / r.width;
-  if (video.duration) video.currentTime = pos * video.duration;
-};
-
-// --- Compression (Bridge Kotlin) ---
-let compressQuality = '720p';
-function openCompressionSheet(anime, sIdx, eIdx) {
+// --- Compression Vidéo Matérielle (Kotlin) ---
+function openCompressionSheet(epTitle, url) {
   $('#sheet').classList.add('on');
   $('#scrim').hidden = false;
   $('#bw').hidden = true;
   $('#bar').style.width = '0%';
   $('#sb').textContent = 'Lancer la compression';
 
+  let selectedQuality = '720p';
   const qs = [
     { label: '480p', desc: 'environ 60 Mo (Ultra rapide)' },
-    { label: '720p', desc: 'environ 90 Mo (Équilibré)' },
-    { label: '1080p', desc: 'environ 180 Mo (Haute qualité)' }
+    { label: '720p', desc: 'environ 90 Mo (Recommandé)' },
+    { label: '1080p', desc: 'environ 180 Mo (Haute fidélité)' }
   ];
 
   $('#qs').innerHTML = qs.map(q => `
-    <button class="opt ${q.label === compressQuality ? 'on' : ''}" data-q="${q.label}">
+    <button class="opt ${q.label === selectedQuality ? 'on' : ''}" data-q="${q.label}">
       <b>${q.label}</b><small>${q.desc}</small>
     </button>
   `).join('');
 
   $('#qs').querySelectorAll('.opt').forEach(b => {
     b.onclick = () => {
-      compressQuality = b.dataset.q;
-      openCompressionSheet(anime, sIdx, eIdx);
+      selectedQuality = b.dataset.q;
+      $('#qs').querySelectorAll('.opt').forEach(x => x.classList.toggle('on', x === b));
     };
   });
 
   $('#sb').onclick = () => {
     $('#bw').hidden = false;
     $('#sb').textContent = 'Compression en cours...';
+
+    // Appel direct au bridge Kotlin Media3 Transformer si sous Android
     if (window.AndroidCompression && window.AndroidCompression.compress) {
-      window.AndroidCompression.compress("video.mp4", compressQuality, "comp_1");
+      window.AndroidCompression.compress(url, selectedQuality, "comp_job");
     } else {
-      // Simulation pour aperçu Webview navigateur
+      // Simulation visuelle pour dev web
       let p = 0;
       const t = setInterval(() => {
         p += 5;
@@ -619,7 +711,7 @@ function openCompressionSheet(anime, sIdx, eIdx) {
           $('#scrim').hidden = true;
           toast('Épisode compressé avec succès !');
         }
-      }, 70);
+      }, 60);
     }
   };
 }
@@ -629,43 +721,53 @@ $('#scrim').onclick = () => {
   $('#scrim').hidden = true;
 };
 
+// Callbacks globaux appelés par Kotlin
+window.onCompressionProgress = (id, percent) => {
+  $('#bar').style.width = `${percent}%`;
+  $('#sb').textContent = `Compression ${percent}%`;
+};
+
+window.onCompressionDone = (id, outPath, err) => {
+  if (err) toast(`Erreur : ${err}`);
+  else {
+    toast(`Compression réussie !`);
+    $('#sheet').classList.remove('on');
+    $('#scrim').hidden = true;
+  }
+};
+
 // --- Bibliothèque ---
 function renderLib() {
-  const fChips = $('#lf');
   const g = $('#lg');
   const favs = Storage.getFavorites ? Storage.getFavorites() : [];
-  
-  fChips.onclick = e => {
-    const b = e.target.closest('[data-f]');
-    if (!b) return;
-    libFilter = b.dataset.f;
-    fChips.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c === b));
-    renderLib();
-  };
+  if (!favs.length) {
+    g.innerHTML = '<p class="empty" style="grid-column: 1/-1;">Aucun favori enregistré.<br><small>Ajoute des animes depuis leur fiche.</small></p>';
+    return;
+  }
 
-  const list = libFilter === 'fav' ? favs : (favs.length ? favs : D_FALLBACK);
-  g.innerHTML = list.map(a => `
-    <button class="card" data-aid="${a.id}">
-      <div class="p" style="background-image:url('${a.poster||''}');">
-        <i class="badge">${a.type === 'film' ? 'Film' : 'Série'}</i>
+  g.innerHTML = favs.map(a => `
+    <div class="as-carte" data-anime="${encodeURIComponent(JSON.stringify(a))}">
+      <div class="as-carte-img">
+        <img src="${a.poster}" alt="">
       </div>
-      <b>${a.title}</b>
-    </button>
+      <div class="as-carte-title">
+        <h3>${a.title}</h3>
+      </div>
+    </div>
   `).join('');
 
-  g.querySelectorAll('.card').forEach(c => {
+  g.querySelectorAll('.as-carte').forEach(c => {
     c.onclick = () => {
-      const found = list.find(x => x.id === c.dataset.aid);
-      if (found) go('det', { anime: found });
+      const anime = JSON.parse(decodeURIComponent(c.dataset.anime));
+      go('det', { anime });
     };
   });
 }
 
 // --- Réglages ---
 function renderSettings() {
-  const s = Storage.getSettings ? Storage.getSettings() : { quality: '720p', source: 'animesama', lockEnabled: true };
+  const s = Storage.getSettings ? Storage.getSettings() : { quality: '720p', lockEnabled: true };
   $('#lbl-qual').textContent = s.quality || '720p';
-  $('#lbl-src').textContent = s.source === 'animesama' ? 'Anime-Sama' : 'VoirAnime';
   $('#lbl-lock').textContent = s.lockEnabled ? 'Activé' : 'Désactivé';
 
   $('#cfg-qual').onclick = () => {
@@ -674,13 +776,6 @@ function renderSettings() {
     Storage.setSettings(s);
     $('#lbl-qual').textContent = s.quality;
     toast(`Qualité : ${s.quality}`);
-  };
-
-  $('#cfg-src').onclick = () => {
-    s.source = s.source === 'animesama' ? 'voiranimes' : 'animesama';
-    Storage.setSettings(s);
-    $('#lbl-src').textContent = s.source === 'animesama' ? 'Anime-Sama' : 'VoirAnime';
-    toast(`Source : ${s.source}`);
   };
 
   $('#cfg-lock').onclick = () => {
@@ -695,19 +790,28 @@ function renderSettings() {
     if (window.Android && window.Android.checkUpdate) {
       window.Android.checkUpdate('1.0.0');
     } else {
-      toast('Anime Plus est à jour (v1.0.0)');
+      fetch('https://api.github.com/repos/karlitodev/animeplus/releases/latest')
+        .then(r => r.json())
+        .then(d => {
+          if (d.tag_name && d.tag_name !== 'v1.0.0') {
+            toast(`Nouvelle version ${d.tag_name} disponible !`);
+          } else {
+            toast('Anime Plus est à jour (v1.0.0)');
+          }
+        })
+        .catch(() => toast('Anime Plus est à jour (v1.0.0)'));
     }
   };
 
   $('#cfg-clean').onclick = () => {
-    if (confirm('Vider l\'historique et le cache ?')) {
-      Storage.clearHistory();
-      toast('Cache nettoyé.');
+    if (confirm('Vider l\'historique et le cache local ?')) {
+      Storage.clearHistory ? Storage.clearHistory() : null;
+      toast('Cache vidé.');
     }
   };
 }
 
-// --- Navigation Globale (Tabs & Back) ---
+// --- Navigation Tab Bar ---
 document.addEventListener('click', e => {
   const tab = e.target.closest('[data-v]');
   if (tab) {

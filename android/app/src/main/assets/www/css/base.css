@@ -1,17 +1,23 @@
 /* =====================================================================
-   ANIME PLUS - CSS PRINCIPAL MOBILE (Optimisé Android / Tecno)
+   ANIME PLUS — CSS MOBILE-FIRST STYLE ANIME-SAMA (Boruto)
+   Optimisé pour Android / Tecno & Webview
    ===================================================================== */
 :root {
   --bg: #070B16;
-  --surface: #0F1526;
-  --surface-2: #172038;
-  --line: #222D4A;
-  --text: #EAF0FF;
-  --muted: #8C9AC0;
+  --bg-darker: #020306;
+  --surface: #0A1424;
+  --surface-2: #0F1D35;
+  --surface-glass: rgba(10, 20, 36, 0.85);
+  --line: rgba(56, 189, 248, 0.16);
+  --line-strong: rgba(56, 189, 248, 0.35);
+  --text: #F1F5F9;
+  --text-muted: #94A3B8;
   --accent: #2F6BFF;
-  --accent-soft: #1B3A8F;
+  --accent-cyan: #38BDF8;
+  --accent-soft: rgba(47, 107, 255, 0.18);
   --danger: #FF5C7A;
-  --success: #4CD4A0;
+  --success: #22C55E;
+  --gold: #FACC15;
   --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -32,12 +38,13 @@ html, body {
 }
 
 body {
-  background: #03050B;
+  background: #020306;
   color: var(--text);
   font-family: var(--font);
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
 
 button {
@@ -54,16 +61,16 @@ button:focus-visible, input:focus-visible {
   outline-offset: 2px;
 }
 
-/* Conteneur principal plein écran pour mobile */
+/* Conteneur App Mobile */
 .app {
   width: 100vw;
-  max-width: 430px;
+  max-width: 440px;
   height: 100dvh;
-  max-height: 880px;
+  max-height: 900px;
   background: var(--bg);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
 }
 
 /* Écrans */
@@ -73,23 +80,23 @@ button:focus-visible, input:focus-visible {
   display: none;
   flex-direction: column;
   overflow-y: auto;
-  padding: calc(env(safe-area-inset-top, 0px) + 20px) 16px 96px;
+  padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px 88px;
   -webkit-overflow-scrolling: touch;
 }
 
 .v.on {
   display: flex;
-  animation: in 0.22s ease-out;
+  animation: fadeIn 0.2s ease-out;
 }
 
-@keyframes in {
-  from { opacity: 0; transform: translateX(14px); }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: none; }
 }
 
 .i {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   fill: none;
   stroke: currentColor;
   stroke-width: 2;
@@ -104,93 +111,48 @@ button:focus-visible, input:focus-visible {
 }
 
 .title {
-  font-size: 28px;
-  font-weight: 700;
+  font-size: 26px;
+  font-weight: 800;
   letter-spacing: -0.02em;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+  color: #fff;
 }
 
 .h {
-  font-size: 18px;
-  font-weight: 600;
-  margin: 24px 0 12px;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 20px 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #E2E8F0;
 }
 
 .muted, small {
-  color: var(--muted);
+  color: var(--text-muted);
   font-size: 13px;
 }
 
 .btn {
-  height: 52px;
-  border-radius: 12px;
+  height: 48px;
+  border-radius: 10px;
   background: var(--accent);
   color: #fff;
-  font-weight: 600;
-  font-size: 16px;
+  font-weight: 700;
+  font-size: 15px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   user-select: none;
+  transition: transform 0.1s, opacity 0.2s;
 }
 
 .btn:active {
   transform: scale(0.98);
 }
 
-.chips {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 4px 0 12px;
-  scrollbar-width: none;
-}
-
-.chips::-webkit-scrollbar {
-  display: none;
-}
-
-.chip {
-  flex: none;
-  padding: 9px 16px;
-  border-radius: 999px;
-  background: var(--surface-2);
-  font-size: 14px;
-  color: var(--muted);
-  min-height: 40px;
-  display: inline-flex;
-  align-items: center;
-  transition: background 0.2s;
-}
-
-.chip.on {
-  background: var(--accent);
-  color: #fff;
-}
-
-.p {
-  background: linear-gradient(160deg, hsl(calc(205 + var(--h, 1) * 14) 80% 40%), #0A1128 78%);
-  border-radius: 12px;
-  position: relative;
-  background-size: cover;
-  background-position: center;
-}
-
-.badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(7, 11, 22, 0.85);
-  padding: 4px 8px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-style: normal;
-  color: #fff;
-}
-
-/* Splash et Gate */
+/* Splash et Verrouillage */
 #splash, #gate {
   justify-content: center;
   align-items: center;
@@ -200,59 +162,53 @@ button:focus-visible, input:focus-visible {
 }
 
 .logo {
-  width: 128px;
-  height: 128px;
+  width: 110px;
+  height: 110px;
   fill: none;
   stroke: var(--accent);
   stroke-width: 5;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 0 22px rgba(47, 107, 255, 0.6));
+  filter: drop-shadow(0 0 20px rgba(47, 107, 255, 0.6));
 }
 
 .logo * {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
-  animation: draw 1.3s ease-out forwards;
+  animation: draw 1.2s ease-out forwards;
 }
 
 .logo path:nth-child(2) { animation-delay: 0.35s; }
-.logo path:nth-child(3) { animation-delay: 0.8s; }
+.logo path:nth-child(3) { animation-delay: 0.75s; }
 
-@keyframes draw {
-  to { stroke-dashoffset: 0; }
-}
+@keyframes draw { to { stroke-dashoffset: 0; } }
 
 .word {
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  margin-top: 20px;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-top: 18px;
+  color: #fff;
 }
 
 .credits {
   position: absolute;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 48px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 36px);
   left: 0;
   right: 0;
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.9;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.8;
 }
 
 .credits b {
-  color: var(--text);
+  color: #fff;
   font-weight: 600;
 }
 
 #gate form {
   width: 100%;
-  margin-top: 28px;
-}
-
-#gate .logo {
-  width: 88px;
-  height: 88px;
+  margin-top: 24px;
 }
 
 .pw {
@@ -261,20 +217,20 @@ button:focus-visible, input:focus-visible {
 
 .pw .i {
   position: absolute;
-  left: 16px;
+  left: 14px;
   top: 14px;
-  color: var(--muted);
+  color: var(--text-muted);
 }
 
 .field {
   width: 100%;
-  height: 52px;
-  border-radius: 12px;
+  height: 48px;
+  border-radius: 10px;
   border: 1px solid var(--line);
   background: var(--surface);
-  color: var(--text);
-  padding: 0 16px 0 48px;
-  font: 16px var(--font);
+  color: #fff;
+  padding: 0 16px 0 44px;
+  font: 15px var(--font);
 }
 
 .field.bad {
@@ -289,10 +245,10 @@ button:focus-visible, input:focus-visible {
 
 .err {
   color: var(--danger);
-  font-size: 14px;
-  margin: 10px 0 0;
+  font-size: 13px;
+  margin: 8px 0 0;
   text-align: left;
-  min-height: 20px;
+  min-height: 18px;
 }
 
 #gate .btn {
@@ -303,23 +259,15 @@ button:focus-visible, input:focus-visible {
   border-color: var(--success);
 }
 
-.err.ok {
-  color: var(--success);
-  text-align: center;
-  font-size: 16px;
-  font-weight: 600;
-  margin-top: 12px;
-}
-
 .tick {
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
   fill: none;
   stroke: var(--success);
   stroke-width: 3.5;
   stroke-linecap: round;
   stroke-linejoin: round;
-  margin-top: 28px;
+  margin-top: 24px;
 }
 
 .tick * {
@@ -328,103 +276,488 @@ button:focus-visible, input:focus-visible {
   animation: draw 0.5s ease-out forwards;
 }
 
-.tick path { animation-delay: 0.35s; }
-
 #gate.win form { display: none; }
 #gate.win .logo { animation: pulse 0.9s ease-out; }
 
 @keyframes pulse {
-  50% { transform: scale(1.12); filter: drop-shadow(0 0 40px rgba(76, 212, 160, 0.8)); }
+  50% { transform: scale(1.1); filter: drop-shadow(0 0 35px rgba(34, 197, 94, 0.8)); }
 }
 
-/* Accueil */
+/* =====================================================================
+   FICHE ANIME STYLE ANIME-SAMA (Boruto / Bleach)
+   ===================================================================== */
+#det {
+  padding: 0 0 88px 0;
+}
+
+.det-container {
+  padding: 0 16px;
+}
+
+/* Bouton retour flottant */
+.back {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(4, 7, 16, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: grid;
+  place-items: center;
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 12px);
+  left: 14px;
+  z-index: 10;
+  backdrop-filter: blur(8px);
+}
+
+/* Hero Section avec fond d'image dégradé */
+.oe-hero {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 240px;
+  background: #070B16;
+  overflow: hidden;
+}
+
+.oe-fond {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.oe-fond img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+  opacity: 0.65;
+  filter: blur(4px);
+  transform: scale(1.08);
+}
+
+.oe-fond::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(7, 11, 22, 1) 0%, rgba(7, 11, 22, 0.85) 45%, rgba(7, 11, 22, 0.3) 80%, rgba(7, 11, 22, 0.2) 100%);
+}
+
+.oe-hero-contenu {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  width: 100%;
+  padding: 60px 16px 16px;
+}
+
+.oe-affiche {
+  flex: 0 0 95px;
+  aspect-ratio: 2 / 3;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0F172A;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.oe-affiche img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.oe-tete {
+  flex: 1;
+  min-width: 0;
+}
+
+.oe-badges {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 6px;
+}
+
+.as-badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: rgba(6, 14, 26, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #93C5FD;
+}
+
+.as-badge.scan { color: #86EFAC; }
+.as-badge.vf { color: #60A5FA; }
+
+.oe-titre {
+  margin: 0;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.15;
+  text-transform: uppercase;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+  overflow-wrap: anywhere;
+}
+
+.oe-alters {
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 11px;
+  font-style: italic;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.oe-meta {
+  margin-top: 6px;
+  color: #E2E8F0;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.oe-point {
+  margin: 0 4px;
+  color: #64748B;
+}
+
+/* Notes */
+.oe-notes {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.oe-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(71, 85, 105, 0.5);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.oe-note svg {
+  width: 13px;
+  height: 13px;
+  color: var(--gold);
+  fill: var(--gold);
+}
+
+/* Boutons d'action */
+.oe-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  color: #fff;
+}
+
+.btn-watchlist { background: rgba(59, 130, 246, 0.25); border-color: rgba(59, 130, 246, 0.4); }
+.btn-favoris   { background: rgba(234, 179, 8, 0.22); border-color: rgba(234, 179, 8, 0.4); }
+.btn-favoris.on { background: rgba(234, 179, 8, 0.45); border-color: var(--gold); color: var(--gold); }
+
+/* Titre de section stylé Anime-Sama */
+.oe-h2 {
+  margin: 18px 0 10px;
+  padding-bottom: 4px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid #3B82F6;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.oe-h2 span {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: none;
+}
+
+/* Synopsis */
+.oe-synopsis {
+  color: #CBD5E1;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* Genres */
+.oe-genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.genre-pill {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  font-size: 11px;
+  font-weight: 600;
+  color: #93C5FD;
+}
+
+/* Panneaux de saisons (Cartes horizontales Anime-Sama) */
+.saisons-rail {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0 12px;
+  scrollbar-width: none;
+}
+
+.saisons-rail::-webkit-scrollbar { display: none; }
+
+.saison-card {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font-size: 13px;
+  font-weight: 700;
+  color: #CBD5E1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.18s;
+}
+
+.saison-card.on {
+  background: #1D4ED8;
+  border-color: #60A5FA;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+}
+
+.saison-card .lang-badge {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.45);
+  font-weight: 800;
+}
+
+/* Liste des épisodes réels */
+.ep-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.ep-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  transition: background 0.15s;
+}
+
+.ep-item:active {
+  background: var(--surface-2);
+}
+
+.ep-num {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 13px;
+  color: var(--accent-cyan);
+  flex: none;
+}
+
+.ep-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ep-info b {
+  display: block;
+  font-size: 14px;
+  color: #F1F5F9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ep-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ep-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--text-muted);
+}
+
+.ep-btn.play {
+  background: #2563EB;
+  border-color: #60A5FA;
+  color: #fff;
+}
+
+/* =====================================================================
+   ACCUEIL & RECHERCHE (CARTES AS-CARTE ANIME-SAMA)
+   ===================================================================== */
 .hero {
-  height: 210px;
+  height: 180px;
   padding: 16px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   gap: 4px;
   width: 100%;
-  border-radius: 18px;
-}
-
-.hero h2 {
-  font-size: 22px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  margin-bottom: 8px;
 }
 
 .prog {
   height: 4px;
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.2);
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .prog i {
   display: block;
   height: 100%;
   width: 0%;
-  background: #fff;
+  background: #38BDF8;
   border-radius: 4px;
-  transition: width 0.3s;
 }
 
 .rail {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   overflow-x: auto;
   scrollbar-width: none;
+  padding: 4px 0 12px;
 }
 
-.rail::-webkit-scrollbar {
-  display: none;
+.rail::-webkit-scrollbar { display: none; }
+
+/* Carte style Anime-Sama (.as-carte) */
+.as-carte {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  flex: 0 0 125px;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
 }
 
-.card {
-  flex: 0 0 118px;
+.as-carte:active {
+  transform: scale(0.97);
+  border-color: var(--accent-cyan);
 }
 
-.card .p {
-  height: 170px;
-  margin-bottom: 8px;
+.as-carte-img {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: #0F172A;
 }
 
-.card b {
-  font-size: 14px;
-  font-weight: 600;
+.as-carte-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.as-carte-img::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(7, 11, 22, 0.95) 0%, rgba(7, 11, 22, 0.2) 60%, rgba(7, 11, 22, 0) 100%);
+}
+
+.as-carte-badges {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  z-index: 2;
+  display: flex;
+  gap: 3px;
+}
+
+.as-carte-title {
+  padding: 6px 8px 8px;
+}
+
+.as-carte-title h3 {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  line-height: 1.25;
 }
 
-.row {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  width: 100%;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--line);
+/* Grille pour la Bibliothèque */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
-.row .p {
-  width: 64px;
-  height: 92px;
+.grid .as-carte {
   flex: none;
-  border-radius: 10px;
 }
 
-.row > div {
-  flex: 1;
-}
-
-.row b {
-  display: block;
-  font-size: 16px;
-  margin-bottom: 4px;
-}
-
-/* Recherche */
+/* Ligne de recherche */
 .sf {
   position: relative;
 }
@@ -432,137 +765,96 @@ button:focus-visible, input:focus-visible {
 .sf .i {
   position: absolute;
   left: 14px;
-  top: 14px;
-  color: var(--muted);
+  top: 13px;
+  color: var(--text-muted);
 }
 
 .sf .field {
-  padding-right: 48px;
+  padding-right: 44px;
 }
 
 .clr {
   position: absolute;
   right: 4px;
-  top: 4px;
+  top: 2px;
   width: 44px;
   height: 44px;
   display: grid;
   place-items: center;
-  color: var(--muted);
+  color: var(--text-muted);
 }
 
 .sug {
   margin-top: 12px;
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
-.sug .row {
-  padding: 10px 8px;
-  border-radius: 12px;
-  border-bottom: 0;
+.search-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
 }
 
-.sug .row:active {
+.search-row:active {
   background: var(--surface-2);
 }
 
-.sug .row .p {
-  width: 48px;
-  height: 68px;
+.search-row-img {
+  width: 50px;
+  height: 70px;
+  flex: none;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #0F172A;
 }
 
-mark {
-  background: none;
-  color: var(--accent);
-  font-weight: 700;
+.search-row-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.search-row-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.search-row-info b {
+  display: block;
+  font-size: 15px;
+  color: #fff;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .rec {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 8px;
-  color: var(--muted);
+  gap: 10px;
+  padding: 12px 8px;
+  color: var(--text-muted);
   width: 100%;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .empty {
   padding: 32px 8px;
   text-align: center;
-  color: var(--muted);
+  color: var(--text-muted);
   line-height: 1.5;
 }
 
-/* Fiche */
-.back {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: rgba(7, 11, 22, 0.7);
-  display: grid;
-  place-items: center;
-  position: absolute;
-  top: calc(env(safe-area-inset-top, 0px) + 12px);
-  left: 12px;
-  z-index: 2;
-}
-
-.cover {
-  height: 250px;
-  margin: -20px -16px 0;
-  border-radius: 0 0 24px 24px;
-}
-
-.ep {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: var(--surface);
-  border-radius: 14px;
-  margin-bottom: 8px;
-}
-
-.ep .n {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: var(--surface-2);
-  display: grid;
-  place-items: center;
-  font-weight: 600;
-  flex: none;
-}
-
-.ep .t {
-  flex: 1;
-}
-
-.ep b {
-  display: block;
-  font-size: 15px;
-}
-
-.ib {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: var(--surface-2);
-}
-
-.ib.pl {
-  background: var(--accent);
-  color: #fff;
-}
-
-.ib.ok {
-  color: var(--success);
-}
-
-/* Lecteur Vidéo */
+/* =====================================================================
+   LECTEUR VIDÉO (HTML5 + IFRAME EMBED)
+   ===================================================================== */
 #ply {
   background: #000;
   padding: 0;
@@ -577,54 +869,38 @@ mark {
   background: #000;
 }
 
-#ply video {
+#ply video, #ply iframe {
   width: 100%;
   height: 100%;
+  border: 0;
   object-fit: contain;
-}
-
-.scr {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: rgba(0, 0, 0, 0.2);
-}
-
-.pb {
-  width: 76px;
-  height: 76px;
-  border-radius: 50%;
-  background: rgba(7, 11, 22, 0.65);
-  display: grid;
-  place-items: center;
-}
-
-.pb .i {
-  width: 34px;
-  height: 34px;
 }
 
 .ptop {
   position: absolute;
-  top: calc(env(safe-area-inset-top, 0px) + 12px);
-  left: 68px;
-  right: 16px;
-  font-weight: 600;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  left: 64px;
+  right: 14px;
+  font-weight: 700;
+  font-size: 14px;
   z-index: 2;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .pbot {
-  padding: 16px 20px calc(env(safe-area-inset-bottom, 0px) + 28px);
-  background: #000;
+  padding: 12px 16px calc(env(safe-area-inset-bottom, 0px) + 20px);
+  background: #040710;
+  border-top: 1px solid var(--line);
 }
 
 .seek {
   height: 6px;
   border-radius: 6px;
   background: var(--surface-2);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   cursor: pointer;
 }
 
@@ -632,74 +908,79 @@ mark {
   display: block;
   height: 100%;
   width: 0%;
-  background: var(--accent);
+  background: #38BDF8;
   border-radius: 6px;
 }
 
 .times {
   display: flex;
   justify-content: space-between;
-  color: var(--muted);
-  font-size: 13px;
+  color: var(--text-muted);
+  font-size: 12px;
 }
 
-/* Bibliothèque */
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.grid .card .p {
-  height: 200px;
-}
-
-/* Réglages */
+/* =====================================================================
+   RÉGLAGES & ONGLETS
+   ===================================================================== */
 .group {
   background: var(--surface);
-  border-radius: 14px;
-  margin-bottom: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  margin-bottom: 14px;
+  overflow: hidden;
 }
 
 .set {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--line);
-  font-size: 15px;
-  gap: 12px;
+  font-size: 14px;
 }
 
 .set:last-child {
   border-bottom: 0;
 }
 
-.notice {
-  padding: 16px;
-  border: 1px solid var(--accent-soft);
-  border-radius: 14px;
-  font-size: 14px;
-  line-height: 1.5;
+.chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0 12px;
+  scrollbar-width: none;
 }
 
-.notice b {
-  display: block;
-  margin-bottom: 4px;
+.chip {
+  flex: none;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  font-size: 13px;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
 }
 
-/* Navigation basse */
+.chip.on {
+  background: #2563EB;
+  border-color: #60A5FA;
+  color: #fff;
+}
+
 #tabs {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  height: calc(68px + env(safe-area-inset-bottom, 0px));
+  height: calc(64px + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
   display: flex;
-  background: rgba(15, 21, 38, 0.97);
+  background: rgba(7, 11, 22, 0.96);
   border-top: 1px solid var(--line);
-  z-index: 5;
+  z-index: 20;
+  backdrop-filter: blur(10px);
 }
 
 .tab {
@@ -708,22 +989,23 @@ mark {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  color: var(--muted);
-  font-size: 12px;
+  gap: 3px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
   text-align: center;
 }
 
 .tab.on {
-  color: var(--accent);
+  color: #38BDF8;
 }
 
-/* Sheets & Dialogs */
+/* Sheets & Toast */
 #scrim {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  z-index: 8;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 30;
 }
 
 #sheet {
@@ -732,11 +1014,12 @@ mark {
   right: 0;
   bottom: 0;
   background: var(--surface);
-  border-radius: 22px 22px 0 0;
-  padding: 20px 16px calc(env(safe-area-inset-bottom, 0px) + 20px);
+  border-top: 1px solid var(--line-strong);
+  border-radius: 20px 20px 0 0;
+  padding: 18px 16px calc(env(safe-area-inset-bottom, 0px) + 18px);
   transform: translateY(105%);
-  transition: transform 0.25s;
-  z-index: 9;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 35;
 }
 
 #sheet.on {
@@ -744,8 +1027,9 @@ mark {
 }
 
 #sheet h3 {
-  font-size: 18px;
+  font-size: 17px;
   margin-bottom: 12px;
+  color: #fff;
 }
 
 .opt {
@@ -753,16 +1037,16 @@ mark {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 14px;
+  padding: 12px 14px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 10px;
   margin-bottom: 8px;
-  min-height: 52px;
+  background: var(--bg);
 }
 
 .opt.on {
-  border-color: var(--accent);
-  background: rgba(47, 107, 255, 0.12);
+  border-color: #38BDF8;
+  background: rgba(56, 189, 248, 0.1);
 }
 
 .bar {
@@ -776,19 +1060,23 @@ mark {
   display: block;
   height: 100%;
   width: 0;
-  background: var(--accent);
+  background: #38BDF8;
   border-radius: 6px;
 }
 
 #toast {
   position: absolute;
   left: 50%;
-  bottom: 96px;
+  bottom: 84px;
   transform: translateX(-50%);
-  background: var(--surface-2);
-  padding: 12px 18px;
+  background: rgba(15, 29, 53, 0.95);
+  border: 1px solid var(--line-strong);
+  color: #fff;
+  padding: 10px 18px;
   border-radius: 999px;
-  font-size: 14px;
-  z-index: 10;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 50;
   white-space: nowrap;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
 }
