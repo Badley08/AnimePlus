@@ -7,6 +7,8 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import java.io.*
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.net.Socket
 import java.net.URLDecoder
@@ -20,8 +22,15 @@ import java.util.concurrent.TimeUnit
  */
 class LocalProxyServer(private val context: Context, private val port: Int = 8888) {
 
-    private var serverSocket: ServerSocket? = null
-    private var isRunning = false
+    private companion object {
+        const val TAG = "LocalProxyServer"
+        const val CLIENT_TIMEOUT_MS = 15_000
+        const val MAX_HEADER_LINES = 100
+        const val MAX_BODY_BYTES = 5 * 1024 * 1024
+    }
+
+    @Volatile private var serverSocket: ServerSocket? = null
+    @Volatile private var isRunning = false
     private val threadPool = Executors.newCachedThreadPool()
 
     private val httpClient = OkHttpClient.Builder()
@@ -36,26 +45,36 @@ class LocalProxyServer(private val context: Context, private val port: Int = 888
 
         threadPool.execute {
             try {
-                serverSocket = ServerSocket(port)
-                Log.d("LocalProxyServer", "Serveur proxy local démarré sur http://127.0.0.1:$port")
+                // Lié uniquement à 127.0.0.1 : inaccessible depuis le Wi-Fi ou le réseau local
+                serverSocket = ServerSocket().apply {
+                    reuseAddress = true
+                    bind(InetSocketAddress(InetAddress.getByName("127.0.0.1"), port))
+                }
+                Log.d(TAG, "Serveur proxy local démarré sur http://127.0.0.1:$port")
 
                 while (isRunning) {
                     try {
                         val clientSocket = serverSocket?.accept() ?: break
                         threadPool.execute { handleClient(clientSocket) }
                     } catch (e: Exception) {
-                        if (!isRunning) break
+                        if (!isRunning || serverSocket?.isClosed == true) break
                     }
                 }
             } catch (e: Exception) {
-                Log.e("LocalProxyServer", "Erreur serveur local: ${e.message}")
+                Log.e(TAG, "Erreur serveur local: ${e.message}")
+                // Permet de rappeler start() si le port était occupé
+                isRunning = false
             }
         }
     }
 
     private fun handleClient(socket: Socket) {
         try {
-            val input = BufferedReader(InputStreamReader(socket.getInputStream()))
+            // Évite qu'un client silencieux bloque un thread indéfiniment
+            socket.soTimeout = CLIENT_TIMEOUT_MS
+
+            // ISO_8859_1 : 1 caractère = 1 octet, donc Content-Length reste exact pour le body POST
+            val input = BufferedReader(InputStreamReader(socket.getInputStream(), Charsets.ISO_8859_1))
             val output = BufferedOutputStream(socket.getOutputStream())
 
             val requestLine = input.readLine() ?: return
@@ -69,9 +88,11 @@ class LocalProxyServer(private val context: Context, private val port: Int = 888
             var line: String?
             var contentLength = 0
             var contentType = "application/x-www-form-urlencoded"
+            var headerCount = 0
 
             while (input.readLine().also { line = it } != null) {
                 if (line.isNullOrEmpty()) break
+                if (++headerCount > MAX_HEADER_LINES) return
                 val lower = line!!.lowercase()
                 if (lower.startsWith("content-length:")) {
                     contentLength = line!!.substringAfter(":").trim().toIntOrNull() ?: 0
@@ -81,7 +102,7 @@ class LocalProxyServer(private val context: Context, private val port: Int = 888
             }
 
             if (method == "OPTIONS") {
-                val resp = "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: GET, POST, OPTIONS\r\nAccess-Control-Allow-Headers: *\r\nContent-Length: 0\r\n\r\n"
+                val resp = "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: GET, POST, OPTIONS\r\nAccess-Control-Allow-Headers: *\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
                 output.write(resp.toByteArray())
                 output.flush()
                 socket.close()
@@ -93,23 +114,42 @@ class LocalProxyServer(private val context: Context, private val port: Int = 888
                 var targetUrl: String? = null
 
                 for (pair in queryStr.split("&")) {
-                    val kv = pair.split("=")
-                    if (kv.size == 2 && kv[0] == "url") {
-                        targetUrl = URLDecoder.decode(kv[1], "UTF-8")
+                    // indexOf au lieu de split("=") : une URL cible contenant "=" n'est plus rejetée
+                    val idx = pair.indexOf('=')
+                    if (idx > 0 && pair.substring(0, idx) == "url") {
+                        targetUrl = try {
+                            URLDecoder.decode(pair.substring(idx + 1), "UTF-8")
+                        } catch (_: Exception) {
+                            null
+                        }
                         break
                     }
                 }
 
-                if (targetUrl == null) {
-                    val err = "HTTP/1.1 400 Bad Request\r\nAccess-Control-Allow-Origin: *\r\nContent-Length: 15\r\n\r\nMissing url param"
+                if (targetUrl.isNullOrBlank()) {
+                    // Content-Length calculé (l'ancienne valeur fixe "15" tronquait le message de 17 caractères)
+                    val errBytes = "Missing url param".toByteArray()
+                    val err = "HTTP/1.1 400 Bad Request\r\nAccess-Control-Allow-Origin: *\r\nContent-Type: text/plain\r\nContent-Length: ${errBytes.size}\r\nConnection: close\r\n\r\n"
                     output.write(err.toByteArray())
+                    output.write(errBytes)
                     output.flush()
                     socket.close()
                     return
                 }
 
-                val reqBuilder = Request.Builder()
-                    .url(targetUrl)
+                val reqBuilder = try {
+                    Request.Builder().url(targetUrl)
+                } catch (_: IllegalArgumentException) {
+                    val errBytes = "Invalid url".toByteArray()
+                    val err = "HTTP/1.1 400 Bad Request\r\nAccess-Control-Allow-Origin: *\r\nContent-Type: text/plain\r\nContent-Length: ${errBytes.size}\r\nConnection: close\r\n\r\n"
+                    output.write(err.toByteArray())
+                    output.write(errBytes)
+                    output.flush()
+                    socket.close()
+                    return
+                }
+
+                reqBuilder
                     .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36")
                     .header("Accept", "*/*")
 
@@ -125,22 +165,31 @@ class LocalProxyServer(private val context: Context, private val port: Int = 888
                 }
 
                 if (method == "POST") {
-                    val bodyChars = CharArray(contentLength)
-                    input.read(bodyChars, 0, contentLength)
-                    val bodyStr = String(bodyChars)
-                    val reqBody = bodyStr.toRequestBody(contentType.toMediaTypeOrNull())
+                    val safeLength = contentLength.coerceIn(0, MAX_BODY_BYTES)
+                    val bodyChars = CharArray(safeLength)
+                    // read() peut renvoyer moins que demandé : on boucle jusqu'à tout recevoir
+                    var total = 0
+                    while (total < safeLength) {
+                        val n = input.read(bodyChars, total, safeLength - total)
+                        if (n == -1) break
+                        total += n
+                    }
+                    val bodyBytes = String(bodyChars, 0, total).toByteArray(Charsets.ISO_8859_1)
+                    val reqBody = bodyBytes.toRequestBody(contentType.toMediaTypeOrNull())
                     reqBuilder.post(reqBody)
                 }
 
                 try {
-                    val response = httpClient.newCall(reqBuilder.build()).execute()
-                    val bodyBytes = response.body?.bytes() ?: ByteArray(0)
-                    val mime = response.header("Content-Type") ?: "text/plain; charset=utf-8"
+                    // use { } ferme toujours la réponse OkHttp et libère la connexion
+                    httpClient.newCall(reqBuilder.build()).execute().use { response ->
+                        val bodyBytes = response.body?.bytes() ?: ByteArray(0)
+                        val mime = response.header("Content-Type") ?: "text/plain; charset=utf-8"
 
-                    val headerResp = "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: *\r\nContent-Type: $mime\r\nContent-Length: ${bodyBytes.size}\r\nConnection: close\r\n\r\n"
-                    output.write(headerResp.toByteArray())
-                    output.write(bodyBytes)
-                    output.flush()
+                        val headerResp = "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: *\r\nContent-Type: $mime\r\nContent-Length: ${bodyBytes.size}\r\nConnection: close\r\n\r\n"
+                        output.write(headerResp.toByteArray())
+                        output.write(bodyBytes)
+                        output.flush()
+                    }
                 } catch (e: Exception) {
                     val errBytes = (e.message ?: "Proxy fetch failed").toByteArray()
                     val errResp = "HTTP/1.1 502 Bad Gateway\r\nAccess-Control-Allow-Origin: *\r\nContent-Type: text/plain\r\nContent-Length: ${errBytes.size}\r\nConnection: close\r\n\r\n"
@@ -149,12 +198,12 @@ class LocalProxyServer(private val context: Context, private val port: Int = 888
                     output.flush()
                 }
             } else {
-                val notFound = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n"
+                val notFound = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
                 output.write(notFound.toByteArray())
                 output.flush()
             }
         } catch (e: Exception) {
-            Log.e("LocalProxyServer", "Client handler error: ${e.message}")
+            Log.e(TAG, "Client handler error: ${e.message}")
         } finally {
             try { socket.close() } catch (_: Exception) {}
         }
@@ -168,4 +217,3 @@ class LocalProxyServer(private val context: Context, private val port: Int = 888
         serverSocket = null
     }
 }
-

@@ -105,17 +105,37 @@ const Storage = (() => {
   }
 
   function addToLibrary(anime) {
-    if (!anime || !anime.id) return false;
-    let lib = getLibrary();
-    const existing = lib.findIndex(a => a.id === anime.id);
-    if (existing >= 0) {
-      // Met à jour
-      lib[existing] = { ...lib[existing], ...anime, addedAt: lib[existing].addedAt || Date.now() };
+  // Ensure the anime has a stable identifier – fallback to its URL or title hash
+  if (!anime) return false;
+  if (!anime.id) {
+    if (anime.url) {
+      anime.id = anime.url;
+    } else if (anime.title) {
+      // simple deterministic hash (djb2) of the title
+      let hash = 5381;
+      for (let i = 0; i < anime.title.length; i++) {
+        hash = ((hash << 5) + hash) + anime.title.charCodeAt(i);
+      }
+      anime.id = 'anime_' + (hash >>> 0);
     } else {
-      lib.unshift({ ...anime, addedAt: Date.now(), status: 'added' });
+      // cannot identify – abort
+      console.warn('[Storage] addToLibrary: missing id, url, and title');
+      return false;
     }
+  }
+  // If already present, update the entry but do NOT create a duplicate
+  let lib = getLibrary();
+  const existing = lib.findIndex(a => a.id === anime.id);
+  if (existing >= 0) {
+    // Merge new fields while preserving original addedAt
+    lib[existing] = { ...lib[existing], ...anime, addedAt: lib[existing].addedAt || Date.now() };
     return _set(KEYS.LIBRARY, lib);
   }
+  // New entry – prepend to library
+  lib.unshift({ ...anime, addedAt: Date.now(), status: 'added' });
+  return _set(KEYS.LIBRARY, lib);
+}
+
 
   function removeFromLibrary(animeId) {
     let lib = getLibrary().filter(a => a.id !== animeId);

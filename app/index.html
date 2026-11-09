@@ -929,7 +929,7 @@ function renderSettings() {
       if (window.Android && window.Android.checkUpdate) {
         window.Android.checkUpdate('1.0.0');
       } else {
-        fetch('https://api.github.com/repos/karlitodev/animeplus/releases/latest')
+        fetch('https://api.github.com/repos/Badley08/animeplus/releases/latest')
           .then(r => r.json())
           .then(d => {
             if (d.tag_name && d.tag_name !== 'v1.0.0') {
