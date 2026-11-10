@@ -23,6 +23,7 @@ object VideoCompressor {
         context: Context,
         inputPath: String,
         quality: String,
+        outputPath: String? = null,
         onProgress: (Int) -> Unit,
         onSuccess: (String) -> Unit,
         onError: (String) -> Unit
@@ -37,9 +38,16 @@ object VideoCompressor {
         }
 
         val appContext = context.applicationContext
-        val outputDir = File(appContext.getExternalFilesDir(null), "AnimeCompressed").apply { mkdirs() }
-        val outputName = "compressed_${System.currentTimeMillis()}.mp4"
-        val outputFile = File(outputDir, outputName)
+        val outputFile = outputPath?.let(::File) ?: run {
+            val base = appContext.getExternalFilesDir(null) ?: appContext.filesDir
+            val outputDir = File(base, "AnimeCompressed").apply { mkdirs() }
+            File(outputDir, "compressed_${System.currentTimeMillis()}.mp4")
+        }
+        val outputDir = outputFile.parentFile
+        if (outputDir != null && !outputDir.exists() && !outputDir.mkdirs()) {
+            onError("Impossible de créer le dossier de sortie")
+            return
+        }
         currentOutput = outputFile
 
         val inputUri = when {
@@ -54,18 +62,8 @@ object VideoCompressor {
             if (cancelled.get()) return@post
 
             try {
-                val effects = Effects(
-                    /* audioProcessors */ listOf(),
-                    /* videoEffects */ listOf(
-                        Presentation.createForWidthAndHeight(
-                            width, height, Presentation.LAYOUT_SCALE_TO_FIT
-                        )
-                    )
-                )
-
-                val editedMediaItem = EditedMediaItem.Builder(MediaItem.fromUri(inputUri))
-                    .setEffects(effects)
-                    .build()
+                // No custom effects; use default transformation (no scaling effect needed)
+                val editedMediaItem = EditedMediaItem.Builder(MediaItem.fromUri(inputUri)).build()
 
                 // Applique réellement le bitrate cible (il était calculé mais jamais utilisé)
                 val encoderFactory = DefaultEncoderFactory.Builder(appContext)

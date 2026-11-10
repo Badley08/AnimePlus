@@ -1,5 +1,5 @@
 /**
- * Settings.js — Réglages, compression, mises à jour GitHub et À propos
+ * Settings.js — Réglages, compression et À propos
  */
 const Settings = (() => {
   function render() {
@@ -24,12 +24,8 @@ const Settings = (() => {
           </div>
         </div>
 
-        <h2 class="h" style="margin-top:8px">Mises à jour & Maintenance</h2>
+        <h2 class="h" style="margin-top:8px">Maintenance</h2>
         <div class="group">
-          <div class="set" id="row-update">
-            <span>Vérifier les mises à jour</span>
-            <small>GitHub Releases</small>
-          </div>
           <div class="set" id="row-clear">
             <span>Vider le cache & historique</span>
             <small style="color:var(--danger)">Nettoyer</small>
@@ -84,29 +80,6 @@ const Settings = (() => {
       Toast.show(`Verrouillage ${settings.lockEnabled ? 'activé' : 'désactivé'}`);
     };
 
-    // Check updates
-    document.getElementById('row-update').onclick = () => {
-      Toast.show("Recherche de mise à jour...");
-      if (window.Android && window.Android.checkUpdate) {
-        window.Android.checkUpdate("1.0.0");
-      } else {
-        fetch('https://api.github.com/repos/karlitodev/animeplus/releases/latest')
-          .then(res => res.json())
-          .then(data => {
-            if (data.tag_name && data.tag_name !== 'v1.0.0') {
-              Sheet.open(`
-                <h3>Mise à jour disponible ! (${data.tag_name})</h3>
-                <p class="muted" style="margin-bottom:12px;">${data.body || "Améliorations de performance et corrections de bugs."}</p>
-                <button class="btn" onclick="window.open('${data.html_url}', '_blank')">Télécharger l'APK</button>
-              `);
-            } else {
-              Toast.show("AnimePlus est à jour (v1.0.0)");
-            }
-          })
-          .catch(() => Toast.show("Impossible de contacter GitHub"));
-      }
-    };
-
     // Vider le cache
     document.getElementById('row-clear').onclick = () => {
       if (confirm("Supprimer l'historique et le cache local ?")) {
@@ -118,4 +91,3 @@ const Settings = (() => {
 
   return { render, mount };
 })();
-

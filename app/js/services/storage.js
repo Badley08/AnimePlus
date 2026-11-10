@@ -13,7 +13,14 @@ const Storage = (() => {
     SETTINGS: 'ap_settings',
     PASSWORD: 'ap_password',
     LAST_WATCH: 'ap_last_watch',
+    PROFILE: 'ap_profile',
   };
+  const PASSWORD_ITERATIONS = 210000;
+  const DEFAULT_PASSWORD_RECORDS = [
+    { salt: 'fbdfd692389ad127e795ca317c5c7304', hash: '2f857251c75ed455d0a5a2638c76e40b19bfa6f79b68a740def4552f4a8a0c14' },
+    { salt: '296406157c0d5afde0a741b1f5f4dd47', hash: 'e8e0334f86051004a3631fd412c0796fa60fe73e56b82c03fe616a14e000f97d' },
+    { salt: '9c783035df73ca72809e5c5a2bac9be1', hash: '3a3f85545ad037e76486ddd39f6d6d23fa053cff7afe9296a13da8e631a9761e' },
+  ];
 
   function _get(key, fallback = null) {
     try {
@@ -164,19 +171,54 @@ const Storage = (() => {
     return _get(KEYS.FAVORITES, []);
   }
 
-  function isFavorite(animeId) {
-    return getFavorites().includes(animeId);
+  function _getAnimeKey(animeOrId) {
+    if (!animeOrId) return null;
+    if (typeof animeOrId === 'string') return animeOrId;
+    return animeOrId.id || animeOrId.url || (animeOrId.title ? 'anime_' + animeOrId.title.trim().toLowerCase() : null);
   }
 
-  function toggleFavorite(animeId) {
+  function isFavorite(animeOrId) {
+    const key = _getAnimeKey(animeOrId);
+    if (!key) return false;
+    const favs = getFavorites();
+    return favs.some(item => {
+      if (typeof item === 'string') return item === key;
+      return (item.id === key || item.url === key || (item.title && key.includes(item.title.trim().toLowerCase())));
+    });
+  }
+
+  function toggleFavorite(anime) {
+    if (!anime) return false;
     let favs = getFavorites();
-    if (favs.includes(animeId)) {
-      favs = favs.filter(id => id !== animeId);
+    const key = _getAnimeKey(anime);
+    if (!key) return false;
+
+    const existingIdx = favs.findIndex(item => {
+      if (typeof item === 'string') return item === key;
+      return (item.id === key || item.url === key || (item.title && key.includes(item.title.trim().toLowerCase())));
+    });
+
+    let isFavNow = false;
+    if (existingIdx >= 0) {
+      favs.splice(existingIdx, 1);
+      isFavNow = false;
     } else {
-      favs.unshift(animeId);
+      // Normaliser l'objet favori pour toujours avoir un objet complet sans doublons
+      const animeObj = (typeof anime === 'object') ? {
+        id: anime.id || key,
+        title: anime.title || 'Anime',
+        poster: anime.poster || '',
+        url: anime.url || '',
+        source: anime.source || 'animesama',
+        genres: anime.genres || []
+      } : { id: key, title: key, poster: '', url: key, source: 'animesama' };
+
+      favs.unshift(animeObj);
+      isFavNow = true;
     }
+
     _set(KEYS.FAVORITES, favs);
-    return favs.includes(animeId); // retourne l'état actuel
+    return isFavNow;
   }
 
   // ---- Settings ----
@@ -210,13 +252,74 @@ const Storage = (() => {
     return _set(KEYS.SETTINGS, s);
   }
 
-  // ---- Mot de passe (hash SHA-256) ----
+  function getProfile() {
+    return _get(KEYS.PROFILE, { name: '', avatar: '🎬', avatarType: 'emoji', setupComplete: false });
+  }
+
+  function setProfile(profile) {
+    const name = String(profile && profile.name || '').trim().slice(0, 24);
+    const emojiAvatars = new Set(['🎬', '🌙', '✨', '🐱', '🎧', '⭐', '🔥', '🌸', '🐼', '🦊', '🐧', '🍥']);
+    const svgAvatars = new Set(['home', 'search', 'lib', 'set', 'play', 'pause', 'zip', 'ok', 'clock', 'star', 'bookmark', 'info', 'download', 'lock', 'x']);
+    const avatarType = profile && profile.avatarType === 'svg' ? 'svg' : 'emoji';
+    if (!name) return false;
+    if (avatarType === 'emoji' ? !emojiAvatars.has(profile.avatar) : !svgAvatars.has(profile.avatar)) return false;
+    return _set(KEYS.PROFILE, {
+      name,
+      avatar: profile.avatar,
+      avatarType,
+      setupComplete: true
+    });
+  }
+
+  // ---- Mot de passe (PBKDF2-SHA-256 avec sel) ----
+  function bytesToHex(bytes) {
+    return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
+  }
+
+  function hexToBytes(hex) {
+    if (typeof hex !== 'string' || hex.length % 2 !== 0 || !/^[0-9a-f]+$/i.test(hex)) {
+      throw new Error('Sel de mot de passe invalide.');
+    }
+    return Uint8Array.from(hex.match(/.{2}/g), byte => parseInt(byte, 16));
+  }
+
+  async function derivePassword(input, salt, iterations = PASSWORD_ITERATIONS) {
+    const key = await crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode(input),
+      'PBKDF2',
+      false,
+      ['deriveBits']
+    );
+    const bits = await crypto.subtle.deriveBits({
+      name: 'PBKDF2',
+      salt: hexToBytes(salt),
+      iterations,
+      hash: 'SHA-256'
+    }, key, 256);
+    return bytesToHex(new Uint8Array(bits));
+  }
+
+  async function hashLegacyPassword(input) {
+    const bits = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+    return bytesToHex(new Uint8Array(bits));
+  }
+
+  function createSalt() {
+    const salt = new Uint8Array(16);
+    crypto.getRandomValues(salt);
+    return bytesToHex(salt);
+  }
+
   async function hashPassword(input) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(input);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    const normalized = String(input).trim().toLowerCase();
+    const salt = createSalt();
+    return {
+      algorithm: 'PBKDF2-SHA-256',
+      iterations: PASSWORD_ITERATIONS,
+      salt,
+      hash: await derivePassword(normalized, salt)
+    };
   }
 
   function getPasswordHash() {
@@ -225,25 +328,47 @@ const Storage = (() => {
 
   async function setPassword(plainText) {
     const hash = await hashPassword(plainText);
-    _set(KEYS.PASSWORD, hash);
+    if (!_set(KEYS.PASSWORD, hash)) throw new Error('Impossible d’enregistrer le mot de passe.');
     return hash;
   }
 
   async function checkPassword(input) {
+    const normalized = String(input).trim().toLowerCase();
+    if (!normalized) return false;
+
     const stored = getPasswordHash();
-    if (!stored) {
-      // Pas de mot de passe défini — créer le défaut "animeplus"
-      await setPassword('animeplus');
-      const hash = await hashPassword(input);
-      return hash === getPasswordHash();
+    if (typeof stored === 'string') {
+      const legacyHashes = await Promise.all([
+        hashLegacyPassword(String(input).trim()),
+        hashLegacyPassword(normalized)
+      ]);
+      if (legacyHashes.includes(stored)) {
+        await setPassword(normalized);
+        return true;
+      }
+    } else if (stored && stored.algorithm === 'PBKDF2-SHA-256') {
+      const iterations = Number(stored.iterations);
+      if (!Number.isInteger(iterations) || iterations < 100000 || iterations > 1000000) {
+        throw new Error('Paramètres de mot de passe enregistrés invalides.');
+      }
+      const hash = await derivePassword(normalized, stored.salt, iterations);
+      if (hash === stored.hash) return true;
     }
-    const hash = await hashPassword(input);
-    return hash === stored;
+
+    const defaultMatches = await Promise.all(DEFAULT_PASSWORD_RECORDS.map(async record =>
+      await derivePassword(normalized, record.salt) === record.hash
+    ));
+    return defaultMatches.some(Boolean);
   }
 
   async function initDefaultPassword() {
     if (!getPasswordHash()) {
-      await setPassword('animeplus');
+      const record = DEFAULT_PASSWORD_RECORDS[0];
+      _set(KEYS.PASSWORD, {
+        algorithm: 'PBKDF2-SHA-256',
+        iterations: PASSWORD_ITERATIONS,
+        ...record
+      });
     }
   }
 
@@ -350,6 +475,8 @@ const Storage = (() => {
     setSettings,
     getSetting,
     setSetting,
+    getProfile,
+    setProfile,
     // Password
     hashPassword,
     getPasswordHash,

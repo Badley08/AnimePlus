@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 object VideoDownloader {
@@ -23,6 +24,7 @@ object VideoDownloader {
         context: Context,
         url: String,
         filename: String,
+        relativeDirectory: String = "",
         onProgress: (Int) -> Unit,
         onSuccess: (String) -> Unit,
         onError: (String) -> Unit
@@ -30,9 +32,8 @@ object VideoDownloader {
         var tempFile: File? = null
         var completed = false
         try {
-            val dir = File(context.getExternalFilesDir(null), "AnimeDownloads").apply { mkdirs() }
-            // Empêche tout chemin du type "../" dans le nom de fichier
-            val safeName = File(filename).name
+            val dir = downloadDirectory(context, relativeDirectory)
+            val safeName = safeSegment(File(filename).name)
             val outputFile = File(dir, safeName)
             tempFile = File(dir, "$safeName.part")
 
@@ -106,6 +107,7 @@ object VideoDownloader {
         url: String,
         targetQuality: String,
         filename: String,
+        relativeDirectory: String = "",
         onStage: (String, Int) -> Unit,
         onSuccess: (String) -> Unit,
         onError: (String) -> Unit
@@ -113,28 +115,36 @@ object VideoDownloader {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 onStage("download", 0)
+                val safeFilename = safeSegment(File(filename).name)
                 download(
                     context = context,
                     url = url,
-                    filename = "raw_$filename",
+                    filename = "raw_$safeFilename",
+                    relativeDirectory = relativeDirectory,
                     onProgress = { p -> onStage("download", p) },
                     onSuccess = { rawFilePath ->
                         onStage("compress", 0)
-                        VideoCompressor.compress(
-                            context = context,
-                            inputPath = rawFilePath,
-                            quality = targetQuality,
-                            onProgress = { p -> onStage("compress", p) },
-                            onSuccess = { compressedPath ->
-                                // Supprime le fichier brut pour libérer le stockage de l'utilisateur
-                                try { File(rawFilePath).delete() } catch (_: Exception) {}
-                                onSuccess(compressedPath)
-                            },
-                            onError = { err ->
-                                // Si la compression échoue, garde le fichier téléchargé
-                                onError("Échec compression: $err")
-                            }
-                        )
+                        val outputFile = File(downloadDirectory(context, relativeDirectory), safeFilename)
+                        if (outputFile.exists() && !outputFile.delete()) {
+                            onError("Impossible de remplacer le fichier existant")
+                        } else {
+                            VideoCompressor.compress(
+                                context = context,
+                                inputPath = rawFilePath,
+                                quality = targetQuality,
+                                outputPath = outputFile.absolutePath,
+                                onProgress = { p -> onStage("compress", p) },
+                                onSuccess = { compressedPath ->
+                                    // Supprime le fichier brut pour libérer le stockage de l'utilisateur
+                                    try { File(rawFilePath).delete() } catch (_: Exception) {}
+                                    onSuccess(compressedPath)
+                                },
+                                onError = { err ->
+                                    // Si la compression échoue, garde le fichier téléchargé
+                                    onError("Échec compression: $err")
+                                }
+                            )
+                        }
                     },
                     onError = { err -> onError("Échec téléchargement: $err") }
                 )
@@ -143,5 +153,33 @@ object VideoDownloader {
                 onError(e.message ?: "Erreur inattendue")
             }
         }
+    }
+
+    private fun downloadDirectory(context: Context, relativeDirectory: String): File {
+        val base = context.getExternalFilesDir(null) ?: context.filesDir
+        val root = File(base, "AnimeDownloads")
+        val target = relativeDirectory
+            .split('/', '\\')
+            .filter { it.isNotBlank() }
+            .fold(root) { parent, segment -> File(parent, safeSegment(segment)) }
+
+        val rootPath = root.canonicalPath
+        val targetPath = target.canonicalPath
+        if (targetPath != rootPath && !targetPath.startsWith(rootPath + File.separator)) {
+            throw IOException("Chemin de téléchargement invalide")
+        }
+        if (!target.exists() && !target.mkdirs()) {
+            throw IOException("Impossible de créer le dossier de téléchargement")
+        }
+        return target
+    }
+
+    private fun safeSegment(value: String): String {
+        return value
+            .replace(Regex("[\\\\/:*?\"<>|\\p{Cntrl}]"), "-")
+            .trim()
+            .trim('.', '-', ' ')
+            .take(80)
+            .ifBlank { "Anime" }
     }
 }

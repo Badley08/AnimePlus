@@ -57,7 +57,7 @@ const Search = (() => {
       sugContainer.innerHTML = '<p class="empty">Recherche en cours sur les plateformes...</p>';
 
       try {
-        const results = await ScraperService.search(query);
+        const results = await ScrappingService.search(query);
         if (!results || !results.length) {
           sugContainer.innerHTML = `<p class="empty">Aucun résultat trouvé pour « ${query} ».<br>Vérifie l'orthographe.</p>`;
           return;
@@ -86,7 +86,11 @@ const Search = (() => {
           };
         });
       } catch (err) {
-        sugContainer.innerHTML = `<p class="empty">Erreur de connexion aux serveurs de streaming.<br>${err.message || ''}</p>`;
+        console.error('[Search] Search request failed:', err);
+        const message = document.createElement('p');
+        message.className = 'empty';
+        message.textContent = 'La recherche est temporairement indisponible. Réessaie dans un instant.';
+        sugContainer.replaceChildren(message);
       }
     }
 
@@ -114,4 +118,3 @@ const Search = (() => {
 
   return { render, mount };
 })();
-

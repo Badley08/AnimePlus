@@ -57,7 +57,13 @@ class DownloadBridge(
      * Télécharge ET compresse directement en arrière-plan avec Media3 Transformer
      */
     @JavascriptInterface
-    fun downloadAndCompress(url: String, quality: String, filename: String, callbackId: String) {
+    fun downloadAndCompress(
+        url: String,
+        quality: String,
+        filename: String,
+        relativeDirectory: String,
+        callbackId: String
+    ) {
         if (!isHttpUrl(url)) {
             runJs("window.onDownloadCompressDone && window.onDownloadCompressDone(${js(callbackId)}, null, ${js("URL invalide")})")
             return
@@ -68,6 +74,7 @@ class DownloadBridge(
             url = url,
             targetQuality = quality,
             filename = filename,
+            relativeDirectory = relativeDirectory,
             onStage = { stage, percent ->
                 runJs("window.onDownloadCompressProgress && window.onDownloadCompressProgress(${js(callbackId)}, ${js(stage)}, $percent)")
             },

@@ -50,9 +50,17 @@ const Gate = (() => {
         return;
       }
 
-      const isValid = (typeof Storage.checkPassword === 'function') 
-        ? await Storage.checkPassword(val)
-        : (val.toLowerCase() === 'animeplus');
+      let isValid = false;
+      try {
+        if (typeof Storage.checkPassword !== 'function') {
+          throw new Error('Service de vérification indisponible.');
+        }
+        isValid = await Storage.checkPassword(val);
+      } catch (error) {
+        console.error('Password verification failed:', error);
+        err.textContent = 'Le déverrouillage est indisponible pour le moment.';
+        return;
+      }
 
       if (!isValid) {
         err.textContent = 'Mot de passe incorrect. Réessaie.';
@@ -95,4 +103,3 @@ const Gate = (() => {
 
   return { render, mount };
 })();
-

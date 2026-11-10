@@ -1,6 +1,8 @@
 package com.karlitodev.animeplus.bridge
 
+import android.app.Activity
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
@@ -22,7 +24,7 @@ import java.lang.ref.WeakReference
 import java.util.concurrent.TimeUnit
 
 class WebAppInterface(
-    context: Context,
+    activity: Activity,
     webView: WebView
 ) {
     private companion object {
@@ -32,7 +34,10 @@ class WebAppInterface(
     }
 
     // applicationContext : ne retient pas une Activity
-    private val context: Context = context.applicationContext
+    private val context: Context = activity.applicationContext
+
+    // WeakReference sur l'Activity pour setRequestedOrientation (rotation player)
+    private val activityRef = WeakReference(activity)
 
     // WeakReference : le bridge ne maintient pas la WebView en vie après sa destruction
     private val webViewRef = WeakReference(webView)
@@ -157,6 +162,19 @@ class WebAppInterface(
     // Indique que l'environnement natif Android est prêt
     @JavascriptInterface
     fun isNative(): Boolean = true
+
+    // Contrôle de l'orientation : "landscape" pour le player, "portrait" pour le reste
+    @JavascriptInterface
+    fun setOrientation(mode: String) {
+        val activity = activityRef.get() ?: return
+        activity.runOnUiThread {
+            activity.requestedOrientation = when (mode) {
+                "landscape" -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                "portrait"  -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                else        -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            }
+        }
+    }
 
     private fun sendHttpSuccess(callbackId: String, body: String) {
         runJs("window.onNativeHttpSuccess && window.onNativeHttpSuccess(${JSONObject.quote(callbackId)}, ${JSONObject.quote(body)})")

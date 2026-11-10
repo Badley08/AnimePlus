@@ -7,6 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <link rel="shortcut icon" href="favicon.ico">
 <link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/animations.css">
 <!-- GSAP pour les animations UI -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 </head>
@@ -17,7 +18,7 @@
 <symbol id="home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
 <symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
 <symbol id="lib" viewBox="0 0 24 24"><rect x="3" y="4" width="6" height="16" rx="1"/><rect x="11" y="4" width="6" height="16" rx="1"/><path d="M19 6v14"/></symbol>
-<symbol id="set" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></symbol>
+<symbol id="set" viewBox="0 0 24 24"><path d="M10 2h4l.6 2.4a7.9 7.9 0 0 1 1.7 1l2.3-.9 2 3.5-1.8 1.7a8 8 0 0 1 0 2l1.8 1.7-2 3.5-2.3-.9a7.9 7.9 0 0 1-1.7 1L14 22h-4l-.6-2.4a7.9 7.9 0 0 1-1.7-1l-2.3.9-2-3.5 1.8-1.7a8 8 0 0 1 0-2l-1.8-1.7 2-3.5 2.3.9a7.9 7.9 0 0 1 1.7-1L10 2z"/><circle cx="12" cy="12" r="2.5"/></symbol>
 <symbol id="back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
 <symbol id="play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></symbol>
 <symbol id="pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></symbol>
@@ -28,6 +29,8 @@
 <symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
 <symbol id="star" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></symbol>
 <symbol id="bookmark" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></symbol>
+<symbol id="info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+<symbol id="download" viewBox="0 0 24 24"><path d="M12 3v12m0 0 5-5m-5 5-5-5M4 17v3h16v-3"/></symbol>
 </defs></svg>
 
 <div class="app">
@@ -40,7 +43,43 @@
       <path d="M88 68 V92 M76 80 H100" pathLength="1"/>
     </svg>
     <div class="word">animeplus</div>
-    <div class="credits">Idée par <b>Strong</b><br>Dev par <b>Karlito</b></div>
+    <div class="credits">Idée par <b>It_Strong</b><br>Dev par <b>Karlito</b></div>
+  </section>
+
+  <!-- Configuration initiale du profil local -->
+  <section class="v setup-screen" id="setup">
+    <div class="setup-brand">
+      <svg class="logo" viewBox="0 0 120 120" aria-hidden="true">
+        <rect x="8" y="8" width="104" height="104" rx="28"/>
+        <path d="M38 36 L70 60 L38 84 Z"/>
+        <path d="M88 68 V92 M76 80 H100"/>
+      </svg>
+      <div class="word">animeplus</div>
+    </div>
+    <div class="setup-content">
+      <p class="setup-step">CONFIGURATION · 1/1</p>
+      <h1 class="title">Ton profil</h1>
+      <p class="muted">Choisis un nom et un avatar pour personnaliser l’application.</p>
+      <form id="setup-form">
+        <label class="setup-label" for="setup-name">Nom d’utilisateur</label>
+        <input class="setup-name" id="setup-name" type="text" maxlength="24" autocomplete="nickname" placeholder="Ton nom" required>
+        <span class="setup-label">Choisis ton avatar</span>
+        <div class="setup-avatar-types" role="group" aria-label="Type d’avatar">
+          <button type="button" class="setup-avatar-type on" data-avatar-type="emoji" aria-pressed="true">Émojis</button>
+          <button type="button" class="setup-avatar-type" data-avatar-type="svg" aria-pressed="false">Icônes SVG</button>
+        </div>
+        <div class="setup-avatars" id="setup-avatars" role="radiogroup" aria-label="Avatar du profil">
+        </div>
+        <div class="setup-warning" role="note">
+          <b>À savoir sur les catalogues</b>
+          <p>Les catalogues et lecteurs sont gérés par des services externes. Certains titres ou épisodes peuvent manquer ou devenir indisponibles ; cela ne signifie pas que l’anime n’existe pas. Anime Plus n’héberge pas les vidéos.</p>
+        </div>
+        <p class="setup-privacy">Profil enregistré uniquement sur cet appareil. Aucun mot de passe personnel n’est créé pendant cette configuration.</p>
+        <p class="err" id="setup-error" role="alert"></p>
+        <button class="btn" type="submit" id="setup-submit">Continuer</button>
+        <button class="setup-later" id="setup-later" type="button" hidden>Retour aux paramètres</button>
+      </form>
+    </div>
   </section>
 
   <!-- 2. MOT DE PASSE -->
@@ -128,6 +167,7 @@
       <div class="oe-genres" id="det-genres"></div>
 
       <h2 class="oe-h2">Saisons & Versions</h2>
+      <div class="version-filters" id="det-version-filters"></div>
       <div class="saisons-rail" id="det-saisons">
         <div class="muted">Recherche des saisons...</div>
       </div>
@@ -171,6 +211,17 @@
 
     <div class="settings-card">
       <div class="set-header">
+        <span class="profile-avatar" id="profile-avatar" aria-hidden="true"><img class="fluent-emoji" src="assets/emoji/clapper-board.png" alt=""></span>
+        <div class="profile-copy">
+          <b id="profile-name">Profil local</b>
+          <p class="muted" style="font-size:12px;margin-top:2px;">Enregistré sur cet appareil</p>
+        </div>
+        <button class="btn-action profile-edit" id="btn-edit-profile" type="button" aria-label="Modifier le profil" title="Modifier le profil">✎</button>
+      </div>
+    </div>
+
+    <div class="settings-card">
+      <div class="set-header">
         <svg class="i" style="color:var(--accent-cyan);width:20px;height:20px;"><use href="#zip"/></svg>
         <div>
           <b>Qualité de téléchargement</b>
@@ -202,18 +253,17 @@
         <svg class="i" style="color:var(--accent-cyan);width:20px;height:20px;"><use href="#info"/></svg>
         <div>
           <b>Maintenance & Application</b>
-          <p class="muted" style="font-size:12px;margin-top:2px;">Mises à jour et nettoyage de l'application</p>
+          <p class="muted" style="font-size:12px;margin-top:2px;">Nettoyage de l'application</p>
         </div>
       </div>
       <div style="display:flex;gap:8px;margin-top:12px;">
-        <button class="btn-action" id="btn-check-update" style="flex:1;">Vérifier mise à jour</button>
         <button class="btn-action danger" id="btn-clean-cache" style="flex:1;">Nettoyer le cache</button>
       </div>
     </div>
 
     <div class="settings-card" style="text-align:center;padding:16px;">
-      <b style="font-size:14px;color:var(--text-muted);">Anime Plus v1.0.0</b>
-      <p class="muted" style="font-size:12px;margin-top:4px;">Développé avec ❤️ par Karlito Dev</p>
+      <b style="font-size:14px;color:var(--text-muted);">Anime Plus v1.1.0</b>
+      <p class="muted" style="font-size:12px;margin-top:4px;">Développé avec <img class="fluent-emoji fluent-emoji-inline" src="assets/emoji/red-heart.png" alt="amour"> par Karlito Dev</p>
     </div>
   </section>
 
@@ -227,11 +277,19 @@
 
   <!-- Bottom Sheet pour la Compression Natif Kotlin -->
   <div id="scrim" hidden></div>
-  <div id="sheet" role="dialog" aria-label="Compression">
+  <div id="sheet" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Compression">
     <h3>Compresser l'épisode (Kotlin Hardware)</h3>
     <div id="qs"></div>
     <div class="bar" id="bw" hidden><i id="bar"></i></div>
     <button class="btn" id="sb" style="margin-top:8px">Lancer la compression</button>
+  </div>
+  <div id="download-status" class="download-status" role="status" aria-live="polite" hidden>
+    <svg class="i"><use href="#download"/></svg>
+    <div class="download-status-copy">
+      <b id="download-status-title">Téléchargement en arrière-plan</b>
+      <small id="download-status-detail">L'application reste utilisable.</small>
+      <span class="download-status-track"><i id="download-status-progress"></i></span>
+    </div>
   </div>
   <div id="toast" hidden></div>
 
@@ -239,8 +297,9 @@
 
 <!-- Scripts Core & Scraping Réel -->
 <script src="js/services/storage.js"></script>
-<script src="js/scrapping/scraper.js"></script>
+<script src="js/scrapping/scrapping.js"></script>
 <script src="js/services/downloader.js"></script>
+<script src=""js/scrapers.js"></script>
 
 <script>
 const $ = s => document.querySelector(s);
@@ -251,38 +310,150 @@ let currentAnime = null;
 let currentSeasons = [];
 let currentSeasonIdx = 0;
 let currentEpisodes = [];
+let detailRequestId = 0;
+let seasonRequestId = 0;
+let selectedLanguage = 'all';
+let activeDownloadJobId = null;
+let detailReturnScreen = 'home';
+let screenTransitionId = 0;
+let screenTransition = null;
+let activeScreenElement = document.querySelector('.v.on');
 let video = $('#vid');
 let iframe = $('#vid-frame');
 
 // --- Navigation Globale ---
 function go(screen, params = {}) {
-  $$('.v').forEach(el => el.classList.toggle('on', el.id === screen));
+  const screenEl = $$('.v').find(el => el.id === screen);
+  if (!screenEl) return;
+
+  if (screenTransition) {
+    screenTransition.kill();
+    screenTransition = null;
+    $$('.v').forEach(el => {
+      el.classList.toggle('on', el === activeScreenElement);
+      el.style.pointerEvents = '';
+      el.style.zIndex = '';
+    });
+    if (window.gsap && activeScreenElement) {
+      window.gsap.set(activeScreenElement, { clearProps: 'opacity,visibility,transform,filter' });
+    }
+  }
+
+  if (screen === 'det' && !['det', 'ply'].includes(curScreen)) {
+    detailReturnScreen = curScreen;
+  }
+
+  const outgoing = activeScreenElement || document.querySelector('.v.on');
+  const preserveSearch = screen === 'search' && curScreen === 'det' && detailReturnScreen === 'search';
+  const transitionId = ++screenTransitionId;
+
+  function showScreen() {
+    $$('.v').forEach(el => {
+      el.classList.toggle('on', el === screenEl);
+      el.style.pointerEvents = '';
+      el.style.zIndex = '';
+    });
+    activeScreenElement = screenEl;
+  }
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (window.gsap && !reduceMotion && outgoing && outgoing !== screenEl) {
+    window.gsap.killTweensOf([outgoing, screenEl]);
+    screenEl.classList.add('on');
+    outgoing.style.zIndex = '2';
+    screenEl.style.zIndex = '1';
+    outgoing.style.pointerEvents = 'none';
+    screenEl.style.pointerEvents = 'none';
+    window.gsap.set(screenEl, { autoAlpha: 0, y: 14, filter: 'blur(5px)' });
+    screenTransition = window.gsap.timeline({
+      onComplete: () => {
+        if (transitionId !== screenTransitionId) return;
+        showScreen();
+        screenTransition = null;
+        window.gsap.set(screenEl, { clearProps: 'opacity,visibility,transform,filter' });
+      }
+    })
+      .to(outgoing, { autoAlpha: 0, y: -8, filter: 'blur(3px)', duration: 0.34, ease: 'power2.in' }, 0)
+      .to(screenEl, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.58, ease: 'power3.out' }, 0.06);
+  } else {
+    showScreen();
+    if (window.gsap && !reduceMotion && outgoing !== screenEl) {
+      window.gsap.killTweensOf(screenEl);
+      window.gsap.fromTo(screenEl,
+        { autoAlpha: 0, y: 10, filter: 'blur(4px)' },
+        { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.52, ease: 'power3.out', clearProps: 'opacity,transform,visibility,filter' }
+      );
+    }
+  }
+
   $('#tabs').hidden = !['home', 'search', 'lib', 'set'].includes(screen);
   $$('.tab').forEach(t => t.classList.toggle('on', t.dataset.v === screen));
+
+  if (window.gsap && !reduceMotion) {
+    const activeIcon = $('#tabs .tab.on .i');
+    if (activeIcon) {
+      window.gsap.fromTo(activeIcon, { scale: 0.9 }, { scale: 1, duration: 0.42, ease: 'back.out(1.7)', clearProps: 'transform' });
+    }
+  }
 
   if (screen !== 'ply') {
     if (video) { video.pause(); }
     if (iframe) { iframe.src = 'about:blank'; }
+    if (window.Android && window.Android.setOrientation) {
+      window.Android.setOrientation('portrait');
+    }
   }
 
   curScreen = screen;
   if (screen === 'home') renderHome();
-  if (screen === 'search') renderSearch();
+  if (screen === 'search' && !preserveSearch) renderSearch();
   if (screen === 'lib') renderLib();
   if (screen === 'set') renderSettings();
   if (screen === 'det' && params.anime) openDetail(params.anime);
 }
 
+document.addEventListener('pointerdown', e => {
+  const button = e.target.closest('button');
+  if (!button || button.disabled || !window.gsap || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  window.gsap.to(button, { scale: 0.96, duration: 0.08, ease: 'power1.out', overwrite: true });
+});
+
+document.addEventListener('pointerup', e => {
+  const button = e.target.closest('button');
+  if (!button || !window.gsap || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  window.gsap.to(button, { scale: 1, duration: 0.22, ease: 'back.out(2)', overwrite: true, clearProps: 'transform' });
+});
+
+document.addEventListener('pointercancel', e => {
+  const button = e.target.closest('button');
+  if (!button || !window.gsap) return;
+  window.gsap.to(button, { scale: 1, duration: 0.16, ease: 'power1.out', overwrite: true, clearProps: 'transform' });
+});
+
 function toast(msg) {
   const t = $('#toast');
   t.textContent = msg;
   t.hidden = false;
+  if (window.gsap && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    window.gsap.fromTo(t, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.2, ease: 'power2.out', clearProps: 'opacity,transform,visibility' });
+  }
   clearTimeout(t.timer);
-  t.timer = setTimeout(() => t.hidden = true, 2200);
+  t.timer = setTimeout(() => {
+    if (window.gsap && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      window.gsap.to(t, { autoAlpha: 0, y: 8, duration: 0.18, ease: 'power1.in', onComplete: () => { t.hidden = true; } });
+    } else {
+      t.hidden = true;
+    }
+  }, 2200);
 }
 
 // --- Démarrage & Splash ---
 setTimeout(() => {
+  const profile = Storage.getProfile ? Storage.getProfile() : null;
+  if (!profile || !profile.setupComplete) {
+    go('setup');
+    return;
+  }
   const settings = Storage.getSettings ? Storage.getSettings() : {};
   if (settings.lockEnabled === false) {
     go('home');
@@ -291,6 +462,108 @@ setTimeout(() => {
   }
 }, 2200);
 
+// --- Configuration initiale du profil ---
+let setupAvatar = '🎬';
+let setupAvatarType = 'emoji';
+let setupReturnScreen = 'home';
+const setupName = $('#setup-name');
+const profileEmojis = [
+  ['🎬', 'Clap de cinéma', 'clapper-board'], ['🌙', 'Lune', 'crescent-moon'], ['✨', 'Étincelles', 'sparkles'], ['🐱', 'Chat', 'cat-face'],
+  ['🎧', 'Casque audio', 'headphone'], ['⭐', 'Étoile', 'star'], ['🔥', 'Flamme', 'fire'], ['🌸', 'Fleur', 'cherry-blossom'],
+  ['🐼', 'Panda', 'panda'], ['🦊', 'Renard', 'fox'], ['🐧', 'Pingouin', 'penguin'], ['🍥', 'Narutomaki', 'fish-cake']
+];
+const profileSvgIcons = [
+  ['home', 'Accueil'], ['search', 'Recherche'], ['lib', 'Bibliothèque'], ['set', 'Réglages'],
+  ['play', 'Lecture'], ['pause', 'Pause'], ['zip', 'Compression'], ['ok', 'Validé'],
+  ['clock', 'Horloge'], ['star', 'Favori'], ['bookmark', 'Marque-page'], ['info', 'Information'],
+  ['download', 'Téléchargement'], ['lock', 'Cadenas'], ['x', 'Croix']
+];
+const existingProfile = Storage.getProfile ? Storage.getProfile() : null;
+if (existingProfile && existingProfile.setupComplete) {
+  setupName.value = existingProfile.name || '';
+  setupAvatar = existingProfile.avatar || '🎬';
+  setupAvatarType = existingProfile.avatarType === 'svg' ? 'svg' : 'emoji';
+  $('#setup-later').hidden = false;
+}
+
+function renderSetupAvatars() {
+  const choices = setupAvatarType === 'svg' ? profileSvgIcons : profileEmojis;
+  const container = $('#setup-avatars');
+  container.innerHTML = choices.map(([value, label]) => {
+    const selected = value === setupAvatar;
+    const emoji = profileEmojis.find(([glyph]) => glyph === value) || profileEmojis[0];
+    const visual = setupAvatarType === 'svg'
+      ? `<svg class="i" aria-hidden="true"><use href="#${value}"></use></svg>`
+      : `<img class="fluent-emoji" src="assets/emoji/${emoji[2]}.png" alt="">`;
+    return `<button type="button" class="setup-avatar ${selected ? 'on' : ''}" data-avatar="${value}" role="radio" aria-checked="${selected}" aria-label="${label}">${visual}</button>`;
+  }).join('');
+  $$('.setup-avatar-type').forEach(button => {
+    const selected = button.dataset.avatarType === setupAvatarType;
+    button.classList.toggle('on', selected);
+    button.setAttribute('aria-pressed', String(selected));
+  });
+}
+
+function setProfileAvatar(element, profile) {
+  if (profile && profile.avatarType === 'svg' && profileSvgIcons.some(([key]) => key === profile.avatar)) {
+    element.innerHTML = `<svg class="i" aria-hidden="true"><use href="#${profile.avatar}"></use></svg>`;
+    return;
+  }
+  const emoji = profileEmojis.find(([glyph]) => glyph === (profile && profile.avatar)) || profileEmojis[0];
+  element.innerHTML = `<img class="fluent-emoji" src="assets/emoji/${emoji[2]}.png" alt="">`;
+}
+
+$$('.setup-avatar-type').forEach(button => {
+  button.onclick = () => {
+    setupAvatarType = button.dataset.avatarType;
+    const options = setupAvatarType === 'svg' ? profileSvgIcons : profileEmojis;
+    if (!options.some(([value]) => value === setupAvatar)) setupAvatar = options[0][0];
+    renderSetupAvatars();
+  };
+});
+
+$('#setup-avatars').onclick = event => {
+  const button = event.target.closest('[data-avatar]');
+  if (!button) return;
+  setupAvatar = button.dataset.avatar;
+  renderSetupAvatars();
+};
+
+renderSetupAvatars();
+
+$('#setup-form').onsubmit = event => {
+  event.preventDefault();
+  const name = setupName.value.trim();
+  const error = $('#setup-error');
+  if (!name) {
+    error.textContent = 'Entre un nom pour continuer.';
+    setupName.focus();
+    return;
+  }
+  if (!Storage.setProfile({ name, avatar: setupAvatar, avatarType: setupAvatarType })) {
+    error.textContent = 'Le profil n’a pas pu être enregistré sur cet appareil.';
+    return;
+  }
+  const profile = Storage.getProfile();
+  $('#profile-name').textContent = profile.name;
+  setProfileAvatar($('#profile-avatar'), profile);
+  const settings = Storage.getSettings ? Storage.getSettings() : {};
+  go(setupReturnScreen === 'set' ? 'set' : (settings.lockEnabled === false ? 'home' : 'gate'));
+};
+
+$('#setup-later').onclick = () => go(setupReturnScreen);
+$('#btn-edit-profile').onclick = () => {
+  setupReturnScreen = 'set';
+  const profile = Storage.getProfile();
+  setupName.value = profile.name || '';
+  setupAvatar = profile.avatar || '🎬';
+  setupAvatarType = profile.avatarType === 'svg' ? 'svg' : 'emoji';
+  renderSetupAvatars();
+  $('#setup-error').textContent = '';
+  $('#setup-later').hidden = false;
+  go('setup');
+};
+
 // --- Verrouillage / Gate ---
 $('#gf').onsubmit = async (e) => {
   e.preventDefault();
@@ -298,9 +571,17 @@ $('#gf').onsubmit = async (e) => {
   f.classList.remove('bad', 'good');
   if (!v) { m.textContent = 'Entre le mot de passe.'; return; }
 
-  const isValid = (typeof Storage.checkPassword === 'function')
-    ? await Storage.checkPassword(v)
-    : (v.toLowerCase() === 'animeplus');
+  let isValid = false;
+  try {
+    if (typeof Storage.checkPassword !== 'function') {
+      throw new Error('Service de vérification indisponible.');
+    }
+    isValid = await Storage.checkPassword(v);
+  } catch (error) {
+    console.error('Password verification failed:', error);
+    m.textContent = 'Le déverrouillage est indisponible pour le moment.';
+    return;
+  }
 
   if (!isValid) {
     m.textContent = 'Mot de passe incorrect.';
@@ -360,7 +641,7 @@ async function renderHome() {
   // 2. Tendances réelles Anime-Sama
   const rail = $('#hr');
   try {
-    const list = await ScraperService.getTrending();
+    const list = await ScrappingService.getTrending();
     if (list && list.length) {
       rail.innerHTML = list.map(a => `
         <div class="as-carte" data-anime="${encodeURIComponent(JSON.stringify(a))}">
@@ -433,8 +714,19 @@ function renderSearch() {
       sug.innerHTML = '<p class="empty">Tape le titre d\'un anime (ex: Boruto, Bleach, Solo Leveling...).</p>';
       return;
     }
-    sug.innerHTML = '<small style="padding:8px 0; display:block; color:var(--text-muted);">Recherches récentes</small>' +
-      h.map(k => `<button class="rec" data-q="${k}"><svg class="i" style="width:16px;height:16px;"><use href="#clock"/></svg><span>${k}</span></button>`).join('');
+    const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[char]);
+    sug.innerHTML = '<div class="history-heading"><small>Recherches récentes</small><button class="history-clear" type="button">Effacer</button></div>' +
+      h.map(k => `<button class="rec" data-q="${escapeHtml(k)}"><svg class="i" style="width:16px;height:16px;"><use href="#clock"/></svg><span>${escapeHtml(k)}</span></button>`).join('');
+
+    sug.querySelector('.history-clear').onclick = () => {
+      Storage.clearHistory();
+      inp.value = '';
+      clr.hidden = true;
+      showHist();
+      toast('Historique de recherche effacé.');
+    };
 
     sug.querySelectorAll('.rec').forEach(b => {
       b.onclick = () => {
@@ -452,7 +744,7 @@ function renderSearch() {
     sug.innerHTML = '<p class="empty">Recherche en cours sur Anime-Sama & VoirAnime...</p>';
 
     try {
-      const results = await ScraperService.search(q);
+      const results = await ScrappingService.search(q);
       if (!results || !results.length) {
         sug.innerHTML = `<p class="empty">Aucun résultat trouvé pour « ${q} ».<br><small>Vérifie l'orthographe.</small></p>`;
         return;
@@ -480,7 +772,10 @@ function renderSearch() {
       });
     } catch (err) {
       console.error('Search exec error:', err);
-      sug.innerHTML = `<p class="empty" style="color:var(--danger)">Erreur réseau : ${err.message}</p>`;
+      const message = document.createElement('p');
+      message.className = 'empty';
+      message.textContent = 'La recherche est temporairement indisponible. Réessaie dans un instant.';
+      sug.replaceChildren(message);
     }
   }
 
@@ -502,6 +797,38 @@ function renderSearch() {
 }
 
 // --- Fiche Anime Style Boruto / Anime-Sama ---
+function findFrenchDubSeasons(seasons, anime) {
+  if (anime.source !== 'animesama' || !Array.isArray(seasons)) return [];
+
+  const advertisesVf = (anime.badges || []).some(badge => /(^|[^a-z])vf([^a-z]|$)/i.test(String(badge).trim()));
+  if (!advertisesVf) return [];
+
+  const knownFrenchPaths = new Set(
+    seasons
+      .filter(season => season.url && (season.lang || '').toUpperCase() === 'VF')
+      .map(season => season.url.replace(/\/(?:vostfr|vf|va)\/?$/i, '/'))
+  );
+  return seasons
+    .filter(season =>
+      season.url &&
+      (season.lang || '').toUpperCase() !== 'VF' &&
+      /\/(?:vostfr|vostfr\d*|vo)\/?$/i.test(new URL(season.url).pathname)
+    )
+    .map(season => {
+      const basePath = season.url.replace(/\/(?:vostfr|vostfr\d*|vo)\/?$/i, '/');
+      if (knownFrenchPaths.has(basePath)) return null;
+      return {
+        ...season,
+        title: `${season.title.replace(/\s*(?:VOSTFR|VO)\s*/ig, ' ').trim()} VF`.trim(),
+        lang: 'VF',
+        url: season.url.replace(/\/(?:vostfr|vostfr\d*|vo)\/?$/i, '/vf/'),
+        episodes: [],
+        availabilityUnverified: true
+      };
+    })
+    .filter(Boolean);
+}
+
 async function openDetail(anime) {
   if (!anime || !anime.url) {
     console.warn("[App] openDetail: anime ou URL manquante", anime);
@@ -509,8 +836,14 @@ async function openDetail(anime) {
     go('home');
     return;
   }
+  const requestId = ++detailRequestId;
+  currentSeasonIdx = 0;
+  currentSeasons = [];
+  currentEpisodes = [];
+  selectedLanguage = 'all';
+  seasonRequestId++;
   currentAnime = anime;
-  $('#det-back').onclick = () => go('home');
+  $('#det-back').onclick = () => go(detailReturnScreen || 'home');
 
   // Réinitialisation de l'affichage
   $('#dt').textContent = anime.title || 'Anime';
@@ -528,20 +861,21 @@ async function openDetail(anime) {
   // Favori toggle
   const favBtn = $('#det-fav');
   const checkFav = () => {
-    const isF = Storage.isFavorite ? Storage.isFavorite(currentAnime.id) : false;
+    const isF = Storage.isFavorite ? Storage.isFavorite(currentAnime) : false;
     favBtn.classList.toggle('on', isF);
     $('#det-fav-txt').textContent = isF ? 'Dans ma liste' : 'Favoris';
   };
   checkFav();
   favBtn.onclick = () => {
-    Storage.toggleFavorite(currentAnime);
+    const isNowFav = Storage.toggleFavorite(currentAnime);
     checkFav();
-    toast('Favoris mis à jour');
+    toast(isNowFav ? 'Ajouté aux favoris' : 'Retiré des favoris');
   };
 
   try {
     // Récupération de la fiche complète en direct
-    const details = await ScraperService.getAnimeDetail(anime.url, anime.source);
+    const details = await ScrappingService.getAnimeDetail(anime.url, anime.source);
+    if (requestId !== detailRequestId) return;
     currentAnime = { ...currentAnime, ...details };
 
     $('#dt').textContent = details.title || anime.title;
@@ -562,24 +896,63 @@ async function openDetail(anime) {
 
     // Saisons
     currentSeasons = details.seasons || [];
+    if (!currentSeasons.some(s => (s.lang || '').toUpperCase() === 'VF')) {
+      currentSeasons = [...currentSeasons, ...findFrenchDubSeasons(currentSeasons, anime)];
+    }
+    const vfIndex = currentSeasons.findIndex(s => (s.lang || '').toUpperCase() === 'VF');
+    if (vfIndex >= 0) {
+      selectedLanguage = 'VF';
+      currentSeasonIdx = vfIndex;
+    } else if (currentSeasons.length) {
+      selectedLanguage = 'all';
+      currentSeasonIdx = 0;
+    }
     renderSeasonsList();
   } catch (err) {
+    if (requestId !== detailRequestId) return;
     console.error('Detail fetch error:', err);
-    $('#dd').textContent = "Erreur lors du chargement des informations : " + err.message;
+    $('#dd').textContent = "Impossible de charger cette fiche pour le moment. Réessaie plus tard.";
   }
 }
 
 function renderSeasonsList() {
   const container = $('#det-saisons');
+  const filters = $('#det-version-filters');
   if (!currentSeasons.length) {
+    filters.innerHTML = '';
     container.innerHTML = '<div class="muted">Aucune saison disponible.</div>';
+    $('#det-episodes').innerHTML = '<div class="muted">Aucun épisode disponible.</div>';
+    $('#det-ep-title').textContent = 'Épisodes';
     return;
   }
 
-  container.innerHTML = currentSeasons.map((s, idx) => `
-    <button class="saison-card ${idx === currentSeasonIdx ? 'on' : ''}" data-sidx="${idx}">
-      <span>${s.title}</span>
-      ${s.lang ? `<span class="lang-badge">${s.lang}</span>` : ''}
+  const languages = [...new Set(currentSeasons.map(s => (s.lang || '').toUpperCase()).filter(Boolean))];
+  if (!languages.includes(selectedLanguage) && selectedLanguage !== 'all') selectedLanguage = 'all';
+  filters.innerHTML = languages.length > 0
+    ? ['all', ...languages].map(lang => `
+        <button class="version-filter ${selectedLanguage === lang ? 'on' : ''}" data-lang="${lang}">
+          ${lang === 'all' ? 'Toutes versions' : lang}
+        </button>
+      `).join('')
+    : '';
+  filters.querySelectorAll('[data-lang]').forEach(button => {
+    button.onclick = () => {
+      selectedLanguage = button.dataset.lang;
+      renderSeasonsList();
+    };
+  });
+
+  const visibleSeasons = currentSeasons
+    .map((season, index) => ({ season, index }))
+    .filter(({ season }) => selectedLanguage === 'all' || (season.lang || '').toUpperCase() === selectedLanguage);
+  if (!visibleSeasons.some(item => item.index === currentSeasonIdx)) {
+    currentSeasonIdx = visibleSeasons[0].index;
+  }
+
+  container.innerHTML = visibleSeasons.map(({ season, index }) => `
+    <button class="saison-card ${index === currentSeasonIdx ? 'on' : ''}" data-sidx="${index}">
+      <span>${season.title}</span>
+      ${season.lang ? `<span class="lang-badge">${season.lang}</span>` : ''}
     </button>
   `).join('');
 
@@ -592,55 +965,78 @@ function renderSeasonsList() {
   });
 
   // Charge automatiquement les épisodes de la première saison
-  loadSeasonEpisodes(0);
+  loadSeasonEpisodes(currentSeasonIdx);
 }
 
 async function loadSeasonEpisodes(seasonIdx) {
   const season = currentSeasons[seasonIdx];
   if (!season) return;
+  const anime = currentAnime;
+  const requestId = ++seasonRequestId;
 
   const epContainer = $('#det-episodes');
   $('#det-ep-title').textContent = `${season.title} (Chargement...)`;
   epContainer.innerHTML = '<div class="muted" style="padding:14px 0;">Chargement des épisodes réels...</div>';
 
   let episodes = season.episodes || [];
+  let loadError = '';
 
   // Si Anime-Sama, charge dynamiquement episodes.js
   if (currentAnime.source === 'animesama' && (!episodes || !episodes.length)) {
     try {
-      episodes = await ScraperService.getSeasonEpisodesAnimeSama(season.url);
+      episodes = await ScrappingService.getSeasonEpisodesAnimeSama(season.url);
+      if (requestId !== seasonRequestId || anime !== currentAnime) return;
       season.episodes = episodes;
     } catch (e) {
+      if (requestId !== seasonRequestId || anime !== currentAnime) return;
       console.warn('Episodes load error:', e);
+      loadError = season.availabilityUnverified
+        ? 'Cette VF est annoncée, mais ses épisodes ne sont pas accessibles dans ce catalogue pour le moment. Cela ne signifie pas que l’anime n’existe pas.'
+        : 'Impossible de récupérer les épisodes depuis cette source. Son catalogue peut être incomplet ou refuser la requête ; cela ne signifie pas que l’anime n’existe pas.';
     }
   }
 
-  $('#det-ep-title').textContent = `${season.title} (${episodes.length} épisodes)`;
+  if (requestId !== seasonRequestId || anime !== currentAnime) return;
+  currentEpisodes = episodes;
+  $('#det-ep-title').textContent = episodes.length
+    ? `${season.title} (${episodes.length} épisodes)`
+    : `${season.title} (épisodes indisponibles)`;
 
   if (!episodes.length) {
-    epContainer.innerHTML = '<div class="muted" style="padding:14px 0;">Aucun épisode trouvé pour cette saison.</div>';
+    const emptyMessage = document.createElement('div');
+    emptyMessage.className = 'muted';
+    emptyMessage.style.padding = '14px 0';
+    emptyMessage.textContent = loadError || (season.availabilityUnverified
+      ? 'Cette VF est annoncée, mais ses épisodes ne sont pas accessibles dans ce catalogue pour le moment. Cela ne signifie pas que l’anime n’existe pas.'
+      : 'Impossible de récupérer les épisodes depuis cette source. Son catalogue peut être incomplet ou refuser la requête ; cela ne signifie pas que l’anime n’existe pas.');
+    epContainer.innerHTML = '';
+    epContainer.appendChild(emptyMessage);
     return;
   }
 
-  epContainer.innerHTML = episodes.map((ep, idx) => `
-    <div class="ep-item">
-      <div class="ep-num">${ep.number || (idx + 1)}</div>
-      <div class="ep-info">
-        <b>${ep.title || 'Épisode ' + (idx + 1)}</b>
-        <small class="muted">${ep.duration || '24 min'} • Streaming direct</small>
+  epContainer.innerHTML = episodes.map((ep, idx) => {
+    const hasDirectMedia = ScrappingService.isDirectMediaUrl(ep.streamUrl);
+    const actionState = hasDirectMedia ? '' : 'disabled title="Lecteur direct indisponible"';
+    return `
+      <div class="ep-item">
+        <div class="ep-num">${ep.number || (idx + 1)}</div>
+        <div class="ep-info">
+          <b>${ep.title || 'Épisode ' + (idx + 1)}</b>
+          <small class="muted">${ep.duration || '24 min'} • ${hasDirectMedia ? 'Prêt à lire' : 'Lien vidéo direct indisponible'}</small>
+        </div>
+        <div class="ep-actions">
+          <button class="ep-btn" data-comp="${idx}" aria-label="Compresser" ${actionState}><svg class="i" style="width:16px;height:16px;"><use href="#zip"/></svg></button>
+          <button class="ep-btn play" data-play="${idx}" aria-label="Lire" ${actionState}><svg class="i f" style="width:16px;height:16px;"><use href="#play"/></svg></button>
+        </div>
       </div>
-      <div class="ep-actions">
-        <button class="ep-btn" data-comp="${idx}" aria-label="Compresser"><svg class="i" style="width:16px;height:16px;"><use href="#zip"/></svg></button>
-        <button class="ep-btn play" data-play="${idx}" aria-label="Lire"><svg class="i f" style="width:16px;height:16px;"><use href="#play"/></svg></button>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 
   epContainer.querySelectorAll('[data-play]').forEach(btn => {
     btn.onclick = () => {
       const idx = parseInt(btn.dataset.play, 10);
       const ep = episodes[idx];
-      playEpisode(currentAnime, season.title, ep.title, ep.streamUrl, ep.streams || []);
+      playEpisode(anime, season.title, ep.title, ep.streamUrl, ep.streams || []);
     };
   });
 
@@ -648,16 +1044,20 @@ async function loadSeasonEpisodes(seasonIdx) {
     btn.onclick = () => {
       const idx = parseInt(btn.dataset.comp, 10);
       const ep = episodes[idx];
-      openCompressionSheet(ep.title, ep.streamUrl, ep.streams || []);
+      openCompressionSheet(ep.title, ep.streamUrl, ep.streams || [], anime, season, ep, idx);
     };
   });
 }
 
 // --- Lecteur Universel (HTML5 MP4 ou Iframe Embed Sécurisé avec Multi-Lecteurs) ---
 async function playEpisode(anime, seasonTitle, episodeTitle, streamUrl, availableStreams = []) {
-  if (!streamUrl) {
-    toast("Flux vidéo indisponible");
+  if (!ScrappingService.isDirectMediaUrl(streamUrl)) {
+    toast("Aucune URL vidéo directe autorisée n'est disponible pour cet épisode.");
     return;
+  }
+  // Basculer automatiquement en mode paysage pour le streaming vidéo natif
+  if (window.Android && window.Android.setOrientation) {
+    window.Android.setOrientation('landscape');
   }
   $('#pt').textContent = `${anime.title} — ${episodeTitle}`;
   go('ply');
@@ -691,27 +1091,8 @@ async function playEpisode(anime, seasonTitle, episodeTitle, streamUrl, availabl
 async function loadStreamIntoPlayer(anime, seasonTitle, episodeTitle, streamUrl) {
   let finalUrl = streamUrl.trim();
   if (finalUrl.startsWith('//')) finalUrl = 'https:' + finalUrl;
-
-  // Tentative de résolution directe en MP4 / M3U8 (comme AnimeSamaApi / Miro-sh)
-  if (ScraperService.resolveDirectMediaUrl) {
-    try {
-      const resolved = await ScraperService.resolveDirectMediaUrl(finalUrl);
-      if (resolved && resolved.url) {
-        finalUrl = resolved.url;
-      }
-    } catch (_) {}
-  }
-
-  // Si VoirAnime, résoudre l'iframe de streaming
-  if (anime.source === 'voiranime' && finalUrl && !finalUrl.includes('embed') && !finalUrl.endsWith('.mp4')) {
-    $('#pt').textContent = 'Résolution du flux...';
-    try {
-      finalUrl = await ScraperService.resolveVoirAnimeStream(finalUrl);
-    } catch (e) {
-      console.warn('Erreur résolution flux VoirAnime:', e);
-    }
-    if (finalUrl.startsWith('//')) finalUrl = 'https:' + finalUrl;
-    $('#pt').textContent = `${anime.title} — ${episodeTitle}`;
+  if (!ScrappingService.isDirectMediaUrl(finalUrl)) {
+    throw new Error('Une URL vidéo directe autorisée est requise.');
   }
 
   console.log(`[Player] Lecture du flux: ${finalUrl}`);
@@ -726,38 +1107,58 @@ async function loadStreamIntoPlayer(anime, seasonTitle, episodeTitle, streamUrl)
     duration: 1440
   });
 
-  const isDirectMedia = finalUrl.endsWith('.mp4') || finalUrl.includes('.mp4?') || finalUrl.endsWith('.m3u8') || finalUrl.includes('.m3u8?');
+  const isDirectMedia = ScrappingService.isDirectMediaUrl(finalUrl);
 
   if (isDirectMedia) {
-    iframe.hidden = true;
-    iframe.src = 'about:blank';
-    video.hidden = false;
     $('#player-bot').hidden = false;
-    video.src = finalUrl;
-    video.play().catch(() => {});
+    try {
+      const playback = await ScrappingService.playDirectMedia(finalUrl, video, iframe);
+      if (playback.autoplayBlocked) toast('Appuie sur Lecture pour démarrer la vidéo.');
+    } catch (err) {
+      console.error('Direct media playback failed:', err);
+      toast(`Lecture vidéo impossible : ${err.message}`);
+    }
   } else {
-    // Embed iframe sécurisé anti-redirection (pas de top-navigation possible)
     video.pause();
     video.hidden = true;
     $('#player-bot').hidden = true;
-    iframe.hidden = false;
-    iframe.src = finalUrl;
+    iframe.hidden = true;
+    iframe.src = 'about:blank';
+    toast('Les lecteurs intégrés tiers ne sont pas pris en charge.');
   }
 }
 
 $('#pb').onclick = () => {
   if (video) video.pause();
   if (iframe) iframe.src = 'about:blank';
+  // Revenir en mode portrait normal en quittant le lecteur
+  if (window.Android && window.Android.setOrientation) {
+    window.Android.setOrientation('portrait');
+  }
   go('det', { anime: currentAnime });
 };
 
 // --- Compression Vidéo Matérielle (Kotlin Media3 Transformer) ---
-function openCompressionSheet(epTitle, url, streams = []) {
+function openCompressionSheet(epTitle, url, streams = [], anime = currentAnime, season = currentSeasons[currentSeasonIdx], episode = {}, episodeIndex = 0) {
+  if (!ScrappingService.isDirectMediaUrl(url)) {
+    toast("Aucune URL vidéo directe autorisée n'est disponible pour cet épisode.");
+    return;
+  }
+  if (activeDownloadJobId) {
+    toast('Le téléchargement continue en arrière-plan.');
+    return;
+  }
   $('#sheet').classList.add('on');
+  $('#sheet').setAttribute('aria-hidden', 'false');
   $('#scrim').hidden = false;
+  if (window.gsap && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    window.gsap.fromTo('#sheet', { y: '100%' }, { y: 0, duration: 0.3, ease: 'power3.out', clearProps: 'transform' });
+    window.gsap.fromTo('#scrim', { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.2, clearProps: 'opacity,visibility' });
+  }
   $('#bw').hidden = true;
   $('#bar').style.width = '0%';
-  $('#sb').textContent = 'Télécharger & Compresser';
+  $('#sb').disabled = activeDownloadJobId !== null;
+  $('#sb').textContent = activeDownloadJobId ? 'Téléchargement en cours' : 'Télécharger & Compresser';
 
   let selectedQuality = '720p';
   const qs = [
@@ -780,67 +1181,108 @@ function openCompressionSheet(epTitle, url, streams = []) {
   });
 
   $('#sb').onclick = async () => {
+    if (activeDownloadJobId) {
+      toast('Un téléchargement est déjà en cours.');
+      return;
+    }
+    $('#sb').disabled = true;
     $('#bw').hidden = false;
     $('#sb').textContent = 'Préparation du flux...';
 
-    // Trouver le meilleur flux direct pour le téléchargement
-    let streamToDownload = url;
-    for (const st of streams) {
-      if (st.url && (st.url.includes('sendvid') || st.url.includes('sibnet') || st.url.includes('ansembed') || st.url.includes('.mp4'))) {
-        streamToDownload = st.url;
-        break;
-      }
-    }
+    const streamToDownload = url;
 
-    if (ScraperService.resolveDirectMediaUrl) {
-      const direct = await ScraperService.resolveDirectMediaUrl(streamToDownload);
-      if (direct && direct.url) streamToDownload = direct.url;
-    }
+    try {
+      const slug = value => (value || 'anime')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '')
+        .slice(0, 70) || 'anime';
+      const animeSlug = slug(anime && anime.title ? anime.title : epTitle);
+      const language = (season && season.lang ? season.lang : '').trim().toLowerCase();
+      const isFilm = anime && String(anime.type).toLowerCase() === 'film';
+      const episodeNumber = String((episode && episode.number) || episodeIndex + 1).replace(/\D/g, '') || String(episodeIndex + 1);
+      const category = isFilm ? 'Films' : `Saison ${(season && season.number) || currentSeasonIdx + 1}`;
+      const folder = [animeSlug, category, language.toUpperCase()].filter(Boolean).join('/');
+      const filename = isFilm
+        ? `${animeSlug}-film.mp4`
+        : `${animeSlug}-ep-${episodeNumber}.mp4`;
 
-    const safeName = (epTitle || 'episode').replace(/[^a-zA-Z0-9_\-]/g, '_') + '.mp4';
-
-    // Appel au bridge matériel Kotlin Media3 (Download + H.264 Hardware Compressor)
-    if (window.AndroidDownload && window.AndroidDownload.downloadAndCompress) {
+      // Appel au bridge matériel Kotlin Media3 (Download + H.264 Hardware Compressor)
+      if (window.AndroidDownload && window.AndroidDownload.downloadAndCompress) {
       $('#sb').textContent = 'Téléchargement & Compression...';
       const jobId = 'dc_' + Date.now();
+      activeDownloadJobId = jobId;
+      const status = $('#download-status');
+      status.hidden = false;
+      $('#download-status-title').textContent = `Téléchargement de ${animeSlug}`;
+      $('#download-status-detail').textContent = 'Le transfert continue si vous fermez cette fenêtre.';
+      $('#download-status-progress').style.width = '0%';
       window.onDownloadCompressProgress = (id, stage, p) => {
         if (id === jobId) {
           $('#bar').style.width = `${p}%`;
           $('#sb').textContent = stage === 'download' ? `Téléchargement ${p}%` : `Compression matérielle ${p}%`;
+          $('#download-status-detail').textContent = stage === 'download'
+            ? `Téléchargement : ${p}%`
+            : `Compression : ${p}%`;
+          $('#download-status-progress').style.width = `${p}%`;
         }
       };
       window.onDownloadCompressDone = (id, path, err) => {
         if (id === jobId) {
+          activeDownloadJobId = null;
+          $('#sb').disabled = false;
+          $('#download-status-title').textContent = err ? 'Téléchargement échoué' : 'Téléchargement terminé';
+          $('#download-status-detail').textContent = err ? String(err) : `Enregistré dans AnimeDownloads/${folder}`;
+          $('#download-status-progress').style.width = err ? '0%' : '100%';
           $('#sheet').classList.remove('on');
+          $('#sheet').setAttribute('aria-hidden', 'true');
           $('#scrim').hidden = true;
           if (err) {
             toast('Erreur: ' + err);
           } else {
-            toast('Épisode compressé et sauvegardé !');
+            toast(`Épisode enregistré : ${filename}`);
           }
+          setTimeout(() => { status.hidden = true; }, 5000);
         }
       };
-      window.AndroidDownload.downloadAndCompress(streamToDownload, selectedQuality, safeName, jobId);
-    } else {
-      // Simulation visuelle fluide pour aperçu Web PC
-      let p = 0;
-      const t = setInterval(() => {
-        p += 5;
-        $('#bar').style.width = `${p}%`;
-        $('#sb').textContent = p < 50 ? `Téléchargement ${p * 2}%` : `Compression matérielle ${(p - 50) * 2}%`;
-        if (p >= 100) {
-          clearInterval(t);
-          $('#sheet').classList.remove('on');
-          $('#scrim').hidden = true;
-          toast('Épisode compressé avec succès (Kotlin Media3) !');
-        }
-      }, 50);
+      window.AndroidDownload.downloadAndCompress(streamToDownload, selectedQuality, filename, folder, jobId);
+      } else {
+        const status = $('#download-status');
+        status.hidden = false;
+        $('#download-status-title').textContent = 'Aperçu de téléchargement';
+        $('#download-status-detail').textContent = 'Le téléchargement natif fonctionne uniquement sur Android.';
+        let p = 0;
+        const t = setInterval(() => {
+          p += 5;
+          $('#bar').style.width = `${p}%`;
+          $('#sb').textContent = p < 50 ? `Téléchargement ${p * 2}%` : `Compression matérielle ${(p - 50) * 2}%`;
+          $('#download-status-progress').style.width = `${p}%`;
+          if (p >= 100) {
+            clearInterval(t);
+            $('#sb').disabled = false;
+            $('#download-status-detail').textContent = 'Simulation terminée — aucun fichier créé.';
+            $('#sheet').classList.remove('on');
+            $('#sheet').setAttribute('aria-hidden', 'true');
+            $('#scrim').hidden = true;
+            toast('Simulation terminée : aucune compression réelle sur le Web.');
+            setTimeout(() => { status.hidden = true; }, 5000);
+          }
+        }, 50);
+      }
+    } catch (err) {
+      console.error('Compression preparation error:', err);
+      $('#sb').disabled = false;
+      $('#sb').textContent = 'Réessayer';
+      toast(`Impossible de préparer le flux : ${err.message}`);
     }
   };
 }
 
 $('#scrim').onclick = () => {
   $('#sheet').classList.remove('on');
+  $('#sheet').setAttribute('aria-hidden', 'true');
   $('#scrim').hidden = true;
 };
 
@@ -855,6 +1297,7 @@ window.onCompressionDone = (id, outPath, err) => {
   else {
     toast(`Compression réussie !`);
     $('#sheet').classList.remove('on');
+    $('#sheet').setAttribute('aria-hidden', 'true');
     $('#scrim').hidden = true;
   }
 };
@@ -892,6 +1335,9 @@ function renderLib() {
 // --- Paramètres Utilisateur & Contrôles intuitifs ---
 function renderSettings() {
   const s = Storage.getSettings ? Storage.getSettings() : { quality: '720p', lockEnabled: true };
+  const profile = Storage.getProfile ? Storage.getProfile() : null;
+  $('#profile-name').textContent = profile && profile.name ? profile.name : 'Profil local';
+  setProfileAvatar($('#profile-avatar'), profile);
 
   // Boutons de choix de qualité
   const qBtns = $$('#quality-selector .btn-option');
@@ -921,35 +1367,28 @@ function renderSettings() {
     };
   }
 
-  // Vérification de mise à jour
-  const updateBtn = $('#btn-check-update');
-  if (updateBtn) {
-    updateBtn.onclick = () => {
-      toast('Recherche de version GitHub...');
-      if (window.Android && window.Android.checkUpdate) {
-        window.Android.checkUpdate('1.0.0');
-      } else {
-        fetch('https://api.github.com/repos/Badley08/animeplus/releases/latest')
-          .then(r => r.json())
-          .then(d => {
-            if (d.tag_name && d.tag_name !== 'v1.0.0') {
-              toast(`Nouvelle version ${d.tag_name} disponible !`);
-            } else {
-              toast('Anime Plus est à jour (v1.0.0)');
-            }
-          })
-          .catch(() => toast('Anime Plus est à jour (v1.0.0)'));
-      }
-    };
-  }
-
   // Nettoyage du cache
   const cleanBtn = $('#btn-clean-cache');
   if (cleanBtn) {
+    let cleanPending = false;
     cleanBtn.onclick = () => {
-      if (confirm('Voulez-vous réinitialiser le cache et l\'historique ?')) {
+      if (!cleanPending) {
+        // Premier tap : demande confirmation via toast + change le texte du bouton
+        cleanPending = true;
+        const originalContent = cleanBtn.innerHTML;
+        cleanBtn.innerHTML = '<img class="fluent-emoji fluent-emoji-inline" src="assets/emoji/warning.png" alt=""> Confirmer ?';
+        cleanBtn.classList.add('danger');
+        toast('Appuie encore pour confirmer la suppression du cache.');
+        setTimeout(() => {
+          cleanPending = false;
+          cleanBtn.innerHTML = originalContent;
+        }, 3000);
+      } else {
+        // Second tap : on exécute
+        cleanPending = false;
+        cleanBtn.innerHTML = 'Nettoyer le cache';
         Storage.clearHistory ? Storage.clearHistory() : null;
-        toast('Cache nettoyé.');
+        toast('Cache et historique réinitialisés.');
       }
     };
   }

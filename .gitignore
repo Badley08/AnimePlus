@@ -1,0 +1,21 @@
+./*hprof
+./*generated
+./*log
+./*tmp
+./*swp
+./*swo
+./*class
+./*jar
+./*war
+./*ear
+./*iml
+./*ipr
+./tab.len
+
+# Local build output, Gradle cache, and downloaded SDK files
+/.gradle/
+/android/.gradle/
+**/build/
+local.properties
+*.hprof
+/platform-tools*.zip

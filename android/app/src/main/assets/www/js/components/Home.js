@@ -84,8 +84,8 @@ const Home = (() => {
 
     // Nouveautés via Scraper ou fallback
     const rail = document.getElementById('hr');
-    if (rail && window.ScraperService) {
-      ScraperService.getRecents().then(list => {
+    if (rail && window.ScrappingService) {
+      ScrappingService.getRecents().then(list => {
         if (!list || !list.length) {
           rail.innerHTML = '<div class="muted" style="padding:16px;">Ouvre la recherche pour explorer les flux.</div>';
           return;
@@ -114,4 +114,3 @@ const Home = (() => {
 
   return { render, mount };
 })();
-

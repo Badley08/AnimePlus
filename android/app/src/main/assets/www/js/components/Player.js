@@ -74,28 +74,25 @@ const Player = (() => {
       Router.back();
     };
 
-    // Chercher la source de stream réelle
     let streamUrl = episodeData.streamUrl || episodeData.url;
-    if (!streamUrl || !streamUrl.endsWith('.mp4')) {
-      try {
-        titleEl.textContent = 'Résolution du flux...';
-        const streamData = await ScraperService.getStreamLinks(episodeData.url || '', currentAnime.source);
-        if (streamData && streamData.url) {
-          streamUrl = streamData.url;
-        } else {
-          // Fallback démo Big Buck Bunny si le scraper renvoie un embed non compatible natif
-          streamUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
-        }
-      } catch (err) {
-        streamUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
-      }
+    if (!ScrappingService.isDirectMediaUrl(streamUrl)) {
+      Toast.show("Aucune URL vidéo directe autorisée n'est disponible pour cet épisode.");
+      Router.back();
+      return;
     }
 
     titleEl.textContent = currentAnime.type === 'film' 
       ? currentAnime.title 
       : `${currentAnime.title} - S${currentSeason + 1} E${currentEp + 1}`;
 
-    videoEl.src = streamUrl;
+    try {
+      await ScrappingService.playDirectMedia(streamUrl, videoEl);
+    } catch (err) {
+      console.error('[Player] Direct media playback failed:', err);
+      Toast.show(`Lecture impossible : ${err.message}`);
+      Router.back();
+      return;
+    }
 
     // Reprise de lecture
     const saved = Storage.getProgress(currentAnime.id, currentSeason, currentEp);
@@ -184,4 +181,3 @@ const Player = (() => {
 
   return { render, mount, destroy };
 })();
-

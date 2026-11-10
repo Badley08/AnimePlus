@@ -41,7 +41,7 @@ const Detail = (() => {
     } else if (params.url) {
       // Charger les détails depuis le scraper
       try {
-        currentAnime = await ScraperService.getAnimeDetail(params.url, params.source || 'animesama');
+        currentAnime = await ScrappingService.getAnimeDetail(params.url, params.source || 'animesama');
       } catch (e) {
         Toast.show("Impossible de charger les détails de l'anime.");
         Router.back();
@@ -57,7 +57,7 @@ const Detail = (() => {
     // Si les saisons ne sont pas encore peuplées
     if (!currentAnime.seasons || !currentAnime.seasons.length) {
       try {
-        const enriched = await ScraperService.getAnimeDetail(currentAnime.url, currentAnime.source);
+        const enriched = await ScrappingService.getAnimeDetail(currentAnime.url, currentAnime.source);
         currentAnime.seasons = enriched.seasons || [];
         if (enriched.synopsis) currentAnime.synopsis = enriched.synopsis;
       } catch (err) {
@@ -182,4 +182,3 @@ const Detail = (() => {
 
   return { render, mount };
 })();
-
