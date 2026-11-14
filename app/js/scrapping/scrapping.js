@@ -259,16 +259,111 @@ const ScrappingService = (() => {
     return parseAnimeCards(response, 'voiranime', url.href);
   }
 
+  // --- Index Sitemap hors-ligne & auto-complétion instantanée ---
+  let sitemapIndex = null;
+  let sitemapIndexLoading = null;
+
+  async function loadSitemapIndex() {
+    if (sitemapIndex) return sitemapIndex;
+    if (sitemapIndexLoading) return sitemapIndexLoading;
+
+    sitemapIndexLoading = (async () => {
+      try {
+        const res = await fetch('assets/catalog_index.json');
+        if (res.ok) {
+          const data = await res.json();
+          sitemapIndex = data && Array.isArray(data.animes) ? data.animes : [];
+          console.log(`[ScrappingService] Index sitemap chargé : ${sitemapIndex.length} animes.`);
+          return sitemapIndex;
+        }
+      } catch (e) {
+        console.warn('[ScrappingService] Impossible de charger catalog_index.json :', e.message);
+      }
+      sitemapIndex = [];
+      return sitemapIndex;
+    })();
+
+    return sitemapIndexLoading;
+  }
+
+  function searchSitemapIndex(query, catalog) {
+    if (!catalog || !catalog.length) return [];
+    const q = clean(query).toLowerCase();
+    const words = q.split(/\s+/).filter(Boolean);
+    if (!words.length) return [];
+
+    const scored = [];
+    for (const item of catalog) {
+      const titleLower = item.title.toLowerCase();
+      const slugLower = item.slug.toLowerCase();
+
+      // Tous les mots de la recherche doivent être présents
+      const allMatch = words.every(w => titleLower.includes(w) || slugLower.includes(w));
+      if (!allMatch) continue;
+
+      let score = 0;
+      if (titleLower === q || slugLower === q) score += 100;
+      else if (titleLower.startsWith(q) || slugLower.startsWith(q)) score += 60;
+      else if (titleLower.includes(q)) score += 30;
+
+      // Bonus si l'anime a de la VF
+      if (item.has_vf) score += 5;
+
+      const badges = ['Anime'];
+      if (item.has_vf) badges.push('VF');
+      if (item.has_vostfr) badges.push('VOSTFR');
+
+      scored.push({
+        score,
+        item: {
+          id: item.id,
+          title: item.title,
+          poster: '', // sera enrichi par l'affiche réelle sur la fiche
+          url: item.url,
+          source: item.source === 'animesama' ? 'animesama' : 'voiranime',
+          type: 'serie',
+          badges
+        }
+      });
+    }
+
+    scored.sort((a, b) => b.score - a.score);
+    return scored.map(s => s.item);
+  }
+
   async function search(query) {
     const value = clean(query);
     if (!value) return [];
 
+    // 1. Recherche instantanée via sitemap index
+    let sitemapResults = [];
+    try {
+      const catalog = await loadSitemapIndex();
+      sitemapResults = searchSitemapIndex(value, catalog);
+    } catch (e) {
+      console.warn('[ScrappingService] Erreur recherche sitemap index:', e);
+    }
+
+    // 2. Recherche live sur les 2 sites
     const settled = await Promise.allSettled([
       searchAnimeSama(value),
       searchVoirAnime(value)
     ]);
-    const results = settled.flatMap(result => result.status === 'fulfilled' ? result.value : []);
-    if (results.length) return uniqueResults(results);
+    const liveResults = settled.flatMap(result => result.status === 'fulfilled' ? result.value : []);
+
+    // 3. Fusion intelligente : prioriser les live results avec poster, et compléter avec le catalogue sitemap
+    if (liveResults.length || sitemapResults.length) {
+      const combined = [...liveResults];
+      const seenUrls = new Set(liveResults.map(r => r.url.toLowerCase()));
+
+      for (const sItem of sitemapResults) {
+        if (!seenUrls.has(sItem.url.toLowerCase())) {
+          combined.push(sItem);
+          seenUrls.add(sItem.url.toLowerCase());
+        }
+      }
+      return uniqueResults(combined);
+    }
 
     const errors = settled
       .filter(result => result.status === 'rejected')
@@ -547,6 +642,8 @@ const ScrappingService = (() => {
 
   return Object.freeze({
     search,
+    loadSitemapIndex,
+    searchSitemapIndex,
     getTrending,
     getRecents: getTrending,
     getAnimeDetail,
