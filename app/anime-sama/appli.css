@@ -1,0 +1,151 @@
+/* ============================================================
+   appli.css — installer Anime-Sama comme une appli
+   (section de l'accueil, bouton du pied de page, page /application/)
+   ============================================================ */
+
+/* ---------- Section de l'accueil ---------- */
+.appli-section {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem 1.4rem;
+    margin: 1.75rem 0 0.5rem;
+    padding: 1rem 1.2rem;
+    border-radius: 14px;
+    border: 1px solid rgba(56, 189, 248, 0.16);
+    background:
+        radial-gradient(120% 140% at 0% 0%, rgba(56, 189, 248, 0.08), transparent 55%),
+        rgba(13, 25, 43, 0.5);
+}
+.appli-installee .appli-section,
+.appli-bandeau-ferme .appli-section { display: none; }
+.appli-section { position: relative; padding-right: 2.6rem; }
+.appli-titre span { display: flex; flex-direction: column; line-height: 1.2; }
+.appli-titre small { margin-top: 0.15rem; color: #94a3b8; font-size: 0.75rem; font-weight: 600; }
+.appli-fermer {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 26px;
+    height: 26px;
+    padding: 4px;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    color: #7f9bb3;
+    cursor: pointer;
+}
+.appli-fermer:hover { color: #ffffff; background: rgba(255, 255, 255, 0.08); }
+.appli-fermer svg { width: 100%; height: 100%; display: block; }
+.appli-titre {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 800;
+}
+.appli-titre img { width: 28px; height: 28px; border-radius: 7px; }
+.appli-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.55rem; }
+.appli-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.45rem 0.85rem 0.45rem 0.7rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(0, 0, 0, 0.45);
+    color: #ffffff;
+    text-decoration: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+.appli-badge:hover { border-color: rgba(56, 189, 248, 0.6); background: rgba(56, 189, 248, 0.1); }
+.appli-badge svg { width: 22px; height: 22px; flex: 0 0 auto; }
+.appli-badge span { display: flex; flex-direction: column; line-height: 1.1; font-size: 0.92rem; font-weight: 700; }
+.appli-badge small { font-size: 0.62rem; font-weight: 600; color: #94a3b8; }
+
+/* ---------- Bouton du pied de page ---------- */
+.appli-pied { cursor: pointer; }
+.appli-installee .appli-pied { display: none; }
+
+/* ---------- Page /application/ ---------- */
+.appli-page { color: #cbd5e1; }
+.appli-entete {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.2rem;
+    padding: 1.4rem;
+    border-radius: 16px;
+    border: 1px solid rgba(56, 189, 248, 0.16);
+    background:
+        radial-gradient(120% 140% at 0% 0%, rgba(56, 189, 248, 0.1), transparent 55%),
+        rgba(13, 25, 43, 0.55);
+}
+.appli-entete img { flex: 0 0 auto; width: 72px; height: 72px; border-radius: 18px; }
+.appli-entete h1 { color: #ffffff; font-size: 1.6rem; font-weight: 800; line-height: 1.2; }
+.appli-entete p { margin-top: 0.4rem; font-size: 0.92rem; line-height: 1.55; }
+.appli-installer {
+    display: none;                                    /* visible seulement si le navigateur sait installer */
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.65rem 1.2rem;
+    border-radius: 10px;
+    border: 1px solid rgba(56, 189, 248, 0.5);
+    background: rgba(56, 189, 248, 0.18);
+    color: #e0f2fe;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.appli-installer:hover { background: rgba(56, 189, 248, 0.28); }
+.appli-installer svg { width: 18px; height: 18px; }
+.appli-installable .appli-installer { display: inline-flex; }
+.appli-deja { display: none; color: #4ade80 !important; font-weight: 700; }
+.appli-installee .appli-deja { display: block; }
+.appli-installee .appli-installer { display: none; }
+
+.appli-note {
+    margin-top: 0.9rem;
+    padding: 0.7rem 0.95rem;
+    border-radius: 10px;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    background: rgba(245, 158, 11, 0.06);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: #fde68a;
+}
+
+.appli-guides { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.9rem; margin-top: 1.4rem; }
+.appli-guide {
+    padding: 1.1rem 1.2rem;
+    border-radius: 14px;
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    background: rgba(13, 25, 43, 0.5);
+    scroll-margin-top: 5rem;
+}
+.appli-guide:target { border-color: rgba(56, 189, 248, 0.6); }
+html[data-appareil="iphone"] #iphone,
+html[data-appareil="android"] #android,
+html[data-appareil="ordinateur"] #ordinateur { border-color: rgba(56, 189, 248, 0.45); }
+.appli-guide h2 { display: flex; align-items: center; gap: 0.55rem; color: #ffffff; font-size: 1.05rem; font-weight: 800; }
+.appli-guide h2 svg { width: 22px; height: 22px; color: #38bdf8; }
+.appli-guide ol { margin: 0.8rem 0 0; padding-left: 1.2rem; list-style: decimal; font-size: 0.9rem; line-height: 1.6; }
+.appli-guide li + li { margin-top: 0.35rem; }
+.appli-guide b { color: #f1f5f9; }
+.appli-icone-txt { color: #94a3b8; font-size: 0.82rem; }
+.appli-astuce { margin-top: 0.8rem; font-size: 0.8rem; color: #94a3b8; }
+
+@media (max-width: 900px) {
+    .appli-guides { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+    .appli-entete { flex-direction: column; padding: 1.1rem; }
+    .appli-entete h1 { font-size: 1.3rem; }
+    .appli-section { justify-content: flex-start; }
+    .appli-badges { justify-content: flex-start; }
+}

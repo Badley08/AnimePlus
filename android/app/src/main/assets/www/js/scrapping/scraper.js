@@ -87,6 +87,7 @@ const ScraperService = (() => {
       `https://corsproxy.io/?key=${CORS_KEY}&url=${encodeURIComponent(url)}`, // Clé API active de l'utilisateur
       `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
       `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+      `http://127.0.0.1:8787/raw?url=${encodeURIComponent(url)}`
     ];
 
     let lastError = null;

@@ -64,6 +64,9 @@ class WebAppInterface(
                 if (url.contains("anime-sama.to")) {
                     if (url.contains("episodes.js")) {
                         reqBuilder.header("Referer", url.substringBefore("episodes.js"))
+                    } else if (url.contains("/api/lien.php")) {
+                        reqBuilder.header("Referer", "https://anime-sama.to/")
+                        reqBuilder.header("X-Requested-With", "XMLHttpRequest")
                     } else {
                         reqBuilder.header("Referer", "https://anime-sama.to/")
                     }

@@ -1,0 +1,155 @@
+/* ============================================================
+   deroulant.css — listes déroulantes du site (js/defaut/deroulant.js)
+   Même panneau que les listes du profil (tri, langues).
+   ============================================================ */
+
+/* La vraie liste reste dans la page pour les scripts, mais invisible */
+select.as-dd-natif {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    overflow: hidden;
+    clip-path: inset(50%);
+}
+
+.as-dd { position: relative; display: inline-flex; min-width: 0; max-width: 100%; }
+.as-dd[hidden] { display: none; }
+.as-dd-bouton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.55rem;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    outline: none;
+}
+.as-dd-bouton:disabled { opacity: 0.35; cursor: not-allowed; }
+.as-dd-texte { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.as-dd-bouton svg { flex: 0 0 auto; width: 14px; height: 14px; color: #7f9bb3; transition: transform 0.18s ease; }
+.as-dd-ouvert .as-dd-bouton svg { transform: rotate(180deg); }
+
+/* Encadrée : pages épisodes et scans (même look que les anciennes listes) */
+.as-dd-cadre .as-dd-bouton {
+    padding: 0.45rem 0.7rem 0.45rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid rgba(59, 130, 246, 0.45);
+    background: #0b1220;
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: border-color 0.2s;
+}
+.as-dd-cadre .as-dd-bouton:hover,
+.as-dd-cadre .as-dd-bouton:focus-visible,
+.as-dd-ouvert.as-dd-cadre .as-dd-bouton { border-color: #60a5fa; }
+.as-dd-mort .as-dd-bouton { border-color: rgba(239, 68, 68, 0.7); }
+.as-dd-petit .as-dd-bouton { padding: 0.32rem 0.5rem 0.32rem 0.55rem; font-size: 0.78rem; }
+.ct-champ .as-dd { flex: 0 1 auto; }
+
+/* Nue : dans une pastille qui a déjà son cadre (tri du catalogue) */
+.as-dd-nu .as-dd-bouton {
+    padding: 0.2rem 0;
+    border: none;
+    background: none;
+    color: #e6f0fa;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+/* Panneau */
+.as-dd-panneau {
+    position: absolute;
+    z-index: 80;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 100%;
+    width: max-content;
+    max-width: min(24rem, calc(100vw - 2rem));
+    padding: 0.3rem;
+    border-radius: 11px;
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    background: #0c1a2e;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    animation: as-dd-apparait 0.14s ease;
+}
+.as-dd-panneau[hidden] { display: none; }
+.as-dd-nu .as-dd-panneau { left: -2.4rem; }
+.as-dd-haut .as-dd-panneau { top: auto; bottom: calc(100% + 6px); }
+@keyframes as-dd-apparait { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+.as-dd-recherche { padding: 0.1rem 0.1rem 0.35rem; }
+.as-dd-recherche[hidden] { display: none; }
+.as-dd-recherche input {
+    width: 100%;
+    padding: 0.45rem 0.6rem;
+    border-radius: 7px;
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    background: rgba(0, 0, 0, 0.3);
+    color: #e6f0fa;
+    font-family: inherit;
+    font-size: 0.82rem;
+    outline: none;
+}
+.as-dd-recherche input:focus { border-color: rgba(56, 189, 248, 0.5); }
+.as-dd-recherche input::placeholder { color: #7f9bb3; }
+
+.as-dd-liste {
+    max-height: 290px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(56, 189, 248, 0.3) transparent;
+}
+.as-dd-liste::-webkit-scrollbar { width: 8px; }
+.as-dd-liste::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.3); border-radius: 8px; }
+
+.as-dd-option {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.65rem;
+    border: none;
+    border-radius: 7px;
+    background: none;
+    color: #e6f0fa;
+    font-family: inherit;
+    font-size: 0.82rem;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    outline: none;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+.as-dd-option[hidden] { display: none; }
+.as-dd-option:hover,
+.as-dd-option:focus-visible { background: rgba(56, 189, 248, 0.12); }
+.as-dd-option[aria-selected="true"] { background: rgba(56, 189, 248, 0.12); color: #38bdf8; font-weight: 700; }
+.as-dd-option:disabled { color: #f87171; cursor: not-allowed; background: none; }
+.as-dd-groupe {
+    padding: 0.5rem 0.65rem 0.2rem;
+    color: #7f9bb3;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.as-dd-groupe[hidden] { display: none; }
+.as-dd-vide { padding: 0.5rem 0.65rem; color: #7f9bb3; font-size: 0.8rem; }
+
+@media (max-width: 767px) {
+    .as-dd-cadre .as-dd-bouton { font-size: 0.8rem; }
+    .ct-champ .as-dd { flex: 1 1 auto; }
+    .ct-champ .as-dd-bouton { width: 100%; }
+    .as-dd-option { padding: 0.6rem 0.7rem; }
+    .as-dd-liste { max-height: min(290px, 45vh); }
+    .as-dd-recherche input { font-size: 16px; }      /* sous 16 px, l'iPhone zoome sur le champ */
+}

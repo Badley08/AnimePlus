@@ -1,0 +1,311 @@
+/* ============================================================
+   carte.css — la carte « as-carte » utilisée sur tout le site
+   (profil, accueil…) et son menu ⋯ (Watchlist / Favoris / Vu).
+   Image 16:9, titre et infos par-dessus, badges en haut à gauche,
+   ⋯ en haut à droite ; au survol la carte se soulève et l'icône
+   ▶ (anime) ou livre (scans) apparaît en fondu.
+   ============================================================ */
+
+@keyframes as-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---------- Carte « as-carte » ----------
+   Une seule image (vignette WebP), des dégradés et des transformations :
+   pas de flou ni d'ombre animée, donc légère même avec beaucoup de cartes. */
+.as-carte {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(56, 189, 248, 0.14);
+    background: #0a1424;
+    transition: transform 0.18s ease, border-color 0.18s ease;
+}
+.as-carte:hover {
+    transform: translateY(-2px);
+    border-color: rgba(56, 189, 248, 0.40);
+}
+.as-carte-scan:hover { border-color: rgba(148, 163, 184, 0.5); }
+.as-carte-lien { display: block; color: #e6f0fa; text-decoration: none; }
+.as-carte-image { position: relative; aspect-ratio: 16 / 9; overflow: hidden; }
+.as-carte-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.as-carte-image::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(6, 14, 26, 0.96) 0%, rgba(6, 14, 26, 0.35) 48%, rgba(6, 14, 26, 0) 75%);
+}
+
+/* Icône au survol : ▶ (anime) ou livre (scans) */
+.as-carte-survol {
+    position: absolute;
+    left: 50%;
+    top: 40%;
+    z-index: 2;
+    width: 2.7rem;
+    height: 2.7rem;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgba(56, 189, 248, 0.92);
+    color: #04121f;
+    opacity: 0;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.18s ease;
+    pointer-events: none;
+}
+.as-carte-survol svg { width: 20px; height: 20px; }
+.as-carte-anime .as-carte-survol svg { margin-left: 2px; }
+.as-carte-scan .as-carte-survol { background: rgba(203, 213, 225, 0.92); }
+.as-carte:hover .as-carte-survol { opacity: 1; }
+
+/* Badges en haut à gauche */
+.as-carte-badges {
+    position: absolute;
+    top: 0.45rem;
+    left: 0.45rem;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+.as-badge,
+.as-drapeau {
+    display: inline-flex;
+    align-items: center;
+    height: 1.2rem;
+    padding: 0 0.4rem;
+    border-radius: 5px;
+    background: rgba(6, 14, 26, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.as-badge {
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+.as-badge-anime { color: #93c5fd; }
+.as-badge-scan { color: #cbd5e1; }
+.as-badge-webtoon { color: #86efac; border-color: rgba(74, 222, 128, 0.3); }
+.as-badge-manga { color: #f1f5f9; background: rgba(0, 0, 0, 0.88); border-color: rgba(255, 255, 255, 0.2); }
+.as-badge-autre { color: #d8b4fe; border-color: rgba(192, 132, 252, 0.3); }
+
+/* Webtoons (manhwa, manhua… : .as-carte-couleur, voir carte_as.php et carte.js) : touche verte.
+   Les chapitres de scans sont de nouveau en couleur (le noir et blanc a été retiré le 19/10). */
+.as-carte-couleur .as-carte-survol { background: rgba(74, 222, 128, 0.92); }
+.as-carte-scan.as-carte-couleur .as-carte-info { color: #4ade80; }
+.as-carte-scan.as-carte-couleur:hover { border-color: rgba(74, 222, 128, 0.5); }
+.as-drapeau { padding: 0 0.35rem; }
+.as-drapeau img { width: 17px; height: auto; display: block; }
+
+/* Titre et progression par-dessus le bas de l'image */
+.as-carte-texte {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    padding: 0.55rem 0.7rem 0.6rem;
+}
+.as-carte-titre {
+    font-size: 0.86rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    line-height: 1.2;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+.as-carte-info {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.2rem;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #38bdf8;
+}
+.as-carte-scan .as-carte-info { color: #cbd5e1; }
+.as-carte-info svg { width: 12px; height: 12px; flex: 0 0 auto; }
+.as-carte-info span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Bouton ⋯ en haut à droite, plus discret sur ces cartes */
+.as-carte .pf-carte-btn {
+    top: 0.45rem;
+    right: 0.45rem;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.14);
+    border-radius: 7px;
+    background: rgba(6, 14, 26, 0.78);
+}
+
+/* Bouton « ⋯ » sur les cartes */
+.pf-carte-btn {
+    position: absolute;
+    top: 0.3rem;
+    right: 0.3rem;
+    z-index: 20;
+    width: 1.75rem;
+    height: 1.75rem;
+    display: grid;
+    place-items: center;
+    border-radius: 6px;
+    border: 2px solid rgba(120, 130, 160, 0.5);
+    background: rgba(0, 0, 0, 0.7);
+    color: #f3f4f6;
+    cursor: pointer;
+}
+.pf-carte-btn:hover,
+.pf-carte-btn[aria-expanded="true"] { background: rgba(0, 0, 0, 0.9); border-color: #38bdf8; color: #38bdf8; }
+.pf-carte-btn svg { width: 16px; height: 16px; }
+
+.pf-carte-menu {
+    position: absolute;
+    z-index: 80;
+    min-width: 230px;
+    padding: 0.3rem;
+    border-radius: 11px;
+    border: 1px solid rgba(56, 189, 248, 0.40);
+    background: #0c1a2e;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+    animation: as-fade 0.12s ease;
+}
+.pf-carte-menu[hidden] { display: none; }
+.pf-carte-menu .pf-coche { margin-left: auto; color: #38bdf8; font-weight: 800; }
+.pf-carte-menu [data-liste="watch"] svg { color: #3b82f6; }
+.pf-carte-menu [data-liste="fav"] svg { color: #facc15; }
+.pf-carte-menu [data-liste="vu"] svg { color: #4ade80; }
+
+/* Petit message en bas de l'écran après une action */
+.pf-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 24px;
+    z-index: 3000;
+    transform: translateX(-50%);
+    max-width: 90%;
+    padding: 0.7rem 1.1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(56, 189, 248, 0.40);
+    background: #0c1a2e;
+    color: #e6f0fa;
+    font-size: 0.86rem;
+    font-weight: 600;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    animation: as-fade 0.15s ease;
+}
+.pf-toast.pf-toast-alerte { color: #fde68a; border-color: rgba(250, 204, 21, 0.45); }
+
+/* Menu des cartes */
+.pf-carte-menu button {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    width: 100%;
+    padding: 0.55rem 0.65rem;
+    border: none;
+    border-radius: 7px;
+    background: none;
+    color: #e6f0fa;
+    font-size: 0.84rem;
+    text-align: left;
+    cursor: pointer;
+}
+.pf-carte-menu button:hover { background: rgba(56, 189, 248, 0.12); }
+.pf-carte-menu svg { width: 17px; height: 17px; flex: 0 0 auto; }
+.pf-menu-danger { color: #f87171 !important; }
+
+
+@media (prefers-reduced-motion: reduce) {
+    .as-carte { transition: border-color 0.18s ease; }
+}
+
+/* Dans les rangées qui défilent (accueil…) : largeur fixe, espace entre les cartes */
+.grabScroll > .as-carte { flex: 0 0 15rem; margin-right: 1rem; }
+.grabScroll > .as-carte:last-child { margin-right: 0; }
+@media (max-width: 767px) {
+    .grabScroll > .as-carte { flex-basis: min(80%, 17rem); margin-right: 0.75rem; }
+}
+
+/* Infos secondaires (heure de sortie…) et état (Reporté…) */
+.as-carte-temps { margin-left: auto; padding-left: 0.5rem; color: #94a3b8; font-weight: 600; white-space: nowrap; }
+/* L'heure reste toujours entière : c'est le texte épisode/chapitre qui se raccourcit (« … ») */
+.as-carte-info > span:not(.as-carte-temps) { flex: 1 1 auto; min-width: 0; }
+.as-carte-info .as-carte-temps { flex: 0 0 auto; overflow: visible; text-overflow: clip; }
+.as-etat {
+    display: inline-flex;
+    align-items: center;
+    height: 1.2rem;
+    padding: 0 0.4rem;
+    border-radius: 5px;
+    background: rgba(127, 29, 29, 0.85);
+    color: #fecaca;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* Catalogue : grille de cartes (une par ligne sur téléphone, comme sur le profil) */
+#list_catalog { row-gap: 1.25rem; padding-left: 1rem; padding-right: 1rem; }
+#list_catalog > .as-carte { flex: 0 0 15rem; }
+@media (max-width: 767px) {
+    #list_catalog > .as-carte { flex: 0 0 min(100%, 19rem); }
+}
+
+/* ===== Légèreté (octobre 2026) =====
+   - les cartes hors de l'écran ne sont pas dessinées (gros gain sur le planning et le catalogue) ;
+   - sur téléphone : pas d'icône au survol ni d'animation (inutiles au doigt). */
+.as-carte {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 9rem;
+}
+@media (hover: none), (max-width: 767px) {
+    .as-carte-survol { display: none; }
+    .as-carte,
+    .as-carte:hover { transition: none; transform: none; }
+}
+
+/* Lien « Voir tout » à droite du titre des rangées de l'accueil (page /nouveautes/) */
+.voir-tout {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    align-self: center;
+    margin-left: auto;
+    padding: 0.2rem 0.4rem 0.2rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    color: #94a3b8;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+    white-space: nowrap;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.voir-tout:hover { color: #ffffff; border-color: rgba(56, 189, 248, 0.55); background: rgba(56, 189, 248, 0.1); }
+.voir-tout svg { width: 15px; height: 15px; }
+
+/* États des sorties (accueil « Sorties du … » ; le planning a les mêmes, voir css/planning.css) */
+.as-carte.pl-sorti { opacity: 0.68; transition: opacity 0.15s ease; }
+.as-carte.pl-sorti:hover { opacity: 1; }
+.as-carte.pl-sorti .as-etat { background: rgba(22, 101, 52, 0.9); color: #bbf7d0; }
+.as-carte.pl-retard .as-etat { background: rgba(154, 52, 18, 0.9); color: #fed7aa; }
+.as-carte.pl-reporte { border-color: rgba(248, 113, 113, 0.8); box-shadow: inset 0 0 0 1px rgba(248, 113, 113, 0.35), 0 0 18px rgba(220, 38, 38, 0.25); }
+.as-carte.pl-reporte .as-carte-image::after { background: linear-gradient(to top, rgba(127, 29, 29, 0.85) 0%, rgba(69, 10, 10, 0.25) 60%, rgba(69, 10, 10, 0.1) 100%); }
+.as-carte.pl-reporte .as-etat { background: #b91c1c; color: #ffffff; }
+.as-carte.pl-reporte.pl-passe { opacity: 0.75; }
+
+/* Avancement de l'historique (profil.js, /api/avancement.php) */
+.as-etat.as-av-ajour { background: rgba(22, 101, 52, 0.9); color: #bbf7d0; }
+.as-etat.as-av-retard { background: rgba(30, 41, 59, 0.92); color: #cbd5e1; }
+.as-etat.as-av-nouveau { background: #b91c1c; color: #ffffff; }

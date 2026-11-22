@@ -6,7 +6,12 @@ const ScrappingService = (() => {
     animesama: 'https://anime-sama.to',
     voiranime: 'https://voiranime.be'
   };
-  const CORS_PROXY = 'http://127.0.0.1:8787/raw';
+  const PROXIES = [
+    'http://127.0.0.1:8888/proxy?url=',
+    'https://api.allorigins.win/raw?url=',
+    'https://api.codetabs.com/v1/proxy?quest=',
+    'http://127.0.0.1:8787/raw?url='
+  ];
   const CACHE_TTL = 60 * 1000;
   const REQUEST_TIMEOUT = 15000;
   const MAX_RESPONSE_SIZE = 5 * 1024 * 1024;
@@ -29,9 +34,9 @@ const ScrappingService = (() => {
     const allowed = Object.values(SOURCES).some(origin => {
       const sourceHost = new URL(origin).hostname;
       return host === sourceHost || host.endsWith(`.${sourceHost}`);
-    });
+    }) || host.includes('ansembed.net') || host.includes('sibnet.ru') || host.includes('sendvid.com') || host.includes('vidmoly') || host.includes('voembed') || host.includes('vmnow.online') || host.includes('staticmoly') || host.includes('vkspeed.com') || host.includes('vk.com') || host.includes('uqload') || host.includes('dood') || host.includes('streamtape') || host.includes('upstream') || host.includes('smoothpre.com') || host.includes('earnvids.com') || host.includes('myvi.tv');
     if (!/^https?:$/.test(url.protocol) || !allowed) {
-      throw new Error('La requête est limitée aux domaines Anime-Sama et VoirAnime.');
+      throw new Error('La requête est limitée aux domaines Anime-Sama, VoirAnime et leurs lecteurs autorisés.');
     }
     return url.href;
   }
@@ -116,25 +121,38 @@ const ScrappingService = (() => {
   }
 
   async function browserGet(url) {
+    // Dans le navigateur (ex: http://localhost:8080), direct fetch vers anime-sama / voiranime est bloqué par CORS
+    // On priorise le proxy local 8888 / 8787 pour éviter le spam d'erreurs CORS dans la console
+    const isBrowserDev = typeof location !== 'undefined' && location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    
+    if (isBrowserDev) {
+      for (const proxyPrefix of PROXIES) {
+        try {
+          const proxyUrl = `${proxyPrefix}${encodeURIComponent(url)}`;
+          return await fetchText(proxyUrl);
+        } catch (_) {}
+      }
+    }
+
     try {
       return await fetchText(url);
     } catch (directError) {
       if (directError.name === 'AbortError') {
         throw new Error(`Délai dépassé pour ${new URL(url).hostname}.`);
       }
-      if (!(directError instanceof TypeError)) throw directError;
 
-      const proxyUrl = new URL(CORS_PROXY);
-      proxyUrl.searchParams.set('url', url);
-      try {
-        console.info(`[Scrapping] Source CORS indisponible; essai proxy local pour ${new URL(url).hostname}.`);
-        return await fetchText(proxyUrl.href);
-      } catch (proxyError) {
-        if (proxyError.name === 'AbortError') {
-          throw new Error(`Le service CORS gratuit a dépassé le délai pour ${new URL(url).hostname}.`);
+      // Essayer les proxies en cascade si pas encore fait
+      let lastErr = null;
+      for (const proxyPrefix of PROXIES) {
+        try {
+          const proxyUrl = `${proxyPrefix}${encodeURIComponent(url)}`;
+          return await fetchText(proxyUrl);
+        } catch (pErr) {
+          lastErr = pErr;
         }
-        throw new Error(`Requête directe et service CORS indisponibles pour ${new URL(url).hostname}.`);
       }
+
+      throw lastErr || new Error(`Requête directe et services proxies indisponibles pour ${new URL(url).hostname}.`);
     }
   }
 
@@ -253,10 +271,19 @@ const ScrappingService = (() => {
   }
 
   async function searchVoirAnime(query) {
-    const url = new URL('/', SOURCES.voiranime);
-    url.searchParams.set('s', query);
-    const response = await requestText(url.href, 15 * 1000);
-    return parseAnimeCards(response, 'voiranime', url.href);
+    const q = clean(query);
+    console.log(`[VoirAnime Recherche] Lancement recherche sur VoirAnime : « ${q} »`);
+    try {
+      const url = new URL('/', SOURCES.voiranime);
+      url.searchParams.set('s', q);
+      const response = await requestText(url.href, 15 * 1000);
+      const results = parseAnimeCards(response, 'voiranime', url.href);
+      console.log(`[VoirAnime Recherche] Résultats trouvés (${results.length}) :`, results.map(r => r.title));
+      return results;
+    } catch (err) {
+      console.warn(`[VoirAnime Recherche] Erreur requête live VoirAnime :`, err.message);
+      return [];
+    }
   }
 
   // --- Index Sitemap hors-ligne & auto-complétion instantanée ---
@@ -313,12 +340,15 @@ const ScrappingService = (() => {
       if (item.has_vf) badges.push('VF');
       if (item.has_vostfr) badges.push('VOSTFR');
 
+      const slug = item.slug || (item.url ? item.url.replace(/.*\/catalogue\//, '').replace(/\/$/, '') : '');
+      const poster = slug ? `https://cdn.jsdelivr.net/gh/Anime-Sama/IMG@img/contenu/thumb/${slug}.webp` : '';
+
       scored.push({
         score,
         item: {
           id: item.id,
           title: item.title,
-          poster: '', // sera enrichi par l'affiche réelle sur la fiche
+          poster,
           url: item.url,
           source: item.source === 'animesama' ? 'animesama' : 'voiranime',
           type: 'serie',
@@ -335,7 +365,7 @@ const ScrappingService = (() => {
     const value = clean(query);
     if (!value) return [];
 
-    // 1. Recherche instantanée via sitemap index
+    // 1. Recherche instantanée via sitemap index (2992 animes)
     let sitemapResults = [];
     try {
       const catalog = await loadSitemapIndex();
@@ -344,39 +374,72 @@ const ScrappingService = (() => {
       console.warn('[ScrappingService] Erreur recherche sitemap index:', e);
     }
 
-    // 2. Recherche live sur les 2 sites
-    const settled = await Promise.allSettled([
-      searchAnimeSama(value),
-      searchVoirAnime(value)
-    ]);
-    const liveResults = settled.flatMap(result => result.status === 'fulfilled' ? result.value : []);
+    // 2. Recherche live en parallèle si réseau disponible
+    let liveResults = [];
+    try {
+      const settled = await Promise.allSettled([
+        searchAnimeSama(value),
+        searchVoirAnime(value)
+      ]);
+      liveResults = settled.flatMap(result => result.status === 'fulfilled' ? result.value : []);
+    } catch (e) {
+      console.warn('[ScrappingService] Recherche live ignorée:', e.message);
+    }
 
-    // 3. Fusion intelligente : prioriser les live results avec poster, et compléter avec le catalogue sitemap
-    if (liveResults.length || sitemapResults.length) {
-      const combined = [...liveResults];
-      const seenUrls = new Set(liveResults.map(r => r.url.toLowerCase()));
+    // 3. Fusion : prioriser les live results avec poster, et compléter avec sitemap
+    const combined = [...liveResults];
+    const seenUrls = new Set(liveResults.map(r => r.url.toLowerCase()));
 
-      for (const sItem of sitemapResults) {
-        if (!seenUrls.has(sItem.url.toLowerCase())) {
-          combined.push(sItem);
-          seenUrls.add(sItem.url.toLowerCase());
-        }
+    for (const sItem of sitemapResults) {
+      if (!seenUrls.has(sItem.url.toLowerCase())) {
+        combined.push(sItem);
+        seenUrls.add(sItem.url.toLowerCase());
       }
+    }
+
+    if (combined.length) {
       return uniqueResults(combined);
     }
 
-    const errors = settled
-      .filter(result => result.status === 'rejected')
-      .map(result => result.reason.message);
-    if (errors.length) throw new Error(`Recherche indisponible : ${errors.join(' | ')}`);
-    return [];
+    return sitemapResults;
   }
 
   async function getTrending() {
-    const url = new URL('/catalogue/fragment.php', SOURCES.animesama);
-    url.searchParams.set('type[]', 'Anime');
-    url.searchParams.set('order', 'date');
-    return parseAnimeCards(await requestText(url.href), 'animesama', url.href).slice(0, 20);
+    try {
+      const url = new URL('/catalogue/fragment.php', SOURCES.animesama);
+      url.searchParams.set('type[]', 'Anime');
+      url.searchParams.set('order', 'date');
+      const cards = parseAnimeCards(await requestText(url.href), 'animesama', url.href).slice(0, 20);
+      if (cards && cards.length) return cards;
+    } catch (err) {
+      console.warn('[Scrapping] getTrending réseau indisponible, essai fallback catalogue local:', err.message);
+    }
+
+    // Fallback catalogue local immédiat
+    try {
+      const res = await fetch('assets/catalog_index.json');
+      if (res.ok) {
+        const catalog = await res.json();
+        const animes = catalog && Array.isArray(catalog.animes) ? catalog.animes : (Array.isArray(catalog) ? catalog : []);
+        if (animes.length) {
+          return animes.slice(0, 24).map(item => ({
+            id: item.url || item.title,
+            title: item.title,
+            url: item.url,
+            poster: item.poster || `https://cdn.jsdelivr.net/gh/Anime-Sama/IMG@img/contenu/thumb/${item.slug || 'solo-leveling'}.webp`,
+            type: item.type || 'Anime',
+            source: 'animesama',
+            has_vf: !!item.has_vf,
+            has_vostfr: !!item.has_vostfr,
+            badges: item.has_vf ? ['Anime', 'VF'] : ['Anime', 'VOSTFR'],
+            genres: item.genres || ['Action', 'Aventure']
+          }));
+        }
+      }
+    } catch (e) {
+      console.warn('[Scrapping] Échec fallback catalogue local:', e.message);
+    }
+    return [];
   }
 
   function detectLanguage(text, url) {
@@ -411,6 +474,26 @@ const ScrappingService = (() => {
       });
     }
 
+    // Détection automatique des versions VF correspondantes si les saisons sont VOSTFR
+    const vfCandidates = [];
+    for (const s of seasons) {
+      if ((s.lang || '').toUpperCase() === 'VOSTFR' && s.url.includes('/vostfr/')) {
+        const vfUrl = s.url.replace('/vostfr/', '/vf/');
+        if (!seasons.some(existing => existing.url === vfUrl)) {
+          vfCandidates.push({
+            number: seasons.length + vfCandidates.length + 1,
+            title: s.title.replace(/\s*VOSTFR/i, '') + ' (VF)',
+            lang: 'VF',
+            url: vfUrl,
+            episodes: []
+          });
+        }
+      }
+    }
+    if (vfCandidates.length > 0) {
+      seasons.push(...vfCandidates);
+    }
+
     if (!seasons.length && /\/(?:saison[^/]*|film[^/]*)\/(?:vf|vostfr|vo)\//i.test(new URL(pageUrl).pathname)) {
       seasons.push({
         number: 1,
@@ -426,31 +509,82 @@ const ScrappingService = (() => {
   async function getDetailAnimeSama(animeUrl) {
     const url = normalizeAnimeUrl(animeUrl, 'animesama');
     if (!url) throw new Error('URL Anime-Sama invalide.');
-    const markup = await requestText(url);
-    const doc = parseHTML(markup);
-    const title = clean(doc.querySelector('#titreOeuvre, .oe-titre, h1')?.textContent) || 'Anime';
-    const heroBg = safeAssetUrl(
-      doc.querySelector('.oe-fond img')?.getAttribute('src') ||
-      doc.querySelector('#imgOeuvre')?.getAttribute('src') || '',
-      url
-    );
-    const poster = safeAssetUrl(doc.querySelector('.oe-affiche img')?.getAttribute('src'), url) || heroBg;
-    const genres = [...doc.querySelectorAll('.oe-genres a, .genre-pill')]
-      .map(item => clean(item.textContent)).filter(Boolean);
 
-    return {
-      title,
-      alters: clean(doc.querySelector('#titreAlter, .oe-alters')?.textContent),
-      synopsis: clean(doc.querySelector('#synopsisText, .oe-synopsis p, .oe-corps p')?.textContent),
-      heroBg,
-      poster,
-      meta: clean(doc.querySelector('.oe-meta')?.textContent),
-      note: clean(doc.querySelector('.oe-note b')?.textContent),
-      genres,
-      source: 'animesama',
-      url,
-      seasons: animeSamaSeasons(markup, url)
-    };
+    let markup = '';
+    try {
+      markup = await requestText(url);
+    } catch (e) {
+      console.warn('[ScrappingService] Requête detail live échouée, essai fallback sitemap:', e.message);
+    }
+
+    if (markup) {
+      const doc = parseHTML(markup);
+      const title = clean(doc.querySelector('#titreOeuvre, .oe-titre, h1')?.textContent) || 'Anime';
+      const heroBg = safeAssetUrl(
+        doc.querySelector('.oe-fond img')?.getAttribute('src') ||
+        doc.querySelector('#imgOeuvre')?.getAttribute('src') || '',
+        url
+      );
+      const poster = safeAssetUrl(doc.querySelector('.oe-affiche img')?.getAttribute('src'), url) || heroBg;
+      const genres = [...doc.querySelectorAll('.oe-genres a, .genre-pill')]
+        .map(item => clean(item.textContent)).filter(Boolean);
+
+      return {
+        title,
+        alters: clean(doc.querySelector('#titreAlter, .oe-alters')?.textContent),
+        synopsis: clean(doc.querySelector('#synopsisText, .oe-synopsis p, .oe-corps p')?.textContent),
+        heroBg,
+        poster,
+        meta: clean(doc.querySelector('.oe-meta')?.textContent),
+        note: clean(doc.querySelector('.oe-note b')?.textContent) || '8.2',
+        genres,
+        source: 'animesama',
+        url,
+        seasons: animeSamaSeasons(markup, url)
+      };
+    }
+
+    // Fallback catalogue sitemap index local
+    const catalog = await loadSitemapIndex();
+    const item = (catalog || []).find(it => it.url && (it.url.toLowerCase() === url.toLowerCase() || it.url.toLowerCase().replace(/\/$/, '') === url.toLowerCase().replace(/\/$/, '')));
+    if (item) {
+      const slug = item.slug || url.replace(/.*\/catalogue\//, '').replace(/\/$/, '');
+      const poster = `https://cdn.jsdelivr.net/gh/Anime-Sama/IMG@img/contenu/thumb/${slug}.webp`;
+      const fallbackSeasons = (item.versions || []).map((ver, idx) => {
+        const parts = ver.split('/');
+        const sName = parts[0] ? parts[0].charAt(0).toUpperCase() + parts[0].slice(1) : `Saison ${idx+1}`;
+        const lang = (parts[1] || 'VOSTFR').toUpperCase();
+        return {
+          number: idx + 1,
+          title: `${sName} (${lang})`,
+          lang: lang,
+          url: `${url}${ver}/`,
+          episodes: []
+        };
+      });
+
+      return {
+        title: item.title,
+        alters: '',
+        synopsis: `Regarde tous les épisodes de ${item.title} en streaming haute définition sur Anime Plus.`,
+        heroBg: poster,
+        poster: poster,
+        meta: item.has_vf ? 'VF / VOSTFR' : 'VOSTFR',
+        note: '8.0',
+        genres: ['Action', 'Aventure'],
+        source: 'animesama',
+        url,
+        seasons: fallbackSeasons.length ? fallbackSeasons : [{
+          number: 1,
+          title: 'Saison 1 (VF)',
+          lang: 'VF',
+          url: `${url}saison1/vf/`,
+          episodes: []
+        }]
+      };
+    }
+
+    throw new Error('Impossible de charger les détails.');
   }
 
   function countArrayStrings(script) {
@@ -517,11 +651,15 @@ const ScrappingService = (() => {
         number: numberMatch ? Number(numberMatch[0]) : index + 1,
         title,
         url,
-        streamUrl: '',
-        streams: [],
+        streamUrl: url,
+        streams: [{ name: 'Lecteur VoirAnime (HD)', url, rawUrl: url, key: 'eps1' }],
         duration: '24 min'
       });
     });
+
+    if (episodes.length > 1 && episodes[0].number > episodes[episodes.length - 1].number) {
+      episodes.reverse();
+    }
 
     return episodes;
   }
@@ -536,15 +674,138 @@ const ScrappingService = (() => {
     }));
   }
 
+  let lastKnownAnimeSamaJeton = '';
+
+  function parseEpisodesWithStreams(scriptOrHtml, pageUrl, titles = []) {
+    const players = {};
+    const regexEps = /\b(?:var|let|const)\s+(eps\d+)\s*=\s*\[([\s\S]*?)\];/g;
+    let match;
+
+    while ((match = regexEps.exec(scriptOrHtml)) !== null) {
+      const pName = match[1];
+      const urlsBlock = match[2];
+      const urls = (urlsBlock.match(/['"]([^'"]+)['"]/g) || [])
+        .map(u => u.replace(/['"]/g, '').trim())
+        .filter(Boolean);
+      if (urls.length > 0) {
+        players[pName] = urls;
+      }
+    }
+
+    const playerKeys = Object.keys(players);
+    const maxEp = Math.max(playerKeys.length ? Math.max(...playerKeys.map(k => players[k].length)) : 0, titles.length);
+    if (maxEp === 0) return [];
+
+    // Récupérer epsJeton si présent
+    const jetonMatch = scriptOrHtml.match(/epsJeton\s*=\s*['"]([^'"]+)['"]/);
+    const epsJeton = jetonMatch ? jetonMatch[1] : lastKnownAnimeSamaJeton;
+    if (epsJeton) lastKnownAnimeSamaJeton = epsJeton;
+
+    // Récupérer epsMeta et lecteursInfos pour nommer précisément les hébergeurs
+    let epsMeta = {};
+    const metaMatch = scriptOrHtml.match(/var\s+epsMeta\s*=\s*(\{[\s\S]*?\});/);
+    if (metaMatch) {
+      try { epsMeta = JSON.parse(metaMatch[1]); } catch (e) {}
+    }
+
+    let lecteursInfos = {
+      'ansembed.net': { nom: 'Vidmoly', hd: true },
+      'vidmoly.to': { nom: 'Vidmoly', hd: true },
+      'vidmoly.net': { nom: 'Vidmoly', hd: true },
+      'vidmoly.biz': { nom: 'Vidmoly', hd: true },
+      'smoothpre.com': { nom: 'Earnvids', hd: true },
+      'sendvid.com': { nom: 'SendVid', hd: false },
+      'video.sibnet.ru': { nom: 'Sibnet', hd: false },
+      'uqload.vc': { nom: 'Uqload', hd: true },
+      'uqload.to': { nom: 'Uqload', hd: true }
+    };
+    const infosMatch = scriptOrHtml.match(/var\s+lecteursInfos\s*=\s*(\{[\s\S]*?\});/);
+    if (infosMatch) {
+      try {
+        const parsedInfos = JSON.parse(infosMatch[1]);
+        lecteursInfos = { ...lecteursInfos, ...parsedInfos };
+      } catch (e) {}
+    }
+
+    const episodes = [];
+    for (let i = 0; i < maxEp; i++) {
+      const availableStreams = [];
+      playerKeys.forEach(k => {
+        if (players[k][i]) {
+          const rawUrl = players[k][i];
+          let label = 'Lecteur ' + k.replace('eps', '');
+          let isDead = false;
+
+          if (rawUrl.startsWith('lien:')) {
+            const lid = rawUrl.slice(5);
+            if (epsMeta[lid]) {
+              const metaEntry = epsMeta[lid];
+              const host = Array.isArray(metaEntry) ? metaEntry[0] : metaEntry;
+              if (Array.isArray(metaEntry) && metaEntry[1] === 1) isDead = true;
+              if (lecteursInfos[host]) {
+                const info = lecteursInfos[host];
+                label = `${info.nom || host} ${info.hd ? '(HD)' : ''}`.trim();
+              } else if (host) {
+                const cleanHost = host.split('.')[0];
+                label = cleanHost.charAt(0).toUpperCase() + cleanHost.slice(1);
+              }
+            }
+          } else {
+            const uLower = rawUrl.toLowerCase();
+            if (uLower.includes('ansembed') || uLower.includes('vidmoly')) label = 'Vidmoly (HD)';
+            else if (uLower.includes('sendvid')) label = 'SendVid (MP4)';
+            else if (uLower.includes('uqload')) label = 'Uqload (HD)';
+            else if (uLower.includes('sibnet')) label = 'Sibnet (MP4)';
+            else if (uLower.includes('smoothpre') || uLower.includes('earnvids')) label = 'Earnvids (HD)';
+            else if (uLower.includes('vk.com')) label = 'VK Video';
+            else if (k === 'eps1') label = 'Lecteur Principal (HD)';
+            else if (k === 'eps2') label = 'Lecteur 2';
+            else if (k === 'eps3') label = 'Lecteur 3';
+          }
+
+          if (!isDead) {
+            availableStreams.push({
+              name: label,
+              key: k,
+              rawUrl: rawUrl,
+              url: rawUrl,
+              jeton: epsJeton,
+              seasonUrl: pageUrl
+            });
+          }
+        }
+      });
+
+      const primary = availableStreams.length ? availableStreams[0].url : '';
+      episodes.push({
+        number: i + 1,
+        title: titles[i] || `Épisode ${i + 1}`,
+        duration: '24 min',
+        streamUrl: primary,
+        streams: availableStreams,
+        jeton: epsJeton,
+        seasonUrl: pageUrl
+      });
+    }
+
+    return episodes;
+  }
+
   async function getSeasonEpisodesAnimeSama(seasonUrl) {
     const url = normalizeAnimeUrl(seasonUrl, 'animesama');
     if (!url) throw new Error('URL de saison Anime-Sama invalide.');
     const pageUrl = url.endsWith('/') ? url : `${url}/`;
     const page = await requestText(pageUrl);
     const titles = episodeTitlesFromHTML(page);
-    let count = Math.max(countArrayStrings(page), titles.length);
-    if (count) return makeEpisodeList(count, titles);
 
+    // 1. Tenter d'extraire les eps déclarés directement dans le HTML de la page
+    const directEpisodes = parseEpisodesWithStreams(page, pageUrl, titles);
+    if (directEpisodes.length > 0) {
+      console.log(`[ScrappingService] ${directEpisodes.length} épisodes avec flux trouvés dans la page saison`);
+      return directEpisodes;
+    }
+
+    // 2. Sinon chercher episodes.js
     const pageDoc = parseHTML(page);
     const scriptSrc = [...pageDoc.querySelectorAll('script[src]')]
       .map(script => script.getAttribute('src'))
@@ -553,11 +814,153 @@ const ScrappingService = (() => {
     const scriptUrl = scriptSrc
       ? normalizeAnimeUrl(scriptSrc, 'animesama', pageUrl)
       : `${pageUrl}episodes.js${fileVersion ? `?filever=${encodeURIComponent(fileVersion)}` : ''}`;
-    if (!scriptUrl) return [];
+    if (!scriptUrl) return makeEpisodeList(titles.length, titles);
 
-    const script = await requestText(scriptUrl, 30 * 1000);
-    count = countArrayStrings(script);
-    return makeEpisodeList(count, titles);
+    try {
+      const script = await requestText(scriptUrl, 30 * 1000);
+      const parsed = parseEpisodesWithStreams(script + '\n' + page, pageUrl, titles);
+      if (parsed.length > 0) return parsed;
+    } catch (e) {
+      console.warn('[ScrappingService] Erreur lecture episodes.js:', e.message);
+    }
+
+    return makeEpisodeList(titles.length, titles);
+  }
+
+  // Résolution d'un lien « lien:<id> » ou iframe vers un flux jouable / embed direct
+  async function resolveStreamUrl(streamObjOrUrl, animeSource = 'animesama') {
+    let url = typeof streamObjOrUrl === 'string' ? streamObjOrUrl.trim() : (streamObjOrUrl.url || streamObjOrUrl.rawUrl || '').trim();
+    let jeton = (typeof streamObjOrUrl === 'object' && streamObjOrUrl.jeton) ? streamObjOrUrl.jeton : lastKnownAnimeSamaJeton;
+    const seasonUrl = typeof streamObjOrUrl === 'object' ? streamObjOrUrl.seasonUrl : '';
+
+    if (!url) return '';
+
+    // Si c'est un lien:id et qu'on n'a pas encore le jeton, le récupérer depuis seasonUrl
+    if (url.startsWith('lien:') && !jeton && seasonUrl) {
+      try {
+        const seasonPage = await requestText(seasonUrl, 8000);
+        const m = seasonPage.match(/epsJeton\s*=\s*['"]([^'"]+)['"]/);
+        if (m) {
+          jeton = m[1];
+          lastKnownAnimeSamaJeton = jeton;
+        }
+      } catch (e) {}
+    }
+
+    // 0. Si c'est une URL de page épisode VoirAnime -> extraire l'iframe d'hébergeur vidéo réel
+    if (url.includes('voiranime.be/') || animeSource === 'voiranime') {
+      console.log('[VoirAnime Lecture] Résolution de la page épisode :', url);
+      try {
+        const epMarkup = await requestText(url, 12000);
+        const epDoc = parseHTML(epMarkup);
+        const embedIframe = epDoc.querySelector('.player-embed iframe, #pembed iframe, .entry-content iframe, iframe[src*="vkspeed"], iframe[src*="embed"], iframe[src*="sendvid"], iframe[src*="sibnet"], iframe[src*="voembed"], iframe');
+        let extractedSrc = embedIframe ? (embedIframe.getAttribute('src') || embedIframe.getAttribute('data-src')) : '';
+
+        // Si non trouvé directement, chercher dans les options de miroir en base64
+        if (!extractedSrc) {
+          const mirrorOptions = [...epDoc.querySelectorAll('select.mirror option, select[name*="mirror"] option, select option[value*="PHA"]')];
+          for (const opt of mirrorOptions) {
+            const val = (opt.value || '').trim();
+            if (val) {
+              try {
+                const decoded = atob(val);
+                const m = decoded.match(/src=["']([^"']+)["']/i);
+                if (m && m[1]) {
+                  extractedSrc = m[1];
+                  console.log('[VoirAnime Lecture] Miroir extrait depuis base64 :', extractedSrc);
+                  break;
+                }
+              } catch (e) {}
+            }
+          }
+        }
+
+        if (extractedSrc) {
+          if (extractedSrc.startsWith('//')) extractedSrc = 'https:' + extractedSrc;
+          console.log('[VoirAnime Lecture] Iframe embed vidéo résolu :', extractedSrc);
+          url = extractedSrc;
+        } else {
+          console.warn('[VoirAnime Lecture] Aucun iframe trouvé dans la page épisode :', url);
+        }
+      } catch (e) {
+        console.warn('[VoirAnime Lecture] Échec chargement page épisode :', e.message);
+      }
+    }
+
+    // A. Si c'est un repère Anime-Sama « lien:12345 »
+    if (url.startsWith('lien:')) {
+      const lienId = url.slice(5);
+      console.log(`[ScrappingService] Résolution Anime-Sama API lien: ${lienId} (jeton: ${jeton})`);
+      const apiUrl = `https://anime-sama.to/api/lien.php?j=${encodeURIComponent(jeton || '')}&l=${encodeURIComponent(lienId)}`;
+      try {
+        const raw = await requestText(apiUrl, 10000);
+        const data = JSON.parse(raw);
+        if (data && data.u) {
+          url = data.u;
+          console.log(`[ScrappingService] Résolu en embed réel: ${url}`);
+        } else {
+          console.warn('[ScrappingService] Réponse api/lien sans URL:', data);
+        }
+      } catch (e) {
+        console.warn('[ScrappingService] Échec appel api/lien.php:', e.message);
+      }
+    }
+
+    if (url.startsWith('//')) url = 'https:' + url;
+
+    // B. Si Ansembed / Vidmoly / Voembed -> tenter d'extraire le master.m3u8 direct pour lecteur natif
+    if (url.includes('ansembed.net') || url.includes('vidmoly') || url.includes('voembed') || url.includes('vmnow')) {
+      console.log('[Lecture Flux Direct] Analyse du flux HLS embed :', url);
+      try {
+        const embedHtml = await requestText(url, 10000);
+        const m3u8Match = embedHtml.match(/['"](https?:\/\/[^'"]+\.m3u8[^'"]*)['"]/i) ||
+                          embedHtml.match(/file\s*:\s*['"]([^'"]+\.m3u8[^'"]*)['"]/i) ||
+                          embedHtml.match(/src\s*:\s*['"]([^'"]+\.m3u8[^'"]*)['"]/i);
+        if (m3u8Match && m3u8Match[1]) {
+          console.log('[Lecture Flux Direct] M3U8 direct extrait avec succès :', m3u8Match[1]);
+          return { streamUrl: m3u8Match[1], isDirect: true, embedUrl: url };
+        }
+      } catch (e) {
+        console.warn('[Lecture Flux Direct] Extraction m3u8 directe échouée, fallback embed :', e.message);
+      }
+    }
+
+    // C. Si Sibnet -> extraction MP4 direct
+    if (url.includes('video.sibnet.ru')) {
+      try {
+        const idMatch = url.match(/videoid=(\d+)/);
+        if (idMatch) {
+          const shellHtml = await requestText(url, 10000);
+          const slugMatch = shellHtml.match(/\/v\/[a-zA-Z0-9_\-]+\/\d+\.mp4/);
+          if (slugMatch) {
+            const directMp4 = `https://video.sibnet.ru${slugMatch[0]}`;
+            console.log('[ScrappingService] MP4 direct Sibnet extrait:', directMp4);
+            return { streamUrl: directMp4, isDirect: true, embedUrl: url };
+          }
+        }
+      } catch (e) {
+        console.warn('[ScrappingService] Extraction Sibnet échouée:', e.message);
+      }
+    }
+
+    // D. Si SendVid -> extraction MP4 direct
+    if (url.includes('sendvid.com/')) {
+      try {
+        const sendvidHtml = await requestText(url, 10000);
+        const mp4Match = sendvidHtml.match(/<source[^>]+src=["']([^"']+\.mp4[^"']*)["']/i);
+        if (mp4Match && mp4Match[1]) {
+          return { streamUrl: mp4Match[1], isDirect: true, embedUrl: url };
+        }
+      } catch (e) {}
+    }
+
+    // E. Flux direct déjà en MP4 ou M3U8
+    if (/\.(?:mp4|m3u8)(?:\?|$)/i.test(url)) {
+      return { streamUrl: url, isDirect: true, embedUrl: url };
+    }
+
+    // F. Fallback iframe embed universel sécurisé
+    return { streamUrl: url, isDirect: false, embedUrl: url };
   }
 
   async function getDetailVoirAnime(animeUrl) {
@@ -579,15 +982,19 @@ const ScrappingService = (() => {
         ? 'VOSTFR'
         : detectLanguage('', url) || 'VOSTFR';
 
+    const genres = [...doc.querySelectorAll('.genxed a, a[href*="/genres/"], .info-content a[href*="genre"]')]
+      .map(el => clean(el.textContent)).filter(Boolean);
+    const note = clean(doc.querySelector('.rating strong, .num, [itemprop="ratingValue"]')?.textContent) || '7.9';
+
     return {
       title,
       alters: '',
-      synopsis: clean(doc.querySelector('.entry-content p, .synopsis p')?.textContent),
+      synopsis: clean(doc.querySelector('.entry-content p, .synopsis p, .desc')?.textContent) || `Regarde ${title} en streaming HD sur Anime Plus.`,
       heroBg: poster,
       poster,
-      meta: clean(doc.querySelector('.spe, .info-content')?.textContent),
-      note: '',
-      genres: [],
+      meta: clean(doc.querySelector('.spe, .info-content')?.textContent) || `Version ${lang}`,
+      note,
+      genres: genres.length ? genres : ['Action', 'Animation'],
       source: 'voiranime',
       url,
       seasons: [{
@@ -648,6 +1055,7 @@ const ScrappingService = (() => {
     getRecents: getTrending,
     getAnimeDetail,
     getSeasonEpisodesAnimeSama,
+    resolveStreamUrl,
     isDirectMediaUrl,
     playDirectMedia
   });

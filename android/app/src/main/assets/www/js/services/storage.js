@@ -7,6 +7,7 @@ const Storage = (() => {
 
   const KEYS = {
     HISTORY: 'ap_history',
+    WATCH_HISTORY: 'ap_watch_history',
     PROGRESS: 'ap_progress',
     LIBRARY: 'ap_library',
     FAVORITES: 'ap_favorites',
@@ -58,6 +59,40 @@ const Storage = (() => {
 
   function clearHistory() {
     _set(KEYS.HISTORY, []);
+  }
+
+  // ---- Historique réel de visionnage (Streaming / Netflix-style) ----
+  function getWatchHistory() {
+    return _get(KEYS.WATCH_HISTORY, []);
+  }
+
+  function addToWatchHistory(item) {
+    // item = { anime, seasonTitle, episodeTitle, seconds, duration, percent, updatedAt }
+    if (!item || !item.anime) return;
+    const key = _getAnimeKey(item.anime);
+    if (!key) return;
+    let list = getWatchHistory();
+    list = list.filter(entry => entry && entry.anime && _getAnimeKey(entry.anime) !== key);
+    const percent = (item.duration > 0 && item.seconds > 0)
+      ? Math.min(100, Math.round((item.seconds / item.duration) * 100))
+      : (item.percent || 0);
+    list.unshift({
+      ...item,
+      percent,
+      updatedAt: Date.now()
+    });
+    if (list.length > 50) list = list.slice(0, 50);
+    _set(KEYS.WATCH_HISTORY, list);
+    if (window.CloudSync && typeof window.CloudSync.debouncedPush === 'function') {
+      window.CloudSync.debouncedPush();
+    }
+  }
+
+  function clearWatchHistory() {
+    _set(KEYS.WATCH_HISTORY, []);
+    if (window.CloudSync && typeof window.CloudSync.debouncedPush === 'function') {
+      window.CloudSync.debouncedPush();
+    }
   }
 
   // ---- Progression lecture ----
@@ -453,6 +488,9 @@ const Storage = (() => {
     getHistory,
     addHistory,
     clearHistory,
+    getWatchHistory,
+    addToWatchHistory,
+    clearWatchHistory,
     // Progress
     getProgress,
     setProgress,

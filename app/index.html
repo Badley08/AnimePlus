@@ -719,6 +719,7 @@
 <script src="js/services/auth.js"></script>
 <script src="js/services/feedback.js"></script>
 <script src="js/services/storage.js"></script>
+<script src="js/services/cloud-sync.js"></script>
 <script src="js/scrapping/scrapping.js"></script>
 <script src="js/services/downloader.js"></script>
 
@@ -842,12 +843,55 @@ const AVATAR_ICONS = [
   { id: 'fa-bolt', name: 'Éclair' },
   { id: 'fa-fish', name: 'Poisson' },
   { id: 'fa-book-open', name: 'Grimoire' },
-  { id: 'fa-dice-d20', name: 'Dé mystique' }
+  { id: 'fa-dice-d20', name: 'Dé mystique' },
+  { id: 'fa-khanda', name: 'Double Lame' },
+  { id: 'fa-eye', name: 'Sharingan' },
+  { id: 'fa-feather', name: 'Ailes Célestes' },
+  { id: 'fa-sun', name: 'Soleil Ardent' },
+  { id: 'fa-moon', name: 'Lune Obscure' },
+  { id: 'fa-gem', name: 'Cristal de Mana' },
+  { id: 'fa-skull-crossbones', name: 'Pavillon Pirate' },
+  { id: 'fa-hand-fist', name: 'Poing d’Acier' },
+  { id: 'fa-shield-heart', name: 'Bouclier Sacré' },
+  { id: 'fa-wind', name: 'Maître du Vent' },
+  { id: 'fa-water', name: 'Maître des Eaux' },
+  { id: 'fa-paw', name: 'Esprit Chimère' },
+  { id: 'fa-dna', name: 'Lignée Mutante' },
+  { id: 'fa-compass', name: 'Boussole Astrale' },
+  { id: 'fa-infinity', name: 'Infini' }
 ];
 
 let selectedAvatarId = 'fa-user-ninja';
+let selectedSetupSource = 'all';
 let authMode = 'signup';
 let authStepIndex = 0;
+
+function updateSetupSourceUI(source) {
+  selectedSetupSource = source || 'all';
+  const container = $('#setup-source-selector');
+  if (!container) return;
+  container.querySelectorAll('.setup-src-chip').forEach(btn => {
+    const isCur = (btn.dataset.src || 'all') === selectedSetupSource;
+    btn.classList.toggle('active', isCur);
+    btn.classList.toggle('on', isCur);
+    btn.setAttribute('aria-pressed', String(isCur));
+  });
+}
+
+function initSetupSourceSelector() {
+  const container = $('#setup-source-selector');
+  if (!container || container.dataset.initialized === 'true') return;
+  container.dataset.initialized = 'true';
+  container.querySelectorAll('.setup-src-chip').forEach(btn => {
+    btn.onclick = () => {
+      const src = btn.dataset.src || 'all';
+      updateSetupSourceUI(src);
+      if (typeof Storage !== 'undefined' && Storage.setSetting) {
+        Storage.setSetting('preferredSource', src);
+      }
+    };
+  });
+}
 
 function renderSetupAvatarsGrid() {
   const grid = $('#setup-avatars-grid');
@@ -892,7 +936,7 @@ function setAuthMode(mode) {
   const confirmation = $('#setup-password-confirm');
   const toggle = $('#setup-auth-toggle');
   const reset = $('#setup-reset-password');
-  const sourceLabel = $('#setup-source-selector').previousElementSibling;
+  const sourceLabel = $('#setup-source-label') || ($('#setup-source-selector') && $('#setup-source-selector').previousElementSibling);
 
   setupTitle.textContent = isProfile ? 'Modifier le profil' : isLogin ? 'Connexion' : 'Créer mon compte';
   setupSubtitle.textContent = isProfile
@@ -905,8 +949,8 @@ function setAuthMode(mode) {
   password.required = !isProfile;
   password.autocomplete = isSignup ? 'new-password' : 'current-password';
   confirmation.required = isSignup;
-  $('#setup-source-selector').hidden = true;
-  sourceLabel.hidden = true;
+  if ($('#setup-source-selector')) $('#setup-source-selector').hidden = true;
+  if (sourceLabel) sourceLabel.hidden = true;
   $('#setup-sources-note').hidden = true;
   toggle.hidden = isProfile;
   reset.hidden = !isLogin;
@@ -918,6 +962,9 @@ function setAuthMode(mode) {
   password.value = '';
   confirmation.value = '';
   renderSetupAvatarsGrid();
+  initSetupSourceSelector();
+  const currentPref = (typeof Storage !== 'undefined' && Storage.getSetting && Storage.getSetting('preferredSource')) || 'all';
+  updateSetupSourceUI(currentPref);
   renderAuthStep();
 }
 
@@ -938,6 +985,20 @@ function renderAuthStep() {
   formStep1.hidden = isLogin ? false : currentStep !== 1;
   formStep2.hidden = isLogin ? false : currentStep !== 2;
   formStep3.hidden = isLogin || currentStep !== 3;
+
+  const isStep3 = !isLogin && currentStep === 3;
+  const srcSel = $('#setup-source-selector');
+  if (srcSel) srcSel.hidden = !isStep3;
+  const srcLbl = $('#setup-source-label');
+  if (srcLbl) srcLbl.hidden = !isStep3;
+  const srcNote = $('#setup-sources-note');
+  if (srcNote) srcNote.hidden = !isStep3;
+  if (isStep3) {
+    initSetupSourceSelector();
+    const pref = selectedSetupSource || (typeof Storage !== 'undefined' && Storage.getSetting && Storage.getSetting('preferredSource')) || 'all';
+    updateSetupSourceUI(pref);
+  }
+
   $('#setup-email').hidden = authMode === 'profile';
   $('#setup-email').previousElementSibling.hidden = authMode === 'profile';
   $('#setup-name').hidden = isLogin;
@@ -1103,6 +1164,10 @@ window.onBackPressed = () => {
   }
   if (curScreen === 'setup' || curScreen === 'splash') return true;
   if (curScreen === 'ply') {
+    if (isLandscapeCinema) {
+      exitLandscapeCinema();
+      return true;
+    }
     go('det', { anime: currentAnime });
     return true;
   } else if (curScreen === 'det') {
@@ -1228,6 +1293,7 @@ $('#setup-form').onsubmit = async e => {
     if (authMode === 'profile') {
       const user = await FirebaseAuthService.updateProfile(name);
       const saved = Storage.setProfile({ name: user.displayName || name, avatar: selectedAvatarId });
+      Storage.setSetting('preferredSource', selectedSetupSource);
       updateAppAvatarUI(selectedAvatarId);
       setAuthMode('signup');
       go('set');
@@ -1247,6 +1313,7 @@ $('#setup-form').onsubmit = async e => {
 
     const displayName = user.displayName || name || user.email.split('@')[0];
     const saved = Storage.setProfile({ name: displayName, avatar: selectedAvatarId });
+    Storage.setSetting('preferredSource', selectedSetupSource);
     updateAppAvatarUI(selectedAvatarId);
     $('#setup-password').value = '';
     $('#setup-password-confirm').value = '';
@@ -1290,6 +1357,9 @@ $('#btn-edit-profile').onclick = () => {
   $('#setup-name').value = profile.name || '';
   selectedAvatarId = profile.avatar || 'fa-user-ninja';
   renderSetupAvatarsGrid();
+  initSetupSourceSelector();
+  const savedPref = (Storage.getSetting && Storage.getSetting('preferredSource')) || 'all';
+  updateSetupSourceUI(savedPref);
   go('setup');
 };
 $('#setup-later').onclick = () => {
@@ -1425,7 +1495,76 @@ $('#gf').onsubmit = async e => {
   }, 700);
 };
 
-// --- ACCUEIL (HOME) ---
+// --- ACCUEIL (HOME) & CATÉGORIES ---
+let cachedTrending = [];
+let currentHomeCat = 'all';
+
+function renderTrendingRail(list) {
+  const rail = $('#hr');
+  if (!rail) return;
+  if (list && list.length) {
+    rail.innerHTML = list.map(a => `
+      <div class="anime-card" data-anime="${encodeURIComponent(JSON.stringify(a))}">
+        <div class="anime-card-poster">
+          <img src="${a.poster}" alt="" loading="lazy">
+          <div class="anime-card-badges">
+            <span class="badge-pill badge-vf">VF</span>
+            <span class="badge-pill badge-vostfr">VOSTFR</span>
+          </div>
+        </div>
+        <div class="anime-card-body">
+          <h3 class="anime-card-title">${a.title}</h3>
+          <div class="anime-card-meta">
+            <span>Série HD</span>
+            <span><i class="fa-solid fa-star"></i> 8.0</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    rail.querySelectorAll('.anime-card').forEach(c => {
+      c.onclick = () => {
+        const anime = JSON.parse(decodeURIComponent(c.dataset.anime));
+        go('det', { anime });
+      };
+    });
+  } else {
+    rail.innerHTML = '<div class="muted">Aucun anime trouvé pour cette catégorie.</div>';
+  }
+}
+
+function filterHomeTrending(cat) {
+  if (!cachedTrending || !cachedTrending.length) return [];
+  if (cat === 'all') return cachedTrending;
+  if (cat === 'vf') {
+    return cachedTrending.filter(a => a.has_vf || (a.badges && a.badges.some(b => b.toUpperCase() === 'VF')) || /\bvf\b/i.test(a.title));
+  }
+  const catLower = cat.toLowerCase();
+  const filtered = cachedTrending.filter(a => {
+    const g = (a.genres || []).map(x => String(x).toLowerCase());
+    const t = String(a.title || '').toLowerCase();
+    return g.some(item => item.includes(catLower)) || t.includes(catLower);
+  });
+  return filtered.length ? filtered : cachedTrending;
+}
+
+function setupHomeCategories() {
+  const catButtons = $$('#home-categories-rail [data-cat]');
+  catButtons.forEach(btn => {
+    btn.onclick = () => {
+      currentHomeCat = btn.dataset.cat;
+      catButtons.forEach(b => {
+        const isSelected = b === btn;
+        b.classList.toggle('on', isSelected);
+        b.style.background = isSelected ? 'var(--accent-gradient)' : '';
+        b.style.color = isSelected ? '#04070D' : '';
+        b.style.border = isSelected ? 'none' : '';
+      });
+      renderTrendingRail(filterHomeTrending(currentHomeCat));
+    };
+  });
+}
+
 async function renderHome() {
   const wrap = $('#home-resume-wrap');
   const last = Storage.getLastWatch ? Storage.getLastWatch() : null;
@@ -1467,35 +1606,13 @@ async function renderHome() {
   }
 
   // Tendances du Moment
+  setupHomeCategories();
   const rail = $('#hr');
   try {
     const list = await ScrappingService.getTrending();
     if (list && list.length) {
-      rail.innerHTML = list.map(a => `
-        <div class="anime-card" data-anime="${encodeURIComponent(JSON.stringify(a))}">
-          <div class="anime-card-poster">
-            <img src="${a.poster}" alt="" loading="lazy">
-            <div class="anime-card-badges">
-              <span class="badge-pill badge-vf">VF</span>
-              <span class="badge-pill badge-vostfr">VOSTFR</span>
-            </div>
-          </div>
-          <div class="anime-card-body">
-            <h3 class="anime-card-title">${a.title}</h3>
-            <div class="anime-card-meta">
-              <span>Série HD</span>
-              <span><i class="fa-solid fa-star"></i> 8.0</span>
-            </div>
-          </div>
-        </div>
-      `).join('');
-
-      rail.querySelectorAll('.anime-card').forEach(c => {
-        c.onclick = () => {
-          const anime = JSON.parse(decodeURIComponent(c.dataset.anime));
-          go('det', { anime });
-        };
-      });
+      cachedTrending = list;
+      renderTrendingRail(filterHomeTrending(currentHomeCat));
     } else {
       rail.innerHTML = '<div class="muted">Ouvre la recherche pour explorer les titres.</div>';
     }
@@ -1579,11 +1696,17 @@ function renderSearch() {
   }
 
   let lastSearchResults = [];
-  let activeSearchFilter = 'all';
+  let prefSource = (typeof Storage !== 'undefined' && Storage.getSetting && Storage.getSetting('preferredSource')) || 'all';
+  if (prefSource === 'auto') prefSource = 'all';
+  let activeSearchFilter = prefSource;
 
   function filterAndRenderResults() {
     let filtered = [...lastSearchResults];
-    if (activeSearchFilter === 'vf') {
+    if (activeSearchFilter === 'animesama') {
+      filtered = filtered.filter(a => a.source === 'animesama' || !a.source);
+    } else if (activeSearchFilter === 'voiranime') {
+      filtered = filtered.filter(a => a.source === 'voiranime');
+    } else if (activeSearchFilter === 'vf') {
       filtered = filtered.filter(a => a.has_vf || (a.badges && a.badges.some(b => b.toUpperCase() === 'VF')) || /\bvf\b/i.test(a.title));
     }
 
@@ -1628,18 +1751,23 @@ function renderSearch() {
     });
   }
 
-  // Clic sur les filtres Tous / VF
-  const filterBtns = $$('#search .badge-pill[data-filter]');
+  // Clic sur les filtres Tous / Anime-Sama / VoirAnime / VF
+  const filterBtns = $$('#search [data-filter]');
+  function updateSearchFilterChips(activeVal) {
+    filterBtns.forEach(b => {
+      const isCur = (b.dataset.filter || 'all') === activeVal;
+      b.classList.toggle('on', isCur);
+      b.classList.toggle('active', isCur);
+      b.style.background = isCur ? 'var(--accent-gradient)' : '';
+      b.style.color = isCur ? '#04070D' : '';
+      b.style.border = isCur ? 'none' : '';
+    });
+  }
+  updateSearchFilterChips(activeSearchFilter);
   filterBtns.forEach(btn => {
     btn.onclick = () => {
       activeSearchFilter = btn.dataset.filter || 'all';
-      filterBtns.forEach(b => {
-        const isCur = b === btn;
-        b.classList.toggle('on', isCur);
-        b.style.background = isCur ? 'var(--accent-gradient)' : '';
-        b.style.color = isCur ? '#04070D' : '';
-        b.style.border = isCur ? 'none' : '';
-      });
+      updateSearchFilterChips(activeSearchFilter);
       if (lastSearchResults.length) {
         filterAndRenderResults();
       }
@@ -1935,6 +2063,13 @@ async function playEpisode(anime, seasonTitle, episodeTitle, streamUrl, availabl
   await loadStreamIntoProPlayer(anime, seasonTitle, episodeTitle, initialStream);
 }
 
+function formatTime(sec) {
+  if (!sec || isNaN(sec)) return '0:00';
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${s < 10 ? '0' : ''}${s}`;
+}
+
 async function loadStreamIntoProPlayer(anime, seasonTitle, episodeTitle, streamTarget) {
   toast('Résolution du flux vidéo...');
   let resolved = { streamUrl: '', isDirect: false, embedUrl: '' };
@@ -1948,14 +2083,93 @@ async function loadStreamIntoProPlayer(anime, seasonTitle, episodeTitle, streamT
   const finalUrl = resolved.streamUrl || (typeof streamTarget === 'string' ? streamTarget : streamTarget.url);
   currentPlayerStreamUrl = finalUrl;
 
+  const animeId = anime.id || anime.url;
+  const savedProg = Storage.getProgress ? Storage.getProgress(animeId, currentSeasonIdx, currentEpisodeIndex) : null;
+  const resumeSeconds = (savedProg && savedProg.seconds > 10 && savedProg.percent < 95) ? savedProg.seconds : 0;
+
   Storage.setLastWatch({
     anime,
     seasonTitle,
     episodeTitle,
     streamUrl: finalUrl,
-    seconds: 0,
-    duration: 1440
+    seconds: resumeSeconds,
+    duration: (savedProg && savedProg.duration) || 1440,
+    epIdx: currentEpisodeIndex,
+    seasonIdx: currentSeasonIdx
   });
+
+  if (Storage.addToWatchHistory) {
+    Storage.addToWatchHistory({
+      anime,
+      seasonTitle,
+      episodeTitle,
+      seconds: resumeSeconds,
+      duration: (savedProg && savedProg.duration) || 1440,
+      percent: (savedProg && savedProg.percent) || 0,
+      streamUrl: finalUrl,
+      epIdx: currentEpisodeIndex,
+      seasonIdx: currentSeasonIdx
+    });
+  }
+
+  let lastSaveTimestamp = 0;
+  video.ontimeupdate = () => {
+    const now = Date.now();
+    if (now - lastSaveTimestamp > 2500 && video.duration > 0) {
+      lastSaveTimestamp = now;
+      const cur = Math.floor(video.currentTime);
+      const dur = Math.floor(video.duration);
+      const pct = Math.min(100, Math.round((cur / dur) * 100));
+
+      if (Storage.setProgress) Storage.setProgress(animeId, currentSeasonIdx, currentEpisodeIndex, cur, dur);
+      if (Storage.setLastWatch) {
+        Storage.setLastWatch({
+          anime,
+          seasonTitle,
+          episodeTitle,
+          streamUrl: finalUrl,
+          seconds: cur,
+          duration: dur,
+          epIdx: currentEpisodeIndex,
+          seasonIdx: currentSeasonIdx
+        });
+      }
+      if (Storage.addToWatchHistory) {
+        Storage.addToWatchHistory({
+          anime,
+          seasonTitle,
+          episodeTitle,
+          seconds: cur,
+          duration: dur,
+          percent: pct,
+          streamUrl: finalUrl,
+          epIdx: currentEpisodeIndex,
+          seasonIdx: currentSeasonIdx
+        });
+      }
+
+      const timeLabel = $('#cinema-time-label');
+      if (timeLabel) timeLabel.textContent = `${formatTime(cur)} / ${formatTime(dur)}`;
+    }
+  };
+
+  video.onpause = () => {
+    if (video.duration > 0) {
+      const cur = Math.floor(video.currentTime);
+      const dur = Math.floor(video.duration);
+      const pct = Math.min(100, Math.round((cur / dur) * 100));
+      if (Storage.setProgress) Storage.setProgress(animeId, currentSeasonIdx, currentEpisodeIndex, cur, dur);
+      if (Storage.setLastWatch) Storage.setLastWatch({ anime, seasonTitle, episodeTitle, streamUrl: finalUrl, seconds: cur, duration: dur, epIdx: currentEpisodeIndex, seasonIdx: currentSeasonIdx });
+      if (Storage.addToWatchHistory) Storage.addToWatchHistory({ anime, seasonTitle, episodeTitle, seconds: cur, duration: dur, percent: pct, streamUrl: finalUrl, epIdx: currentEpisodeIndex, seasonIdx: currentSeasonIdx });
+    }
+  };
+
+  video.onloadedmetadata = () => {
+    if (resumeSeconds > 0 && resumeSeconds < (video.duration - 15)) {
+      video.currentTime = resumeSeconds;
+      toast(`Reprise à ${formatTime(resumeSeconds)}`);
+    }
+  };
 
   if (resolved.isDirect && finalUrl) {
     // Si M3U8 ou DASH -> utiliser Google Shaka Player pour une lecture fluide sans fuite de mémoire
@@ -2033,19 +2247,31 @@ function setupEpisodeNavButtons(anime, seasonTitle) {
       toast('Aucun flux actif disponible pour le téléchargement.');
       return;
     }
-    const ep = currentEpisodes[currentEpisodeIndex] || { title: 'Episode' };
-    toast('Téléchargement direct lancé...');
+    const filename = `${(anime.title || 'anime').replace(/[^a-z0-9]/gi, '_')}_ep_${currentEpisodeIndex + 1}.mp4`;
+    toast('Téléchargement lancé en arrière-plan...');
     if (window.AndroidDownload && window.AndroidDownload.downloadAndCompress) {
-      const filename = `${(anime.title || 'anime').replace(/[^a-z0-9]/gi, '_')}_ep_${currentEpisodeIndex + 1}.mp4`;
       window.AndroidDownload.downloadAndCompress(currentPlayerStreamUrl, '720p', filename, 'AnimePlus', 'dl_' + Date.now());
+    } else if (window.AndroidDownload && window.AndroidDownload.download) {
+      window.AndroidDownload.download(currentPlayerStreamUrl, filename, 'dl_' + Date.now());
     } else {
       // Téléchargement navigateur direct
       const a = document.createElement('a');
       a.href = currentPlayerStreamUrl;
-      a.download = `${anime.title || 'anime'}_episode_${currentEpisodeIndex + 1}.mp4`;
+      a.download = filename;
       a.target = '_blank';
       a.click();
       toast('Téléchargement ouvert dans le navigateur.');
+    }
+  };
+
+  window.onDownloadCompressProgress = (id, stage, percent) => {
+    console.log('[Download]', stage, percent);
+  };
+  window.onDownloadCompressDone = (id, path, error) => {
+    if (error) {
+      toast('Échec téléchargement : ' + error);
+    } else {
+      toast('Téléchargement terminé avec succès !');
     }
   };
 
@@ -2105,42 +2331,146 @@ $('#pb').onclick = () => {
   go('det', { anime: currentAnime });
 };
 
-// --- BIBLIOTHÈQUE ---
+// --- BIBLIOTHÈQUE & HISTORIQUE RÉEL ---
+let currentLibTab = 'favs';
+
+function setupLibTabs() {
+  const tabFavs = $('#lib-tab-favs');
+  const tabHist = $('#lib-tab-hist');
+  if (!tabFavs || !tabHist) return;
+
+  tabFavs.onclick = () => {
+    currentLibTab = 'favs';
+    tabFavs.classList.add('on');
+    tabFavs.style.background = 'var(--accent-gradient)';
+    tabFavs.style.color = '#04070D';
+    tabFavs.style.border = 'none';
+
+    tabHist.classList.remove('on');
+    tabHist.style.background = '';
+    tabHist.style.color = '';
+    tabHist.style.border = '';
+    renderLib();
+  };
+
+  tabHist.onclick = () => {
+    currentLibTab = 'hist';
+    tabHist.classList.add('on');
+    tabHist.style.background = 'var(--accent-gradient)';
+    tabHist.style.color = '#04070D';
+    tabHist.style.border = 'none';
+
+    tabFavs.classList.remove('on');
+    tabFavs.style.background = '';
+    tabFavs.style.color = '';
+    tabFavs.style.border = '';
+    renderLib();
+  };
+}
+
 function renderLib() {
+  setupLibTabs();
   const g = $('#lg');
-  const favs = (Storage.getFavorites ? Storage.getFavorites() : []).filter(a => a && a.url && a.title);
+  if (!g) return;
 
-  if (!favs.length) {
-    g.innerHTML = `
-      <div style="text-align:center;padding:40px 16px;color:var(--text-muted);grid-column:1/-1;">
-        <i class="fa-solid fa-bookmark" style="font-size:32px;margin-bottom:10px;opacity:0.4;"></i>
-        <p>Aucun anime dans ta liste de favoris.</p>
-        <small style="color:var(--text-dim);">Ajoute des titres depuis leur fiche.</small>
-      </div>
-    `;
-    return;
-  }
+  if (currentLibTab === 'favs') {
+    const favs = (Storage.getFavorites ? Storage.getFavorites() : []).filter(a => a && a.url && a.title);
 
-  g.innerHTML = favs.map(a => `
-    <div class="anime-card" data-anime="${encodeURIComponent(JSON.stringify(a))}">
-      <div class="anime-card-poster">
-        <img src="${a.poster || ''}" alt="">
-        <div class="anime-card-badges">
-          <span class="badge-pill badge-vf"><i class="fa-solid fa-heart"></i> Favori</span>
+    if (!favs.length) {
+      g.innerHTML = `
+        <div style="text-align:center;padding:40px 16px;color:var(--text-muted);grid-column:1/-1;">
+          <i class="fa-solid fa-bookmark" style="font-size:32px;margin-bottom:10px;opacity:0.4;"></i>
+          <p>Aucun anime dans ta liste de favoris.</p>
+          <small style="color:var(--text-dim);">Ajoute des titres depuis leur fiche.</small>
+        </div>
+      `;
+      return;
+    }
+
+    g.innerHTML = favs.map(a => `
+      <div class="anime-card" data-anime="${encodeURIComponent(JSON.stringify(a))}">
+        <div class="anime-card-poster">
+          <img src="${a.poster || ''}" alt="" loading="lazy">
+          <div class="anime-card-badges">
+            <span class="badge-pill badge-vf"><i class="fa-solid fa-heart"></i> Favori</span>
+          </div>
+        </div>
+        <div class="anime-card-body">
+          <h3 class="anime-card-title">${a.title}</h3>
         </div>
       </div>
-      <div class="anime-card-body">
-        <h3 class="anime-card-title">${a.title}</h3>
-      </div>
-    </div>
-  `).join('');
+    `).join('');
 
-  g.querySelectorAll('.anime-card').forEach(c => {
-    c.onclick = () => {
-      const anime = JSON.parse(decodeURIComponent(c.dataset.anime));
-      go('det', { anime });
-    };
-  });
+    g.querySelectorAll('.anime-card').forEach(c => {
+      c.onclick = () => {
+        const anime = JSON.parse(decodeURIComponent(c.dataset.anime));
+        go('det', { anime });
+      };
+    });
+  } else {
+    // Onglet Historique réel (Streaming type Netflix avec reprise et synchronisation)
+    const history = (Storage.getWatchHistory ? Storage.getWatchHistory() : []).filter(h => h && h.anime && h.anime.title);
+    if (!history.length) {
+      g.innerHTML = `
+        <div style="text-align:center;padding:40px 16px;color:var(--text-muted);grid-column:1/-1;">
+          <i class="fa-solid fa-clock-rotate-left" style="font-size:32px;margin-bottom:10px;opacity:0.4;"></i>
+          <p>Aucun historique de lecture.</p>
+          <small style="color:var(--text-dim);">Les épisodes visionnés apparaîtront ici avec reprise automatique.</small>
+        </div>
+      `;
+      return;
+    }
+
+    g.innerHTML = `
+      <div style="grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-size:12px;color:var(--text-muted);font-weight:700;text-transform:uppercase;">Historique de visionnage</span>
+        <button id="btn-clear-watch-hist" style="background:none;border:none;color:var(--danger);font-size:12px;cursor:pointer;">
+          <i class="fa-solid fa-trash-can"></i> Vider l'historique
+        </button>
+      </div>
+      ${history.map(item => {
+        const p = item.percent || (item.duration ? Math.min(100, Math.round((item.seconds / item.duration) * 100)) : 0);
+        return `
+          <div class="anime-card" data-hist-item="${encodeURIComponent(JSON.stringify(item))}">
+            <div class="anime-card-poster">
+              <img src="${item.anime.poster || ''}" alt="" loading="lazy">
+              <div class="resume-progress-bar" style="position:absolute;bottom:0;left:0;right:0;margin:0;border-radius:0;height:4px;background:rgba(0,0,0,0.6);">
+                <div class="resume-progress-fill" style="width:${p}%;height:100%;background:var(--accent-gradient);"></div>
+              </div>
+              <div class="anime-card-badges">
+                <span class="badge-pill badge-vostfr"><i class="fa-solid fa-play"></i> ${p}%</span>
+              </div>
+            </div>
+            <div class="anime-card-body">
+              <h3 class="anime-card-title">${item.anime.title}</h3>
+              <div class="anime-card-meta">
+                <span style="color:var(--accent);">${item.episodeTitle || 'Épisode'}</span>
+                <span>${formatTime(item.seconds)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    `;
+
+    const clearBtn = $('#btn-clear-watch-hist');
+    if (clearBtn) {
+      clearBtn.onclick = () => {
+        if (confirm('Effacer tout ton historique de lecture ?')) {
+          Storage.clearWatchHistory();
+          renderLib();
+          toast('Historique de lecture effacé.');
+        }
+      };
+    }
+
+    g.querySelectorAll('[data-hist-item]').forEach(c => {
+      c.onclick = () => {
+        const item = JSON.parse(decodeURIComponent(c.dataset.histItem));
+        playEpisode(item.anime, item.seasonTitle || 'Saison', item.episodeTitle || 'Épisode', item.streamUrl, [], item.epIdx || 0);
+      };
+    });
+  }
 }
 
 let selectedFeedbackRating = 0;
@@ -2250,6 +2580,49 @@ function renderSettings() {
     : 'Les réponses sont associées à ton compte AnimePlus.';
 
   const s = Storage.getSettings ? Storage.getSettings() : { quality: '720p', lockEnabled: false };
+
+  // --- Sélecteur de source préférée ---
+  const currentSource = (Storage.getSetting && Storage.getSetting('preferredSource')) || 'all';
+  const srcBtns = $$('#source-selector .source-chip');
+  srcBtns.forEach(btn => {
+    const isCur = (btn.dataset.src || 'all') === currentSource;
+    btn.classList.toggle('active', isCur);
+    btn.classList.toggle('on', isCur);
+    btn.onclick = () => {
+      const src = btn.dataset.src || 'all';
+      Storage.setSetting('preferredSource', src);
+      srcBtns.forEach(b => {
+        const active = (b.dataset.src || 'all') === src;
+        b.classList.toggle('active', active);
+        b.classList.toggle('on', active);
+      });
+      if (typeof updateSetupSourceUI === 'function') {
+        updateSetupSourceUI(src);
+      }
+      const label = src === 'animesama' ? 'Anime-Sama' : src === 'voiranime' ? 'VoirAnime' : 'Toutes';
+      toast(`Source préférée : ${label}`);
+    };
+  });
+
+  // --- Sélecteur de qualité par défaut ---
+  const currentQuality = (Storage.getSetting && Storage.getSetting('quality')) || '720p';
+  const qualBtns = $$('#quality-selector button');
+  qualBtns.forEach(btn => {
+    const isCur = btn.dataset.qual === currentQuality;
+    btn.classList.toggle('btn-primary-glow', isCur);
+    btn.classList.toggle('active', isCur);
+    btn.onclick = () => {
+      const qual = btn.dataset.qual || '720p';
+      Storage.setSetting('quality', qual);
+      qualBtns.forEach(b => {
+        const active = b.dataset.qual === qual;
+        b.classList.toggle('btn-primary-glow', active);
+        b.classList.toggle('active', active);
+      });
+      toast(`Qualité par défaut : ${qual}`);
+    };
+  });
+
   const animationButton = $('#btn-toggle-animations');
   if (animationButton) {
     animationButton.onclick = () => {

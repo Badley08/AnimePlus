@@ -105,6 +105,9 @@ class MainActivity : AppCompatActivity() {
                         if (url.contains("anime-sama.to")) {
                             if (url.contains("episodes.js")) {
                                 reqBuilder.header("Referer", url.substringBefore("episodes.js"))
+                            } else if (url.contains("/api/lien.php")) {
+                                reqBuilder.header("Referer", "https://anime-sama.to/")
+                                reqBuilder.header("X-Requested-With", "XMLHttpRequest")
                             } else {
                                 reqBuilder.header("Referer", "https://anime-sama.to/")
                             }
@@ -178,14 +181,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Bouton retour (remplace onBackPressed, déprécié) : même logique qu'avant
+        // Le routeur Web décide d'abord si Retour doit fermer le lecteur ou changer d'écran.
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (webView.canGoBack()) {
-                    webView.evaluateJavascript("window.Router && Router.back()", null)
-                } else {
-                    isEnabled = false
-                    onBackPressedDispatcher.onBackPressed()
+                webView.evaluateJavascript(
+                    "(function(){return window.onBackPressed ? window.onBackPressed() : false;})()"
+                ) { handled ->
+                    if (handled != "true") {
+                        isEnabled = false
+                        onBackPressedDispatcher.onBackPressed()
+                    }
                 }
             }
         })
