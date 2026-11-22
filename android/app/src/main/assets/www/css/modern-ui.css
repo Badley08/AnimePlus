@@ -1,0 +1,1359 @@
+/* =====================================================================
+   ANIME PLUS — MODERN CYBER-CINEMA DESIGN SYSTEM
+   Original UI/UX — Zero Emojis — 100% Font Awesome & Vector Icons
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   1. PALETTES DE COULEURS DYNAMIQUES (5 THÈMES)
+   --------------------------------------------------------------------- */
+
+/* Thème 1 : Cyber Nuit (Default Obsidian & Electric Cyan) */
+:root, [data-theme="cyber"] {
+  --bg: #070B14;
+  --bg-darker: #04070D;
+  --surface: #0E1626;
+  --surface-2: #152238;
+  --surface-glass: rgba(14, 22, 38, 0.85);
+  --surface-card: rgba(21, 34, 56, 0.6);
+  --border: rgba(0, 240, 255, 0.15);
+  --border-strong: rgba(0, 240, 255, 0.4);
+  --border-glow: 0 0 15px rgba(0, 240, 255, 0.25);
+  --text: #F8FAFC;
+  --text-muted: #94A3B8;
+  --text-dim: #64748B;
+  --accent: #00F0FF;
+  --accent-secondary: #3B82F6;
+  --accent-gradient: linear-gradient(135deg, #00F0FF 0%, #3B82F6 100%);
+  --accent-glow: 0 0 25px rgba(0, 240, 255, 0.45);
+  --accent-soft: rgba(0, 240, 255, 0.12);
+  --danger: #EF4444;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --gold: #FBBF24;
+  --font: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+  --shadow-card: 0 8px 24px -4px rgba(0, 0, 0, 0.5), 0 2px 6px -1px rgba(0, 240, 255, 0.08);
+  --shadow-elevated: 0 20px 40px -8px rgba(0, 0, 0, 0.7);
+}
+
+/* Thème 2 : Sakura Neon (Midnight Purple & Radiant Fuchsia) */
+[data-theme="sakura"] {
+  --bg: #0D0614;
+  --bg-darker: #08030D;
+  --surface: #180D26;
+  --surface-2: #241438;
+  --surface-glass: rgba(24, 13, 38, 0.85);
+  --surface-card: rgba(36, 20, 56, 0.6);
+  --border: rgba(236, 72, 153, 0.2);
+  --border-strong: rgba(236, 72, 153, 0.5);
+  --border-glow: 0 0 15px rgba(236, 72, 153, 0.3);
+  --text: #FDF2F8;
+  --text-muted: #D8B4FE;
+  --text-dim: #9333EA;
+  --accent: #EC4899;
+  --accent-secondary: #A855F7;
+  --accent-gradient: linear-gradient(135deg, #EC4899 0%, #A855F7 100%);
+  --accent-glow: 0 0 25px rgba(236, 72, 153, 0.5);
+  --accent-soft: rgba(236, 72, 153, 0.15);
+}
+
+/* Thème 3 : Emerald Abyss (Jade Matrix & Mint Glow) */
+[data-theme="emerald"] {
+  --bg: #05120E;
+  --bg-darker: #020B08;
+  --surface: #0B221B;
+  --surface-2: #12332A;
+  --surface-glass: rgba(11, 34, 27, 0.85);
+  --surface-card: rgba(18, 51, 42, 0.6);
+  --border: rgba(16, 185, 129, 0.2);
+  --border-strong: rgba(16, 185, 129, 0.5);
+  --border-glow: 0 0 15px rgba(16, 185, 129, 0.3);
+  --text: #ECFDF5;
+  --text-muted: #A7F3D0;
+  --text-dim: #059669;
+  --accent: #10B981;
+  --accent-secondary: #06B6D4;
+  --accent-gradient: linear-gradient(135deg, #10B981 0%, #06B6D4 100%);
+  --accent-glow: 0 0 25px rgba(16, 185, 129, 0.5);
+  --accent-soft: rgba(16, 185, 129, 0.15);
+}
+
+/* Thème 4 : Solar Sunset (Charcoal & Blazing Amber) */
+[data-theme="solar"] {
+  --bg: #120906;
+  --bg-darker: #0A0503;
+  --surface: #22120C;
+  --surface-2: #331B13;
+  --surface-glass: rgba(34, 18, 12, 0.85);
+  --surface-card: rgba(51, 27, 19, 0.6);
+  --border: rgba(249, 115, 22, 0.2);
+  --border-strong: rgba(249, 115, 22, 0.5);
+  --border-glow: 0 0 15px rgba(249, 115, 22, 0.3);
+  --text: #FFF7ED;
+  --text-muted: #FED7AA;
+  --text-dim: #EA580C;
+  --accent: #F97316;
+  --accent-secondary: #FBBF24;
+  --accent-gradient: linear-gradient(135deg, #F97316 0%, #FBBF24 100%);
+  --accent-glow: 0 0 25px rgba(249, 115, 22, 0.5);
+  --accent-soft: rgba(249, 115, 22, 0.15);
+}
+
+/* Thème 5 : Amethyst Void (Cosmic Indigo & Royal Violet) */
+[data-theme="amethyst"] {
+  --bg: #0A0717;
+  --bg-darker: #05030E;
+  --surface: #15102E;
+  --surface-2: #211947;
+  --surface-glass: rgba(21, 16, 46, 0.85);
+  --surface-card: rgba(33, 25, 71, 0.6);
+  --border: rgba(139, 92, 246, 0.2);
+  --border-strong: rgba(139, 92, 246, 0.5);
+  --border-glow: 0 0 15px rgba(139, 92, 246, 0.3);
+  --text: #F5F3FF;
+  --text-muted: #C4B5FD;
+  --text-dim: #7C3AED;
+  --accent: #8B5CF6;
+  --accent-secondary: #6366F1;
+  --accent-gradient: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
+  --accent-glow: 0 0 25px rgba(139, 92, 246, 0.5);
+  --accent-soft: rgba(139, 92, 246, 0.15);
+}
+
+/* ---------------------------------------------------------------------
+   2. GLOBAL RESET & BASE
+   --------------------------------------------------------------------- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+input, textarea {
+  user-select: text;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background: radial-gradient(circle at 20% -10%, var(--accent-soft), transparent 50%),
+              radial-gradient(circle at 80% 110%, rgba(59, 130, 246, 0.08), transparent 60%),
+              var(--bg);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ---------------------------------------------------------------------
+   3. APP CONTAINER & RESPONSIVE VIEWPORTS
+   --------------------------------------------------------------------- */
+.app {
+  width: 100vw;
+  height: 100dvh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------------------------------------------------------------------
+   4. SCREENS / VUES (MOBILE + TABLETTE + PAYSAGE)
+   --------------------------------------------------------------------- */
+.v {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: calc(env(safe-area-inset-top, 0px) + 20px) 16px calc(env(safe-area-inset-bottom, 0px) + 94px);
+  -webkit-overflow-scrolling: touch;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.v.on {
+  display: flex;
+  animation: screenFade 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Splash Screen parfaitement centré au milieu de l'écran */
+#splash {
+  position: fixed !important;
+  inset: 0 !important;
+  display: none;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  background: radial-gradient(circle at 50% 45%, rgba(59, 130, 246, 0.22) 0%, rgba(10, 18, 42, 0.96) 50%, var(--bg) 85%) !important;
+  z-index: 1000 !important;
+  padding: 24px !important;
+}
+
+#splash.on {
+  display: flex !important;
+  animation: screenFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.splash-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: auto 0;
+}
+
+.splash-credits {
+  margin-top: auto;
+  font-size: 13px;
+  color: var(--text-dim);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
+}
+
+.splash-sub {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-top: 8px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+/* Animation SVG Logo Anime Plus */
+.logo {
+  width: 100px;
+  height: 100px;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 24px var(--accent-glow));
+}
+
+.logo * {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.logo path:nth-child(2) { animation-delay: 0.35s; }
+.logo path:nth-child(3) { animation-delay: 0.75s; }
+
+@keyframes draw {
+  to { stroke-dashoffset: 0; }
+}
+
+.word {
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  margin-top: 18px;
+  color: #fff;
+}
+
+.word span {
+  color: var(--accent);
+}
+
+@keyframes screenFade {
+  from { opacity: 0; transform: translateY(8px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Titres de sections */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 24px 0 14px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-title i {
+  color: var(--accent);
+  font-size: 18px;
+}
+
+.section-more {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+}
+
+/* ---------------------------------------------------------------------
+   5. HERO SPOTLIGHT CAROUSEL & REPRENDRE
+   --------------------------------------------------------------------- */
+.hero-spotlight {
+  position: relative;
+  width: 100%;
+  min-height: 200px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+  background: var(--surface);
+  margin-bottom: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 20px;
+}
+
+.hero-spotlight-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transform: scale(1.02);
+  transition: transform 6s ease;
+  z-index: 1;
+}
+
+.hero-spotlight:hover .hero-spotlight-bg {
+  transform: scale(1.08);
+}
+
+.hero-spotlight-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(7, 11, 20, 0.95) 0%, rgba(7, 11, 20, 0.4) 60%, rgba(7, 11, 20, 0.1) 100%);
+  z-index: 2;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 3;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: var(--accent-gradient);
+  color: #04070D;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  box-shadow: var(--accent-glow);
+}
+
+.hero-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #FFF;
+  margin-bottom: 6px;
+  line-height: 1.2;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+}
+
+.hero-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.hero-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-full);
+  background: var(--accent-gradient);
+  color: #04070D;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--accent-glow);
+  transition: transform 0.15s, box-shadow 0.2s;
+}
+
+.hero-action-btn:active {
+  transform: scale(0.96);
+}
+
+/* Carte "Reprendre la lecture" */
+.resume-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-card);
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.2s;
+}
+
+.resume-card:active {
+  transform: scale(0.98);
+  border-color: var(--accent);
+}
+
+.resume-thumb {
+  width: 72px;
+  height: 50px;
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  background-color: var(--surface-2);
+}
+
+.resume-thumb .play-mini {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.45);
+  color: #FFF;
+  font-size: 14px;
+}
+
+.resume-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.resume-tag {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--accent);
+  letter-spacing: 0.5px;
+}
+
+.resume-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.resume-progress-bar {
+  width: 100%;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.resume-progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--accent-gradient);
+  box-shadow: 0 0 6px var(--accent);
+}
+
+/* ---------------------------------------------------------------------
+   6. RAILS HORIZONTAUX & CARTES ANIME MODERNES
+   --------------------------------------------------------------------- */
+.rail {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  padding: 4px 0 16px;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+.rail::-webkit-scrollbar {
+  display: none;
+}
+
+/* Carte anime de tendance (Ratio 16:10 / 2:3) */
+.anime-card {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  flex: 0 0 150px;
+  width: 150px;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s, box-shadow 0.2s;
+  box-shadow: var(--shadow-card);
+}
+
+.anime-card:active {
+  transform: scale(0.95);
+  border-color: var(--accent);
+  box-shadow: var(--border-glow);
+}
+
+.anime-card-poster {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background-color: var(--surface-2);
+}
+
+.anime-card-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.anime-card:hover .anime-card-poster img {
+  transform: scale(1.06);
+}
+
+.anime-card-poster::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(7, 11, 20, 0.95) 0%, rgba(7, 11, 20, 0.2) 60%, transparent 100%);
+}
+
+.anime-card-badges {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.badge-pill {
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #FFF;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.badge-pill.badge-vf {
+  background: rgba(16, 185, 129, 0.85);
+  color: #FFF;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.badge-pill.badge-vostfr {
+  background: rgba(0, 240, 255, 0.85);
+  color: #04070D;
+  border-color: rgba(0, 240, 255, 0.4);
+}
+
+.badge-pill.badge-film {
+  background: rgba(236, 72, 153, 0.85);
+  color: #FFF;
+}
+
+.anime-card-body {
+  padding: 8px 10px 10px;
+}
+
+.anime-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.anime-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.anime-card-meta i {
+  color: var(--gold);
+}
+
+/* Grille de recherche & Bibliothèque (Responsive) */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 14px;
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 18px;
+  }
+}
+
+@media (min-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   7. PRO CINEMA VIDEO PLAYER (PORTRAIT & TRUE LANDSCAPE)
+   --------------------------------------------------------------------- */
+#ply {
+  background: #000;
+  padding: 0;
+  max-width: 100%;
+  margin: 0;
+  display: none;
+  flex-direction: column;
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+}
+
+#ply.on {
+  display: flex;
+}
+
+/* Conteneur vidéo 16/9 Strict - Aucun étirement déformant */
+.player-viewport {
+  width: 100%;
+  max-width: 100%;
+  background: #000;
+  position: relative;
+  aspect-ratio: 16 / 9;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.player-viewport video,
+.player-viewport iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  object-fit: contain;
+  background: #000;
+}
+
+/* Overlay flottant sur la vidéo */
+.player-overlay-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: calc(env(safe-area-inset-top, 0px) + 8px) 14px 14px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, transparent 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  z-index: 10;
+  pointer-events: auto;
+  transition: opacity 0.3s ease;
+}
+
+.player-back-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-full);
+  background: rgba(14, 22, 38, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  color: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.player-title-box {
+  flex: 1;
+  min-width: 0;
+}
+
+.player-title-anime {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-title-ep {
+  font-size: 12px;
+  color: #FFF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.9;
+}
+
+/* Zone sous la vidéo (Portrait) */
+.player-details-pane {
+  flex: 1;
+  padding: 16px 16px calc(env(safe-area-inset-bottom, 0px) + 20px);
+  background: var(--bg);
+  overflow-y: auto;
+}
+
+/* Barre d'action rapide sous le lecteur */
+.player-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.player-action-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.2s, background-color 0.2s;
+}
+
+.player-action-chip:active {
+  transform: scale(0.95);
+  border-color: var(--accent);
+}
+
+.player-action-chip.btn-primary-glow {
+  background: var(--accent-gradient);
+  color: #04070D;
+  box-shadow: var(--accent-glow);
+  font-weight: 700;
+}
+
+/* Sélecteur de lecteurs alternatifs */
+.player-lecteurs-wrap {
+  margin-bottom: 20px;
+}
+
+.player-lecteurs-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.player-lecteurs-rail {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.player-lecteurs-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.lecteur-btn {
+  padding: 7px 14px;
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.lecteur-btn.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 10px var(--accent-soft);
+}
+
+.lecteur-badge {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #04070D;
+  font-weight: 800;
+}
+
+/* MODE PAYSAGE CINÉMA RÉEL (Zero étirement, Plein Écran) */
+#ply.cinema-mode {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background: #000;
+  z-index: 9999;
+  padding: 0;
+  overflow: hidden;
+}
+
+#ply.cinema-mode .player-viewport {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto; /* Permet d'adapter l'écran sans forcer ratio fixe */
+  max-width: none;
+}
+
+#ply.cinema-mode .player-viewport video,
+#ply.cinema-mode .player-viewport iframe {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Conserve le 16/9 avec barres noires latérales sur écrans ultra-larges */
+}
+
+#ply.cinema-mode .player-details-pane {
+  display: none;
+}
+
+/* Contrôles overlay plein écran */
+.cinema-controls-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 14px 20px calc(env(safe-area-inset-bottom, 0px) + 14px);
+  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: opacity 0.3s ease;
+}
+
+.cinema-controls-hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------------
+   8. FICHE ANIME (DETAIL VIEW)
+   --------------------------------------------------------------------- */
+#det {
+  padding-top: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.detail-hero {
+  position: relative;
+  width: 100%;
+  min-height: 280px;
+  background-color: var(--surface-2);
+  display: flex;
+  align-items: flex-end;
+  padding: 20px 16px;
+  overflow: hidden;
+}
+
+.detail-hero-backdrop {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(12px) brightness(0.6);
+  transform: scale(1.1);
+  z-index: 1;
+}
+
+.detail-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--bg) 0%, rgba(7, 11, 20, 0.6) 70%, rgba(7, 11, 20, 0.2) 100%);
+  z-index: 2;
+}
+
+.detail-hero-body {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.detail-poster-wrap {
+  width: 100px;
+  height: 145px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow-elevated);
+  flex-shrink: 0;
+  background-color: var(--surface);
+}
+
+.detail-poster-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detail-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.detail-title {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #FFF;
+  margin-bottom: 6px;
+}
+
+.detail-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.detail-body-container {
+  padding: 20px 16px;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.detail-synopsis {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin-bottom: 20px;
+  background: var(--surface-card);
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+/* Saisons Tabs */
+.season-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+  scrollbar-width: none;
+}
+
+.season-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.season-tab {
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.season-tab.active {
+  background: var(--accent-gradient);
+  color: #04070D;
+  border-color: transparent;
+  box-shadow: var(--accent-glow);
+}
+
+/* Liste des épisodes */
+.episode-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.2s, background-color 0.2s;
+}
+
+.episode-card:active {
+  transform: scale(0.98);
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+
+.episode-number-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.episode-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.episode-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.episode-duration {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.episode-play-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+/* ---------------------------------------------------------------------
+   9. BOTTOM NAVIGATION BAR (FLOATING SAMSUNG ONE UI STYLE)
+   --------------------------------------------------------------------- */
+#tabs.nav,
+#tabs,
+.nav {
+  position: fixed !important;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 12px) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: calc(100% - 24px) !important;
+  max-width: 440px !important;
+  height: 64px !important;
+  border-radius: 9999px !important;
+  background: var(--surface-glass, rgba(11, 18, 38, 0.94)) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.12)) !important;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.65), 0 0 16px var(--accent-soft) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-evenly !important;
+  padding: 0 4px !important;
+  box-sizing: border-box !important;
+  z-index: 999 !important;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease !important;
+}
+
+#tabs[hidden],
+.nav[hidden] {
+  display: none !important;
+}
+
+/* Disparition fluide au scroll down & réapparition au scroll up */
+#tabs.nav-hidden,
+.nav.nav-hidden {
+  transform: translateX(-50%) translateY(140%) !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+#tabs .nav-item,
+#tabs .tab,
+.nav-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  padding: 4px 2px !important;
+  border-radius: 9999px !important;
+  background: transparent !important;
+  border: none !important;
+  color: var(--text-muted, #94A3B8) !important;
+  cursor: pointer !important;
+  transition: color 0.2s ease, transform 0.15s ease, background-color 0.2s ease !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+}
+
+.nav-item:active {
+  transform: scale(0.92);
+}
+
+.nav-item i {
+  font-size: 19px;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s;
+}
+
+.nav-item span {
+  font-size: 10.5px;
+  font-weight: 700;
+  margin-top: 3px;
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  transition: color 0.2s;
+}
+
+.nav-item.on {
+  color: var(--accent);
+}
+
+.nav-item.on i {
+  transform: translateY(-2px) scale(1.1);
+  filter: drop-shadow(0 0 10px var(--accent));
+}
+
+/* ---------------------------------------------------------------------
+   10. MODAL CHANGELOG & SETTINGS PALETTES
+   --------------------------------------------------------------------- */
+.theme-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin: 12px 0 20px;
+}
+
+.theme-swatch {
+  height: 48px;
+  border-radius: var(--radius-md);
+  border: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFF;
+  font-size: 16px;
+  transition: transform 0.15s, border-color 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+.theme-swatch:active {
+  transform: scale(0.92);
+}
+
+.theme-swatch.active {
+  border-color: #FFF;
+  transform: scale(1.05);
+}
+
+/* Avatar Selector (Font Awesome - Zero Emojis) */
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 12px 0 20px;
+}
+
+.avatar-option {
+  height: 54px;
+  border-radius: var(--radius-md);
+  background: var(--surface-2);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.2s, color 0.2s;
+}
+
+.avatar-option.selected {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: var(--border-glow);
+}
+
+/* Source & Filter Chips Compact & Sleek Styling */
+.source-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1.2;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.source-chip i {
+  font-size: 10px;
+}
+
+.source-chip:hover {
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.source-chip:active {
+  transform: scale(0.95);
+}
+
+.source-chip.active, .source-chip.on {
+  background: var(--accent-gradient) !important;
+  color: #04070D !important;
+  font-weight: 700 !important;
+  border-color: transparent !important;
+  box-shadow: 0 2px 8px rgba(0, 240, 255, 0.3) !important;
+}
+
+.source-chip.active i, .source-chip.on i {
+  color: #04070D !important;
+}
+
+.source-chip[data-src="animesama"] i, .source-chip[data-filter="animesama"] i {
+  color: #38BDF8;
+}
+
+.source-chip[data-src="voiranime"] i, .source-chip[data-filter="voiranime"] i {
+  color: #A855F7;
+}
+
+.source-chip[data-src="all"] i, .source-chip[data-filter="all"] i {
+  color: var(--accent);
+}
+
+.source-chip[data-filter="vf"] i {
+  color: #10B981;
+}
+
+/* Version compacte pour les grilles Setup et Paramètres */
+#setup-source-selector .source-chip,
+#source-selector .source-chip {
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+}
+  color: #10B981;
+}
+
+#tabs[hidden], .nav[hidden] {
+  display: none !important;
+}

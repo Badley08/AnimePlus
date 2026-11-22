@@ -1,0 +1,49 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /feedback/{feedbackId} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly([
+          'uid',
+          'rating',
+          'feeling',
+          'comment',
+          'appVersion',
+          'createdAt'
+        ])
+        && request.resource.data.keys().hasAll([
+          'uid',
+          'rating',
+          'feeling',
+          'comment',
+          'appVersion',
+          'createdAt'
+        ])
+        && request.resource.data.uid == request.auth.uid
+        && feedbackId == request.auth.uid + '_' + request.resource.data.appVersion
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 10
+        && request.resource.data.feeling in [
+          'satisfied',
+          'okay',
+          'frustrated',
+          'confused'
+        ]
+        && request.resource.data.comment is string
+        && request.resource.data.comment.size() <= 1000
+        && request.resource.data.appVersion.matches('^[0-9]+\\.[0-9]+\\.[0-9]+$')
+        && request.resource.data.createdAt == request.time;
+
+      allow read, delete: if request.auth != null
+        && resource.data.uid == request.auth.uid;
+
+      allow update: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

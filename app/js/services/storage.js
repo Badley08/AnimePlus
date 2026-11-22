@@ -173,18 +173,27 @@ const Storage = (() => {
 
   function _getAnimeKey(animeOrId) {
     if (!animeOrId) return null;
-    if (typeof animeOrId === 'string') return animeOrId;
-    return animeOrId.id || animeOrId.url || (animeOrId.title ? 'anime_' + animeOrId.title.trim().toLowerCase() : null);
+    if (typeof animeOrId === 'string') return animeOrId.trim();
+    return animeOrId.id || animeOrId.url || (animeOrId.title ? 'anime_' + animeOrId.title.trim().toLowerCase().replace(/[^a-z0-9]/g, '_') : null);
+  }
+
+  function _matchesAnime(item, key, anime) {
+    if (!item) return false;
+    if (typeof item === 'string') return item === key;
+    if (item.id && (item.id === key || (anime && item.id === anime.id))) return true;
+    if (item.url && (item.url === key || (anime && item.url === anime.url))) return true;
+    if (item.title && anime && anime.title) {
+      return item.title.trim().toLowerCase() === anime.title.trim().toLowerCase();
+    }
+    return false;
   }
 
   function isFavorite(animeOrId) {
     const key = _getAnimeKey(animeOrId);
     if (!key) return false;
+    const anime = typeof animeOrId === 'object' ? animeOrId : null;
     const favs = getFavorites();
-    return favs.some(item => {
-      if (typeof item === 'string') return item === key;
-      return (item.id === key || item.url === key || (item.title && key.includes(item.title.trim().toLowerCase())));
-    });
+    return favs.some(item => _matchesAnime(item, key, anime));
   }
 
   function toggleFavorite(anime) {
@@ -193,10 +202,7 @@ const Storage = (() => {
     const key = _getAnimeKey(anime);
     if (!key) return false;
 
-    const existingIdx = favs.findIndex(item => {
-      if (typeof item === 'string') return item === key;
-      return (item.id === key || item.url === key || (item.title && key.includes(item.title.trim().toLowerCase())));
-    });
+    const existingIdx = favs.findIndex(item => _matchesAnime(item, key, anime));
 
     let isFavNow = false;
     if (existingIdx >= 0) {
@@ -229,6 +235,7 @@ const Storage = (() => {
     theme: 'dark',
     autoPlay: true,
     skipIntro: false,
+    animationsEnabled: true,
     version: '1.0.0',
   };
 
@@ -253,20 +260,16 @@ const Storage = (() => {
   }
 
   function getProfile() {
-    return _get(KEYS.PROFILE, { name: '', avatar: '🎬', avatarType: 'emoji', setupComplete: false });
+    return _get(KEYS.PROFILE, { name: '', avatar: 'fa-user-ninja', setupComplete: false });
   }
 
   function setProfile(profile) {
     const name = String(profile && profile.name || '').trim().slice(0, 24);
-    const emojiAvatars = new Set(['🎬', '🌙', '✨', '🐱', '🎧', '⭐', '🔥', '🌸', '🐼', '🦊', '🐧', '🍥']);
-    const svgAvatars = new Set(['home', 'search', 'lib', 'set', 'play', 'pause', 'zip', 'ok', 'clock', 'star', 'bookmark', 'info', 'download', 'lock', 'x']);
-    const avatarType = profile && profile.avatarType === 'svg' ? 'svg' : 'emoji';
     if (!name) return false;
-    if (avatarType === 'emoji' ? !emojiAvatars.has(profile.avatar) : !svgAvatars.has(profile.avatar)) return false;
+    const avatar = (profile && profile.avatar) || 'fa-user-ninja';
     return _set(KEYS.PROFILE, {
       name,
-      avatar: profile.avatar,
-      avatarType,
+      avatar,
       setupComplete: true
     });
   }

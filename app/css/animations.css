@@ -275,6 +275,133 @@ button {
   transition: width 180ms ease;
 }
 
+@keyframes ap-rise-in {
+  from { opacity: 0; transform: translateY(14px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes ap-pop-in {
+  0% { opacity: 0; transform: scale(.88); }
+  72% { opacity: 1; transform: scale(1.035); }
+  100% { transform: scale(1); }
+}
+
+@keyframes ap-toast-in {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes ap-modal-in {
+  from { opacity: 0; transform: translateY(16px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes ap-slow-pan {
+  from { transform: scale(1.02) translateX(-.5%); }
+  to { transform: scale(1.08) translateX(.5%); }
+}
+
+.anime-card,
+.settings-card,
+.resume-card,
+.hero-spotlight {
+  animation: ap-rise-in 420ms cubic-bezier(.2, .75, .25, 1) both;
+}
+
+#hr .anime-card:nth-child(2),
+#sug .anime-card:nth-child(2),
+#home-favs-rail .anime-card:nth-child(2) { animation-delay: 35ms; }
+
+#hr .anime-card:nth-child(3),
+#sug .anime-card:nth-child(3),
+#home-favs-rail .anime-card:nth-child(3) { animation-delay: 70ms; }
+
+#hr .anime-card:nth-child(4),
+#sug .anime-card:nth-child(4),
+#home-favs-rail .anime-card:nth-child(4) { animation-delay: 105ms; }
+
+#hr .anime-card:nth-child(5),
+#sug .anime-card:nth-child(5),
+#home-favs-rail .anime-card:nth-child(5) { animation-delay: 140ms; }
+
+.anime-card {
+  transition: transform 220ms cubic-bezier(.2, .8, .2, 1), box-shadow 220ms ease;
+}
+
+.anime-card:hover {
+  transform: translateY(-4px) scale(1.015);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .28);
+}
+
+.hero-spotlight-bg {
+  animation: ap-slow-pan 24s ease-in-out infinite alternate;
+}
+
+.hero-action-btn,
+.player-action-chip,
+.source-chip,
+.badge-pill,
+.theme-swatch,
+.avatar-option,
+.nav-item {
+  transition: transform 180ms cubic-bezier(.2, .8, .2, 1), box-shadow 180ms ease, filter 180ms ease;
+}
+
+button:not(:disabled):hover {
+  filter: brightness(1.08);
+}
+
+button:not(:disabled):active {
+  transform: scale(.97);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.theme-swatch:hover,
+.avatar-option:hover {
+  transform: translateY(-3px) scale(1.04);
+}
+
+.avatar-option.selected {
+  animation: ap-pop-in 260ms ease both;
+}
+
+.section-title > i,
+.nav-item.on > i,
+.resume-tag > i {
+  animation: ap-pop-in 360ms ease both;
+}
+
+.resume-progress-fill {
+  animation: ap-glow 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes ap-glow {
+  from { filter: brightness(.9); }
+  to { filter: brightness(1.3); }
+}
+
+#update-modal:not([hidden]) > div,
+#feedback-modal:not([hidden]) > form,
+#delete-account-modal:not([hidden]) > form {
+  animation: ap-modal-in 240ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+#toast:not([hidden]) {
+  animation: ap-toast-in 220ms ease-out both;
+}
+
+html.motion-disabled *,
+html.motion-disabled *::before,
+html.motion-disabled *::after {
+  animation: none !important;
+  scroll-behavior: auto !important;
+  transition: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
