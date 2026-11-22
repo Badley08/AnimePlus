@@ -4,7 +4,7 @@ Application Android privée pour organiser, rechercher, lire et compresser ses �
 
 **Idée par Strong. Développement par Karlito.**
 
-> Anime Plus n'est ni à vendre ni à louer. Elle n'est pas publiée sur le Play Store et ne doit pas être partagée en dehors de ses deux utilisateurs.
+> Anime Plus n'est ni à vendre ni à louer. Elle n'est pas publiée sur le Play Store et ne doit pas être partagée en dehors de ses deux utilisateurs si vous etes un dev libre a vous de fork.
 
 ---
 

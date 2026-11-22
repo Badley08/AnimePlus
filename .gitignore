@@ -11,6 +11,7 @@
 ./*iml
 ./*ipr
 ./tab.len
+./*kotlin
 
 # Local build output, Gradle cache, and downloaded SDK files
 /.gradle/
@@ -18,4 +19,6 @@
 **/build/
 local.properties
 *.hprof
+*.apk
 /platform-tools*.zip
+kotlin-compiler*.salive

@@ -43,7 +43,8 @@
   - [x] Animations d'interface fluides (GSAP & transitions CSS)
   - [x] Option dans Paramètres pour activer / désactiver toutes les animations (`reduce-motion`)
 
-- [ ] **10. Compilation Release v1.3.1 & Déploiement GitHub**
+- [x] **10. Compilation Release v1.3.1 & Déploiement GitHub**
   - [x] Synchronisation complète des assets vers `android/app/src/main/assets/www/`
-  - [ ] Compilation APK Release v1.3.1 (Build 5) avec Gradle 9.6.0 (sur demande de l'utilisateur)
-  - [ ] Publication de la release v1.3.1 sur GitHub avec l'APK
+  - [x] Compilation APK Release v1.3.1 (Build 5) avec Gradle 9.6.0 (`AnimePlus-v1.3.1.apk`)
+  - [x] Documentation complète : README.md avec shields GitHub, CHANGELOG.md sans emoji, LICENSE GNU GPL 3.0
+  - [x] Publication de la release v1.3.1 sur GitHub avec l'APK et les release notes
